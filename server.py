@@ -84,9 +84,9 @@ class GetTableCols(Resource):
         return {'columns': names}
 
 
-api.add_resource(TableNames, '/api/get_table/')
-api.add_resource(GetTable, '/api/get_table/<string:table_name>')
-api.add_resource(GetTableCols, '/api/get_table_cols/')
+api.add_resource(TableNames, '/self-service-api/get_table/')
+api.add_resource(GetTable, '/self-service-api/get_table/<string:table_name>')
+api.add_resource(GetTableCols, '/self-service-api/get_table_cols/')
 
 
 if __name__ == '__main__':

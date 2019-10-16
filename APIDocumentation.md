@@ -1,7 +1,7 @@
 ## API Documentation
 
 #### Get list of table names
-URL: baseURL/api/get_table/
+URL: baseURL/self-service-api/get_table/
 Returns:
 ```json
 {
@@ -21,8 +21,8 @@ Returns:
 ```
 
 #### Get entire table
-URL: baseURL/api/get_table/<string:pt_deid>
-Example: baseURL/api/get_table/pt_deid
+URL: baseURL/self-service-api/get_table/<string:pt_deid>
+Example: baseURL/self-service-api/get_table/pt_deid
 Returns:
 ```json
 {
@@ -53,8 +53,8 @@ Returns:
 ```
 
 #### Get columns in a table
-URL: baseURL/api/get_table_cols/?table_name=<string: table_name>
-Example: baseURL/api/get_table_cols/?table_name=pt_deid
+URL: baseURL/self-service-api/get_table_cols/?table_name=<string: table_name>
+Example: baseURL/self-service-api/get_table_cols/?table_name=pt_deid
 Returns:
 ```json
 {
