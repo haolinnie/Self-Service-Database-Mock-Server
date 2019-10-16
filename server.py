@@ -25,6 +25,7 @@ parser.add_argument('table_name', type=str, help='ERROR: empty table name')
 parser.add_argument('column', type=str, help='ERROR: column name empty')
 
 
+@app.route('/')
 @app.route('/ssd_api/')
 def index():
     with open('APIDocumentation.md', 'r') as f:
@@ -57,14 +58,12 @@ def not_found(error):
 
 class TableNames(Resource):
     def get(self):
-        print(TABLE_NAMES)
         return {'table_names': TABLE_NAMES}
 
 
 class GetTable(Resource):
     def get(self, table_name):
         # If no table name specified
-        print(table_name)
         if table_name is None:
             return {'table_names': TABLE_NAMES}
 
