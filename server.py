@@ -1,4 +1,5 @@
 #!flask/bin/python
+import sys
 from flask import Flask, jsonify
 from flask import make_response, abort
 from flask_restful import Resource, Api, reqparse
@@ -89,4 +90,7 @@ api.add_resource(GetTableCols, '/api/get_table_cols/')
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5100)
+    if sys.platform == 'linux':
+        app.run(debug=False, port=5100)
+    else:
+        app.run(debug=True, port=5100)
