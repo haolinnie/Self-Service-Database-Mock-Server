@@ -1,6 +1,6 @@
 #!flask/bin/python
 import sys
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Markup
 from flask import make_response, abort
 from flask_restful import Resource, Api, reqparse
 from flask_misaka import markdown
@@ -24,13 +24,29 @@ parser = reqparse.RequestParser()
 parser.add_argument('table_name', type=str, help='ERROR: empty table name')
 parser.add_argument('column', type=str, help='ERROR: column name empty')
 
-with open('APIDocumentation.md', 'r') as f:
-    content = f.read()
-    readme = markdown(content)
-
 
 @app.route('/ssd_api/')
 def index():
+    with open('APIDocumentation.md', 'r') as f:
+        content = f.read()
+        readme = markdown(content)
+        readme += Markup(
+            """
+            <meta charset=UTF-8>
+            <meta name=viewport content="width=device-width,shrink-to-fit=0,user-scalable=no,minimum-scale=1,maximum-scale=1">
+            <title>SSD API Docs</title>
+            <style>
+            html{font-family:"Courier New", Courier, monospace}
+            body{padding-left:10rem;padding-right:10rem;}
+            h3{font-weight:bold}
+            code {
+            background-color: rgb(246,248,250);
+            display:block;
+            padding: 10px;
+            }
+            </style>
+            """
+        )
     return readme
 
 
