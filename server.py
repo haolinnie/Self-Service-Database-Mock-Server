@@ -24,30 +24,25 @@ parser = reqparse.RequestParser()
 parser.add_argument('table_name', type=str, help='ERROR: empty table name')
 parser.add_argument('column', type=str, help='ERROR: column name empty')
 
+# Parse Documentation
+with open('APIDocumentation.md', 'r') as f:
+    content = f.read()
+    readme = markdown(content)
+    readme += Markup(
+        """
+        <meta charset=UTF-8>
+        <meta name=viewport content="width=device-width,shrink-to-fit=0,user-scalable=no,minimum-scale=1,maximum-scale=1">
+        <meta name=author content="Tiger Nie">
+        <title>SSD API Docs</title>
+        <style> html{font-family:"Courier New", Courier, monospace} body{padding-left:1rem;padding-right:1rem;}
+        h3{font-weight:bold}code{background-color:rgb(246,248,250);display:block;padding:10px;} </style>
+        """
+    )
+
 
 @app.route('/')
 @app.route('/ssd_api/')
 def index():
-    with open('APIDocumentation.md', 'r') as f:
-        content = f.read()
-        readme = markdown(content)
-        readme += Markup(
-            """
-            <meta charset=UTF-8>
-            <meta name=viewport content="width=device-width,shrink-to-fit=0,user-scalable=no,minimum-scale=1,maximum-scale=1">
-            <title>SSD API Docs</title>
-            <style>
-            html{font-family:"Courier New", Courier, monospace}
-            body{padding-left:10rem;padding-right:10rem;}
-            h3{font-weight:bold}
-            code {
-            background-color: rgb(246,248,250);
-            display:block;
-            padding: 10px;
-            }
-            </style>
-            """
-        )
     return readme
 
 
