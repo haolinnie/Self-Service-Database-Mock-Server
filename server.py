@@ -13,7 +13,7 @@ TABLE_NAMES = []
 with get_db() as connection:
     cursor = connection.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    TABLE_NAMES = cursor.fetchall()
+    TABLE_NAMES = list(map(lambda x: x[0], cursor.fetchall()))
     cursor.close()
 
 app = Flask(__name__)
@@ -35,46 +35,58 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 
-todos = {
-    'todo1': ['hello', 'world']
-}
-
-
-class TodoSimple(Resource):
-    def get(self, todo_id):
-        return {todo_id: todos[todo_id]}
-
-    def put(self, todo_id):
-        todos[todo_id] = request.form['data']
-        return {todo_id: todos[todo_id]}
-
-
 class TableNames(Resource):
     def get(self):
+        print(TABLE_NAMES)
         return {'table_names': TABLE_NAMES}
 
 
 class GetTable(Resource):
-    def get(self):
-        data = parser.parse_args()
-        table_name = data.get('table_name')
+    def get(self, table_name):
+        # If no table name specified
+        print(table_name)
         if table_name is None:
             return {'table_names': TABLE_NAMES}
 
-        # Get column names of a table
-        with get_db() as connection:
-            cursor = connection.cursor()
-            cursor.execute("SELECT * FROM "+table_name)
-            names = list(map(lambda x: x[0], cursor.description))
-            cursor.close()
+        # Get table from db
+        try:
+            with get_db() as connection:
+                cursor = connection.cursor()
+                cursor.execute("SELECT * FROM "+table_name)
+                names = list(map(lambda x: x[0], cursor.description))
+                data = cursor.fetchall()
+                cursor.close()
+        except:  # TODO: figure out which exception this is
+            return {"ERROR": "table doesn't exist."}
 
-        res = {table_name: names}
-        return res
+        return {'columns': names, 'data': data}
 
 
-api.add_resource(TodoSimple, '/api/todo/<string:todo_id>')
-api.add_resource(TableNames, '/api/table_names/')
-api.add_resource(GetTable, '/api/get_table/')
+class GetTableCols(Resource):
+    def get(self):
+        data = parser.parse_args()
+        table_name = data.get('table_name')
+
+        # If no table name specified
+        if table_name is None:
+            return {'table_names': TABLE_NAMES}
+
+        # Get table columns
+        try:
+            with get_db() as connection:
+                cursor = connection.cursor()
+                cursor.execute("SELECT * FROM "+table_name)
+                names = list(map(lambda x: x[0], cursor.description))
+                cursor.close()
+        except:  # TODO: figure out which exception this is
+            return {"ERROR": "table doesn't exist."}
+
+        return {'columns': names}
+
+
+api.add_resource(TableNames, '/api/get_table/')
+api.add_resource(GetTable, '/api/get_table/<string:table_name>')
+api.add_resource(GetTableCols, '/api/get_table_cols/')
 
 
 if __name__ == '__main__':

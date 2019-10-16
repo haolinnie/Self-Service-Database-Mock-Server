@@ -1,5 +1,5 @@
 # Mock server for Self-Service Database UI
-Author: Tiger Nie <[nhl0819@gmail.com]>
+Author: Tiger Nie [nhl0819@gmail.com]
 Version: 1.0.0
 
 ## Deployment steps
@@ -14,4 +14,5 @@ Make the app to an executable
 
 Start the server
 `./server.py`
+
 
