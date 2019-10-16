@@ -1,4 +1,5 @@
 import pandas as pd
+from db_op import get_db
 
 DATA_PATH = 'data/deid_data_sample.xlsx'
 
@@ -16,8 +17,16 @@ def loadData():
     return loadExcel(DATA_PATH)
 
 
-if __name__ == '__main__':
+def excel_to_db():
+    tables, table_names = loadData()
+    connection = get_db()
 
-    tables, table_names= loadExcel(DATA_PATH)
-    breakpoint()
+    for name in table_names:
+        print("Adding table "+name+" to db.")
+        tables[name].to_sql(name, con=connection)
+    
+    connection.commit()
 
+
+if __name__ == "__main__":
+    excel_to_db()
