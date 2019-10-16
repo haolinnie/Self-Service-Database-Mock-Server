@@ -1,10 +1,9 @@
 #!flask/bin/python
 import sys
 from flask import Flask, jsonify, Markup
-from flask import make_response, abort
+from flask import make_response
 from flask_restful import Resource, Api, reqparse
 from flask_misaka import markdown
-import json
 
 # Get sample database
 from db_op import get_db
