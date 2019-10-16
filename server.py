@@ -2,7 +2,6 @@
 from flask import Flask, jsonify
 from flask import make_response, abort
 from flask_restful import Resource, Api, reqparse
-import pandas as pd
 import json
 
 # Get sample database
