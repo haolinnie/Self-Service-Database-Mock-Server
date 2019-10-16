@@ -90,4 +90,4 @@ api.add_resource(GetTableCols, '/api/get_table_cols/')
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5100)
