@@ -1,13 +1,13 @@
-#!flask/bin/python
+#!../flask/bin/python
 import sys
 from flask import Flask, jsonify, Markup
-from flask import make_response, abort
+from flask import make_response
 from flask_restful import Resource, Api, reqparse
 from flask_misaka import markdown
-import json
+import sqlite3
 
 # Get sample database
-from db_op import get_db
+from db_op import get_db, execute_sql
 
 TABLE_NAMES = []
 # Load all table names
@@ -18,30 +18,39 @@ with get_db() as connection:
     cursor.close()
 
 app = Flask(__name__)
+
+## Running behind Nginx
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app)
+
+app.config['BUNDLE_ERRORS'] = True
 api = Api(app)
 parser = reqparse.RequestParser()
 
-parser.add_argument('table_name', type=str, help='ERROR: empty table name')
-parser.add_argument('column', type=str, help='ERROR: column name empty')
+parser.add_argument('table_name', type=str, required=True, help='ERROR: empty table name')
+parser.add_argument('col_name', type=str, help='ERROR: empty column name')
 
 # Parse Documentation
-with open('APIDocumentation.md', 'r') as f:
+with open('../APIDocumentation.md', 'r') as f:
     content = f.read()
     readme = markdown(content)
     readme += Markup(
         """
         <meta charset=UTF-8>
-        <meta name=viewport content="width=device-width,shrink-to-fit=0,user-scalable=no,minimum-scale=1,maximum-scale=1">
+        <meta name=viewport content="width=device-width,shrink-to-fit=0,
+        user-scalable=no,minimum-scale=1,maximum-scale=1">
         <meta name=author content="Tiger Nie">
         <title>SSD API Docs</title>
-        <style> html{font-family:"Courier New", Courier, monospace} body{padding-left:1rem;padding-right:1rem;}
-        h3{font-weight:bold}code{background-color:rgb(246,248,250);display:block;padding:10px;} </style>
+        <style> html{font-family:"Courier New", Courier, monospace}
+        body{padding-left:1rem;padding-right:1rem;} h3{font-weight:bold}
+        code{background-color:rgb(246,248,250);display:block;padding:10px;}
+        </style>
         """
     )
 
 
 @app.route('/')
-@app.route('/ssd_api/')
+@app.route('/ssd_api')
 def index():
     return readme
 
@@ -66,7 +75,7 @@ class GetTable(Resource):
         try:
             with get_db() as connection:
                 cursor = connection.cursor()
-                cursor.execute("SELECT * FROM "+table_name)
+                cursor.execute("SELECT * FROM {}".format(table_name))
                 names = list(map(lambda x: x[0], cursor.description))
                 data = cursor.fetchall()
                 cursor.close()
@@ -89,18 +98,47 @@ class GetTableCols(Resource):
         try:
             with get_db() as connection:
                 cursor = connection.cursor()
-                cursor.execute("SELECT * FROM "+table_name)
+                cursor.execute("SELECT * FROM {}".format(table_name))
                 names = list(map(lambda x: x[0], cursor.description))
                 cursor.close()
-        except:  # TODO: figure out which exception this is
+        except sqlite3.OperationalError:
             return {"ERROR": "table doesn't exist."}
 
         return {'columns': names}
 
 
-api.add_resource(TableNames, '/ssd_api/get_table/')
+class GetDistinctX(Resource):
+    def get(self):
+        data = parser.parse_args()
+        col_name = data.get('col_name')
+        table_name = data.get('table_name')
+
+        # If no col_name provided, return col_names in the table
+        if col_name is None:
+            try:
+                with get_db() as connection:
+                    cursor = connection.cursor()
+                    cursor.execute("SELECT * FROM {}".format(table_name))
+                    names = list(map(lambda x: x[0], cursor.description))
+                    cursor.close()
+            except sqlite3.OperationalError:
+                return {"ERROR": "table doesn't exist."}
+            return {'columns': names}
+
+        try:
+            cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
+            data = execute_sql(cmd)
+            data = [r[0] for r in data]
+        except sqlite3.OperationalError:
+            return {"ERROR": "sqlite3.OperationalError"}
+        
+        return {"data": data}
+
+
+api.add_resource(TableNames, '/ssd_api/get_table')
 api.add_resource(GetTable, '/ssd_api/get_table/<string:table_name>')
 api.add_resource(GetTableCols, '/ssd_api/get_table_cols/')
+api.add_resource(GetDistinctX, '/ssd_api/get_distinct/')
 
 
 if __name__ == '__main__':
