@@ -24,8 +24,7 @@ parser.add_argument('table_name', type=str, help='ERROR: empty table name')
 parser.add_argument('column', type=str, help='ERROR: column name empty')
 
 
-@app.route('/')
-@app.route('/api/')
+@app.route('/ssd_api/')
 def index():
     return "Self-Service Database Mock API"
 
@@ -84,9 +83,9 @@ class GetTableCols(Resource):
         return {'columns': names}
 
 
-api.add_resource(TableNames, '/self-service-api/get_table/')
-api.add_resource(GetTable, '/self-service-api/get_table/<string:table_name>')
-api.add_resource(GetTableCols, '/self-service-api/get_table_cols/')
+api.add_resource(TableNames, '/ssd_api/get_table/')
+api.add_resource(GetTable, '/ssd_api/get_table/<string:table_name>')
+api.add_resource(GetTableCols, '/ssd_api/get_table_cols/')
 
 
 if __name__ == '__main__':
