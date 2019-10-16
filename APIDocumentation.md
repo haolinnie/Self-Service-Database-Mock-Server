@@ -1,7 +1,9 @@
-## API Documentation
+# Self-Service Database Mock API Documentation
 
-#### Get list of table names
-URL: baseURL/ssd_api/get_table/
+### Get list of table names
+
+URL: `baseURL/ssd_api/get_table/`
+
 Returns:
 ```json
 {
@@ -20,9 +22,12 @@ Returns:
 }
 ```
 
-#### Get entire table
-URL: baseURL/ssd_api/get_table/<string:pt_deid>
-Example: baseURL/ssd_api/get_table/pt_deid
+### Get entire table
+
+URL: `baseURL/ssd_api/get_table/<string:pt_deid>`
+
+Example: `baseURL/ssd_api/get_table/pt_deid`
+
 Returns:
 ```json
 {
@@ -52,9 +57,12 @@ Returns:
 }
 ```
 
-#### Get columns in a table
-URL: baseURL/ssd_api/get_table_cols/?table_name=<string: table_name>
-Example: baseURL/ssd_api/get_table_cols/?table_name=pt_deid
+### Get columns in a table
+
+URL: `baseURL/ssd_api/get_table_cols/?table_name=<string: table_name>`
+
+Example: `baseURL/ssd_api/get_table_cols/?table_name=pt_deid`
+
 Returns:
 ```json
 {

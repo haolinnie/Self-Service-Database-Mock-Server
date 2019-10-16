@@ -3,6 +3,7 @@ import sys
 from flask import Flask, jsonify
 from flask import make_response, abort
 from flask_restful import Resource, Api, reqparse
+from flask_misaka import markdown
 import json
 
 # Get sample database
@@ -23,10 +24,14 @@ parser = reqparse.RequestParser()
 parser.add_argument('table_name', type=str, help='ERROR: empty table name')
 parser.add_argument('column', type=str, help='ERROR: column name empty')
 
+with open('APIDocumentation.md', 'r') as f:
+    content = f.read()
+    readme = markdown(content)
+
 
 @app.route('/ssd_api/')
 def index():
-    return "Self-Service Database Mock API"
+    return readme
 
 
 @app.errorhandler(404)
