@@ -20,6 +20,8 @@ This app is built in Python 3 with the Flask microframework, and Gunicorn is the
 
 ## Deployment steps
 
+Linux recommended, MacOS supported.
+
 Clone the repo (working on easier deployment)
 
 ```bash
