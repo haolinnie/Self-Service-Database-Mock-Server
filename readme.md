@@ -1,4 +1,4 @@
-# Mock server for Self-Service Database UI
+# Self-Service Database Server for Northwestern Medicine
 
 Author: Tiger Nie [nhl0819@gmail.com]
 
