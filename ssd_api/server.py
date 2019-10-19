@@ -20,7 +20,7 @@ config = Config(os.path.join(
 
 # Initialise request parser
 parser = reqparse.RequestParser()
-parser.add_argument('table_name', type=str, required=True, help='ERROR: empty table name')
+parser.add_argument('table_name', type=str, help='ERROR: empty table name')
 parser.add_argument('col_name', type=str, help='ERROR: empty column name')
 
 class TableNames(Resource):
@@ -49,6 +49,10 @@ class GetTableCols(Resource):
         data = parser.parse_args()
         table_name = data.get('table_name')
 
+        # error handling
+        if table_name is None:
+            return {'ERROR': 'empty table_name'}
+
         # Get table columns
         try:
             with get_db() as connection:
@@ -70,15 +74,11 @@ class GetDistinctX(Resource):
         connection = get_db()
         cursor = connection.cursor()
 
-        # If no col_name provided, return col_names in the table
+        # error handling
+        if table_name is None:
+            return {'ERROR': 'empty table_name'}
         if col_name is None:
-            try:
-                cursor.execute("SELECT * FROM {}".format(table_name))
-                names = list(map(lambda x: x[0], cursor.description))
-                cursor.close()
-            except sqlite3.OperationalError:
-                return {"ERROR": "table doesn't exist."}
-            return {'columns': names}
+            return {'ERROR': 'empty col_name'}
 
         try:
             cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
