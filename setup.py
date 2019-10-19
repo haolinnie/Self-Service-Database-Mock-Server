@@ -13,6 +13,7 @@ setup(
         'Flask==1.1.1',
         'Flask-RESTful==0.3.7',
         'Flask-Misaka==1.0.0',
+        'gunicorn==19.9.0',
         'itsdangerous==1.1.0',
         'Jinja2==2.10.3',
         'MarkupSafe==1.1.1',
