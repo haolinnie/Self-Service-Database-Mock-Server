@@ -11,7 +11,7 @@ def test_get_table(client):
 
 def test_get_cols(client):
     res = client.get('/ssd_api/get_table_cols/')
-    assert res.status_code == 400
+    assert res.status_code == 200
     res = client.get('/ssd_api/get_table_cols/?table_name=pt_deid')
     assert res.status_code == 200
     res = client.get('/ssd_api/get_table_cols/?table_name=bla')
@@ -20,14 +20,11 @@ def test_get_cols(client):
 def test_get_distinct(client):
     # Table name required
     res = client.get('/ssd_api/get_distinct/')
-    assert res.status_code == 400
+    assert res.status_code == 200
     # Success
     res = client.get('/ssd_api/get_distinct/?table_name=pt_deid&col_name=pt_id')
     assert res.status_code == 200
-    # Wrong table name
-    res = client.get('/ssd_api/get_distinct/?table_name=pt')
-    assert res.status_code == 200
-    # Correct table name
+    # Missing col name
     res = client.get('/ssd_api/get_distinct/?table_name=pt_deid')
     assert res.status_code == 200
     # Wrong column name
