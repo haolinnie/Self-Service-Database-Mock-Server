@@ -6,13 +6,10 @@ Version: 1.0.0
 Create & activate virtual environment
 `python3 -m venv flask && source flask/bin/activate`
 
-Download requirements
-`pip3 install -r requirements.txt`
-
-Make the app to an executable
-`chmod a+x server.py`
+Install module
+`pip3 install .`
 
 Start the server
-`./server.py`
+`python3 ssd_api/server.py`
 
 
