@@ -13,4 +13,3 @@ def test_doc(client):
 def test_404(client):
     res = client.get('/ssd_api/bla')
     assert res.status_code == 404
-    assert res.data == b'{\n  "error": "Not found"\n}\n'

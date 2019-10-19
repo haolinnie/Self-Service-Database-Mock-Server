@@ -16,7 +16,6 @@ def test_get_cols(client):
     assert res.status_code == 200
     res = client.get('/ssd_api/get_table_cols/?table_name=bla')
     assert res.status_code == 200
-    assert res.data == b'{\n    "ERROR": "table doesn\'t exist."\n}\n'
 
 def test_get_distinct(client):
     # Table name required
