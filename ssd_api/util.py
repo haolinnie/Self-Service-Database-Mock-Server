@@ -7,7 +7,7 @@ parent_dir = os.path.dirname(os.path.abspath(__file__))
 
 def get_documentation():
     # Parse Documentation
-    with open(os.path.join(parent_dir, '../APIDocumentation.md'), 'r') as f:
+    with open(os.path.join(parent_dir, 'APIDocumentation.md'), 'r') as f:
     
         content = f.read()
         readme = markdown(content)
