@@ -4,7 +4,7 @@ Version: 1.0.0
 
 ## Deployment steps
 Create & activate virtual environment
-`python3 -m virtualenv flask && source flask/bin/activate`
+`python3 -m venv flask && source flask/bin/activate`
 
 Download requirements
 `pip3 install -r requirements.txt`
