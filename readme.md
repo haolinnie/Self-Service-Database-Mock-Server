@@ -6,6 +6,11 @@ Version: 1.0.0
 
 Python >= 3.5
 
+## Status
+
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
+[![Build Status](https://travis-ci.com/haolinnie/Self-Service-Database-Mock-Server.svg?branch=master)](https://travis-ci.com/haolinnie/Self-Service-Database-Mock-Server)
+
 ## Documentation
 
 [Here](https://tigernie.com/ssd_api) is the most up-to-date API documentation.
