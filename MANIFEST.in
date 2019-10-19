@@ -1,0 +1,2 @@
+include ssd_api/data/deid_data.db
+include ssd_api/APIDocumentation.md

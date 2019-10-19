@@ -1,8 +1,11 @@
+import os
 import pandas as pd
 from db_op import get_db
 
-DATA_PATH = 'data/deid_data_sample.xlsx'
-
+DATA_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    'data/deid_data_sample.xlsx'
+)
 
 def loadExcel(path):
     excel_file = pd.ExcelFile(path)
