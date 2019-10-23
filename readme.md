@@ -8,7 +8,7 @@ Python >= 3.5
 
 ## Status
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/LICENSE)
 [![Build Status](https://travis-ci.com/haolinnie/Self-Service-Database-Mock-Server.svg?branch=master)](https://travis-ci.com/haolinnie/Self-Service-Database-Mock-Server)
 
 ## Documentation
@@ -19,6 +19,8 @@ This app is built in Python 3 with the Flask microframework, and Gunicorn is the
 
 
 ## Deployment steps
+
+Linux recommended, MacOS supported.
 
 Clone the repo (working on easier deployment)
 

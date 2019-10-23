@@ -129,7 +129,7 @@ def create_app(test_config=None):
     return app
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     app = create_app()
     if sys.platform == 'linux':
         app.run(debug=False, port=config.getint('app', 'port'))
