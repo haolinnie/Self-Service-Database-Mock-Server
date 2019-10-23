@@ -1,0 +1,6 @@
+#!/bin/bash
+
+source flask/bin/activate
+coverage run -m pytest
+coverage report --omit=ssd_api/excel_op.py
+coverage html

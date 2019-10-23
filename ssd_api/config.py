@@ -7,10 +7,10 @@ class Config(object):
         self.config = ConfigParser()
         self.config.read(path, encoding='utf-8')
     
-    def get(self, *args):
+    def get(self, *args): # pragma: no cover
         return self.config.get(args[0], args[1])
 
-    def getint(self, *args):
+    def getint(self, *args): # pragma: no cover
         return self.config.getint(args[0], args[1])
     
     # def getfloat(self, *args):
