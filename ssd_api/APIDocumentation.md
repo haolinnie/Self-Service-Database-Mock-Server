@@ -66,7 +66,8 @@ Example: `baseURL/ssd_api/get_table_cols/?table_name=pt_deid`
 Returns:
 ```json
 {
-    "pt_deid": [
+    "table_name": "pt_deid",
+    "columns": [
         "index",
         "pt_id",
         "dob",
@@ -82,15 +83,24 @@ populate a multiple choice filter
 
 URL: `baseURL/ssd_api/get_distinct/?table_name=<string>&col_name=<string>`
 
-Example: `baseURL/ssd_api/get_table_cols/?table_name=pt_deid&col_name=pt_id`
+Example: `baseURL/ssd_api/get_distinct/?table_name=pt_deid&col_name=pt_id`
 
 Returns:
 ```json
 {
     "data": [
-        "1972-02-15 00:00:00", "1950-10-15 00:00:00",
-        "1950-07-09 00:00:00", "1977-02-07 00:00:00",
-        "1983-04-17 00:00:00", "1947-02-02 00:00:00"
-    ]
+        20676,
+        36440,
+        50765,
+        53754,
+        59153,
+        64153,
+        64656,
+        66166,
+        66172,
+        66475
+    ],
+    "table_name": "pt_deid",
+    "col_name": "pt_id"
 }
 ```
