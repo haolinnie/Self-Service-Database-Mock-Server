@@ -9,7 +9,7 @@ Python >= 3.5
 ## Status
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/LICENSE)
-[![Build Status](https://travis-ci.com/haolinnie/Self-Service-Database-Mock-Server.svg?branch=master)](https://travis-ci.com/haolinnie/Self-Service-Database-Mock-Server)
+[![Build Status](https://travis-ci.com/haolinnie/Self-Service-Database-Server.svg?branch=master)](https://travis-ci.com/haolinnie/Self-Service-Database-Server)
 
 ## Documentation
 

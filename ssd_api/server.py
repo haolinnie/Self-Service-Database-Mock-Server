@@ -63,11 +63,12 @@ class GetTableCols(Resource):
         except sqlite3.OperationalError:
             return {"ERROR": "table doesn't exist."}
 
-        return {'columns': names}
+        return {'table_name': table_name, 'columns': names}
 
 
 class GetDistinctX(Resource):
     def get(self):
+        print("[DEBUG] Get Distinct Called")
         data = parser.parse_args()
         col_name = data.get('col_name')
         table_name = data.get('table_name')
@@ -88,7 +89,7 @@ class GetDistinctX(Resource):
         except sqlite3.OperationalError:
             return {"ERROR": "sqlite3.OperationalError"}
         
-        return {"data": data}
+        return {"data": data, "table_name": table_name, "col_name": col_name}
 
 
 def create_app(test_config=None):
