@@ -30,3 +30,17 @@ def test_get_distinct(client):
     # Wrong column name
     res = client.get('/ssd_api/get_distinct/?table_name=pt_deid&col_name=bla')
     assert res.status_code == 200
+
+def test_filter_table_with_ptid(client):
+    # Require at least 1 pt_id
+    res = client.get('/ssd_api/filter_table_with_ptid/') 
+    assert res.status_code == 200
+    # Must provide table name
+    res = client.get('/ssd_api/filter_table_with_ptid/?pt_id=100') 
+    assert res.status_code == 200
+    # Single pt_id query
+    res = client.get('/ssd_api/filter_table_with_ptid/?pt_id=20676&table_name=pt_deid') 
+    assert res.status_code == 200
+    # Multi pt_id query
+    res = client.get('/ssd_api/filter_table_with_ptid/?pt_id=20676&pt_id=36440&table_name=pt_deid') 
+    assert res.status_code == 200

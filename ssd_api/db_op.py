@@ -11,6 +11,24 @@ db_path  = os.path.join(
     'data/deid_data.db'
 )
 
+### Testing db functions
+
+def test_con():
+    db = sqlite3.connect(db_path)
+    return db
+
+def test_execute(cmd):
+    db = test_con()
+    cursor = db.cursor()
+    cursor.execute(cmd)
+    res = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return res
+
+
+### Flask server db functions
+
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(
@@ -20,6 +38,14 @@ def get_db():
         # g.db.row_factory = sqlite3.Row
 
     return g.db
+
+def db_execute(cmd):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(cmd)
+    res = cursor.fetchall()
+    cursor.close()
+    return res
 
 def close_db(e=None):
     db = g.pop('db', None)

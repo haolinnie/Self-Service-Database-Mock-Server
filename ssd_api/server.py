@@ -8,7 +8,7 @@ from flask_restful import Resource, Api, reqparse
 from ssd_api.util import get_documentation
 from ssd_api.db_op import (
     get_db, get_table_names, sqlite3,
-    init_app
+    init_app, db_execute
 )
 from ssd_api.config import Config
 
@@ -22,6 +22,8 @@ config = Config(os.path.join(
 parser = reqparse.RequestParser()
 parser.add_argument('table_name', type=str, help='ERROR: empty table name')
 parser.add_argument('col_name', type=str, help='ERROR: empty column name')
+parser.add_argument('pt_id', type=int, action='append', help='ERROR: empty pt_id_list')
+
 
 class TableNames(Resource):
     def get(self):
@@ -68,12 +70,10 @@ class GetTableCols(Resource):
 
 class GetDistinctX(Resource):
     def get(self):
-        print("[DEBUG] Get Distinct Called")
+        # print("[DEBUG] Get Distinct Called")
         data = parser.parse_args()
         col_name = data.get('col_name')
         table_name = data.get('table_name')
-        connection = get_db()
-        cursor = connection.cursor()
 
         # error handling
         if table_name is None:
@@ -83,13 +83,49 @@ class GetDistinctX(Resource):
 
         try:
             cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
-            cursor.execute(cmd)
-            data = cursor.fetchall()
+            data = db_execute(cmd)
             data = [r[0] for r in data]
         except sqlite3.OperationalError:
             return {"ERROR": "sqlite3.OperationalError"}
         
         return {"data": data, "table_name": table_name, "col_name": col_name}
+
+
+class FilterTableWithPTID(Resource):
+    def get(self):
+        data = parser.parse_args()
+        pt_id = data.get('pt_id')
+        table_name = data.get('table_name')
+
+        if not pt_id:
+            return {'ERROR': 'Must provide at least 1 pt_id'}
+        if not table_name:
+            return {'ERROR': 'Must provide table_name'}
+
+        ### Select values from tables with given pt_id
+        pt_id = "'" + "', '".join([str(v) for v in pt_id]) + "'"
+        # print(pt_id)
+
+        out_cols = "*"
+        cmd = """
+        SELECT {}
+        FROM {}
+        WHERE pt_id IN({})
+        ORDER BY pt_id
+        """.format(out_cols, table_name, pt_id)
+
+        # Filter table for pt_id
+        try:
+            with get_db() as connection:
+                cursor = connection.cursor()
+                cursor.execute(cmd)
+                col_names = list(map(lambda x: x[0], cursor.description))
+                res = cursor.fetchall()
+                cursor.close()
+        except sqlite3.OperationalError:
+            return {"ERROR": "Query error."}
+
+        return {'columns': col_names, 'data': res}
 
 
 def create_app(test_config=None):
@@ -127,6 +163,7 @@ def create_app(test_config=None):
     api.add_resource(GetTable, '/ssd_api/get_table/<string:table_name>')
     api.add_resource(GetTableCols, '/ssd_api/get_table_cols/')
     api.add_resource(GetDistinctX, '/ssd_api/get_distinct/')
+    api.add_resource(FilterTableWithPTID, '/ssd_api/filter_table_with_ptid/')
     return app
 
 
