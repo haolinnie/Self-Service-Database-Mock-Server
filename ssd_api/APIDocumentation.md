@@ -1,5 +1,8 @@
 # Self-Service Database Mock API Documentation
+Author: [Tiger Nie] <nhl0819@gmail.com>
+Github: <https://github.com/haolinnie/Self-Service-Database-Server>
 
+---
 ### Get list of table names
 Get the names of all the tables in the database
 
@@ -23,7 +26,7 @@ Returns:
 }
 ```
 
-
+---
 ### Get entire table
 Given a **table_name**, return the entire table.
 
@@ -62,7 +65,7 @@ Returns (truncated):
 }
 ```
 
-
+---
 ### Get columns in a table
 Given a **table_name**, return the columns of the table
 
@@ -86,7 +89,7 @@ Returns:
 }
 ```
 
-
+---
 ### Get distinct values in a table column
 Given a **table_name** and **col_name**, return the unique values in that column.
 Can be used to obtain unique values from a column (e.g. medication) to
@@ -118,7 +121,7 @@ Returns:
 }
 ```
 
-
+---
 ### Filter a table for specific pt_id
 Given a list (one or more) **pt_id** and a **table_name**, return row data for 
 those patients. Note that there can be an arbitrary number of pt_id values,
@@ -176,3 +179,6 @@ Returns (truncated):
         ],
     ]
 }
+```
+
+---
