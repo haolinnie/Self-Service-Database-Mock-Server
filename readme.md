@@ -13,7 +13,7 @@ Python >= 3.5
 
 ## Documentation
 
-[Here](https://tigernie.com/ssd_api) is the most up-to-date API documentation.
+[Here](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md) is the most up-to-date API documentation.
 
 This app is built in Python 3 with the Flask microframework, and Gunicorn is the current production WSGI server of choice, although many others will also get the job done.
 
