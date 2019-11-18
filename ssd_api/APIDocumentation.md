@@ -8,9 +8,11 @@ Testing url: <https://tigernie.com/ssd_api>
 
 ---
 ### Get list of table names
-Get the names of all the tables in the database
+Get the names of all the tables in the database.
 
 URL: `baseURL/ssd_api/get_table`
+
+Type: `GET`
 
 Example:
 
@@ -39,6 +41,8 @@ Returns:
 Given a **table_name**, return the entire table.
 
 URL: `baseURL/ssd_api/get_table/<string>`
+
+Type: `GET`
 
 Example: To get the entire table of **pt_deid**
 
@@ -75,9 +79,11 @@ Returns (truncated):
 
 ---
 ### Get columns in a table
-Given a **table_name**, return the columns of the table
+Given a **table_name**, return the columns of the table.
 
 URL: `baseURL/ssd_api/get_table_cols`
+
+Type: `GET`
 
 Example: To get the column names of **pt_deid**
 
@@ -101,9 +107,11 @@ Returns:
 ### Get distinct values in a table column
 Given a **table_name** and **col_name**, return the unique values in that column.
 Can be used to obtain unique values from a column (e.g. medication) to
-populate a multiple choice filter
+populate a multiple choice filter.
 
 URL: `baseURL/ssd_api/get_distinct`
+
+Type: `GET`
 
 Example: To get the distinct values in table **pt_deid** column **pt_id**
 
@@ -131,11 +139,13 @@ Returns:
 
 ---
 ### Filter a table for specific pt_id
-Given a list (one or more) **pt_id** and a **table_name**, return row data for 
+Given a list of **pt_id** and a **table_name**, return row data for 
 those patients. Note that there can be an arbitrary number of pt_id values,
-just chain them like so `pt_id=<int>&pt_id=<int>&..`
+just chain them like so `pt_id=<int>&pt_id=<int>&..`.
 
 URL: `baseURL/ssd_api/filter_table_with_ptid?pt_id=<int>&table_name=<string>`
+
+Type: `GET`
 
 Example: Retrieve data for patients **[20676, 36440]** from table **diagnosis_deid**
 
@@ -191,12 +201,11 @@ Returns (truncated):
 
 ---
 ### Retrieves Patient History 
-Given a list of **pt_id**, return all the data to populate the Patient History table.
-The specified columns include date, medication, therapeutic class, eye diagnoses,
-systemic diagnoses, lab values, exam ID, left vision, right vision, left intraocular pressure,
-and right intraocular pressure. All sorted by date.
+Given a list of **pt_id**, return the `medication[{id, generic_name, therapeutic_class}], eye_diagnosis[{diagnosis, date}], systemic_diagnosis[{diagnosis, date}], lab_values[{lab_name, lab_value, unit, date}], vision[{name, value, smart_data_id, date}], pressure[{name, value, smart_data_id, date}]` for each **pt_id**. This provides all the data to populate the Patient History table. All listed items are sorted by date.
 
 URL: `baseURL/ssd_api/patients`
+
+Type: `GET`
 
 Example: Retrieve patient history for patients **[20676, 36440]** 
 
@@ -209,7 +218,7 @@ Returns (truncated):
         "medication": [
             {"id": "Spacer/Aerosol-Holding Chambers - Device", "generic_name": "Miscellaneous Products", "therapeutic_class": "2010-12-03 16:19:00"}, 
             {"id": "Fluticasone Propionate Nasal Susp 50 MCG/ACT", "generic_name": "Respiratory Agents", "therapeutic_class": "2013-12-08 09:02:00"}, 
-            {"id": "Apremilast Tab 30 MG", "generic_name": "Analgesics & Anesthetics", "therapeutic_class": '2015-03-19 09:31:00'}
+            {"id": "Apremilast Tab 30 MG", "generic_name": "Analgesics & Anesthetics", "therapeutic_class": "2015-03-19 09:31:00"}
         ],
         "eye_diagnosis": [],
         "systemic_diagnosis": [
@@ -237,9 +246,11 @@ Returns (truncated):
 
 ---
 ### Retrieves Patient Images   
-Given a list of **pt_id**, return [[pt_id, exam_id, exam_date, image_id, image_procedure, image_laterality, link], …]
+Given a list of **pt_id**, return the `exam_id, exam_date, images[]` for each **pt_id**.
 
 URL: `baseURL/ssd_api/patient_images`
+
+Type: `GET`
 
 Example: Retrieve patient images for patients **[20676, 36440]** 
 
