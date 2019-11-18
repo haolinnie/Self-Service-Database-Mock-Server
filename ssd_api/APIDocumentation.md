@@ -1,8 +1,10 @@
-# Self-Service Database Mock API Documentation
+# Self-Service Database API Documentation
 ---
 Author: [Tiger Nie] <nhl0819@gmail.com>
 
 Github: <https://github.com/haolinnie/Self-Service-Database-Server>
+
+Documentation: <https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md>
 
 Testing url: <https://tigernie.com/ssd_api>
 
