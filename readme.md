@@ -31,15 +31,15 @@ cd Self-Service-Database-Mock-Server
 Create & activate virtual environment
 
 ```bash
-python3 -m venv flask
+python -m venv flask
 source flask/bin/activate
 ```
 
 Install the app factory module
 
 ```
-pip3 install --upgrade pip
-pip3 install .
+python -m pip install --upgrade pip
+python -m pip install .
 ```
 
 Start the server
