@@ -1,8 +1,11 @@
 # Self-Service Database Mock API Documentation
-
+---
 Author: [Tiger Nie] <nhl0819@gmail.com>
+
 Github: <https://github.com/haolinnie/Self-Service-Database-Server>
+
 Testing url: <https://tigernie.com/ssd_api>
+
 ---
 ### Get list of table names
 Get the names of all the tables in the database
@@ -39,7 +42,7 @@ URL: `baseURL/ssd_api/get_table/<string>`
 
 Example: To get the entire table of **pt_deid**
 
-`baseURL/ssd_api/get_table/pt_deid`
+`https://tigernie.com/ssd_api/get_table/pt_deid`
 
 Returns (truncated):
 ```json
@@ -188,7 +191,7 @@ Returns (truncated):
 
 ---
 ### Retrieves Patient History 
-Given a list of **pt_id**, return all the data to populate the Patient History table
+Given a list of **pt_id**, return all the data to populate the Patient History table.
 The specified columns include date, medication, therapeutic class, eye diagnoses,
 systemic diagnoses, lab values, exam ID, left vision, right vision, left intraocular pressure,
 and right intraocular pressure. All sorted by date.
@@ -215,9 +218,9 @@ Returns (truncated):
             {"diagnosis": "ENCOUNTER FOR THERAPEUTIC DRUG MONITORING", "date": "2014-05-02 15:28:00"}
         ], 
         "lab_values": [
-            {"lab_name": "FEMORAL NECK(RIGHT): Z-SCORE", "lab_value": "-0.4", "unit": None, "date": "2010-06-26 20:38:00"},
+            {"lab_name": "FEMORAL NECK(RIGHT): Z-SCORE", "lab_value": "-0.4", "unit": "None", "date": "2010-06-26 20:38:00"},
             {"lab_name": "TOTAL HIP BILATERAL AVERAGE: BMD", "lab_value": "0.934", "unit": "g/cm2", "date": "2010-06-26 20:38:00"},
-            {"lab_name": "TOTAL HIP(RIGHT): Z-SCORE", "lab_value": "-0.5", "unit": None, "date": "2010-06-26 20:38:00"}
+            {"lab_name": "TOTAL HIP(RIGHT): Z-SCORE", "lab_value": "-0.5", "unit": "None", "date": "2010-06-26 20:38:00"}
         ],
         "vision": [
             {"name": "FINDINGS - TESTS - EYES - VISUAL ACUITY - VA - METHOD - REFRACTION - MANIFEST REFRACTION - MANIFEST REFRACTION - RIGHT DIST VA", "value": "20/20", "smart_data_id": 23773081, "date": "2014-08-09 00:00:00"}
