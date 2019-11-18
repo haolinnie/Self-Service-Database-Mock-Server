@@ -6,10 +6,8 @@ from flask import make_response
 from flask_restful import Resource, Api, reqparse
 
 from ssd_api.util import get_documentation
-from ssd_api.db_op import (
-    get_db, get_table_names, sqlite3,
-    init_app, db_execute
-)
+from ssd_api.db_op import init_app, db_execute
+from ssd_api.db_op import get_db, get_table_names, sqlite3
 from ssd_api.config import Config
 
 config = Config(os.path.join(
@@ -106,13 +104,13 @@ class FilterTableWithPTID(Resource):
         pt_id = "'" + "', '".join([str(v) for v in pt_id]) + "'"
         # print(pt_id)
 
-        out_cols = "*"
+        med_cols = "*"
         cmd = """
         SELECT {}
         FROM {}
         WHERE pt_id IN({})
         ORDER BY pt_id
-        """.format(out_cols, table_name, pt_id)
+        """.format(med_cols, table_name, pt_id)
 
         # Filter table for pt_id
         try:
@@ -126,6 +124,92 @@ class FilterTableWithPTID(Resource):
             return {"ERROR": "Query error."}
 
         return {'columns': col_names, 'data': res}
+
+
+class PatientHistory(Resource):
+    def get(self):
+        data = parser.parse_args()
+        pt_id = data.get('pt_id')
+
+        if not pt_id:
+            return {'ERROR': 'Must provide at least 1 pt_id'}
+
+        out_json = {}
+        med_cols = ('id', 'generic_name', 'therapeutic_class', 'date')
+        diag_cols = ('diagnosis', 'date')
+        lab_cols = ('lab_name', 'lab_value', 'unit', 'date')
+        smart_cols = ('name', 'value', 'smart_data_id', 'date')
+        for id in pt_id:
+            # Initialise dict for current pt_id
+            out_json[str(id)] = {}
+
+            # Medication
+            cols = "generic_name, therapeutic_class, order_placed_dt"
+            table_name = "medication_deid"
+            cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY order_placed_dt
+            """.format(cols, table_name, id)
+            res = db_execute(cmd)
+            out_json[str(id)]['medication'] = [dict(zip(med_cols, val)) for val in res]
+
+            # Diagnosis
+            cols = "diagnosis_name, diagnosis_start_dt"
+            table_name = "diagnosis_deid"
+            cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY diagnosis_start_dt 
+            """.format(cols, table_name, id)
+            res = db_execute(cmd)
+            out_json[str(id)]['eye_diagnosis'] = [dict(zip(diag_cols, val)) for val in res if val[0].find('retina')!=-1]
+            out_json[str(id)]['systemic_diagnosis'] = [dict(zip(diag_cols, val)) for val in res if val[0].find('retina')==-1]
+
+            # Lab values
+            cols = "name, value, reference_unit,result_dt"
+            table_name = "lab_value_deid"
+            cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY result_dt
+            """.format(cols, table_name, id)
+            res = db_execute(cmd)
+            out_json[str(id)]['lab_values'] = [dict(zip(lab_cols, val)) for val in res]
+
+            # Vision & Pressure
+            cols = "element_name, smrtdta_elem_value, smart_data_id, value_dt"
+            table_name = "smart_data_deid"
+            cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY value_dt
+            """.format(cols, table_name, id)
+            res = db_execute(cmd)
+            out_json[str(id)]['vision'] = [dict(zip(smart_cols, val)) for val in res if val[0].find('ACUIT') != -1]
+            out_json[str(id)]['pressure'] = [dict(zip(smart_cols, val)) for val in res if val[0].find('PRESSURE') != -1]
+
+        return out_json
+
+
+class PatientImages(Resource):
+    def get(self):
+        data = parser.parse_args()
+        pt_id = data.get('pt_id')
+
+        if not pt_id:
+            return {'ERROR': 'Must provide at least 1 pt_id'}
+
+        out_json = {}
+        image_cols = ('image_id', 'image_num', 'image_type', 'image_laterality', 'image_procedure_id')
+        
+        ## image_procedures cache
+        cmd = """SELECT image_procedure_id, image_procedure FROM image_procedure"""
+        res = db_execute(cmd)
+        image_procedures = dict(res)
+        for id in pt_id:
+            cmd = """ SELECT exam_id, exam_date FROM exam_deid
+            WHERE pt_id IN({}) ORDER BY exam_date """.format(id)
+            res = db_execute(cmd)
+            out_cols = ('exam_id', 'exam_date')
+            out_json[str(id)] = [dict(zip(out_cols, val)) for val in res]
+
+            for curr_exam in out_json[str(id)]:
+                curr_exam['images'] = {}
+                cmd = """ SELECT image_id, image_num, image_type, image_laterality, image_procedure_id
+                FROM image_deid WHERE exam_id IN({}) ORDER BY image_num """.format(curr_exam['exam_id'])
+                res = db_execute(cmd)
+                curr_exam['images'] = [dict(zip(image_cols, list(val[:-1]) + [image_procedures[val[-1]]] )) for val in res]
+
+        return out_json
 
 
 def create_app(test_config=None):
@@ -161,15 +245,16 @@ def create_app(test_config=None):
     api = Api(app)
     api.add_resource(TableNames, '/ssd_api/get_table')
     api.add_resource(GetTable, '/ssd_api/get_table/<string:table_name>')
-    api.add_resource(GetTableCols, '/ssd_api/get_table_cols/')
-    api.add_resource(GetDistinctX, '/ssd_api/get_distinct/')
-    api.add_resource(FilterTableWithPTID, '/ssd_api/filter_table_with_ptid/')
+    api.add_resource(GetTableCols, '/ssd_api/get_table_cols')
+    api.add_resource(GetDistinctX, '/ssd_api/get_distinct')
+    api.add_resource(FilterTableWithPTID, '/ssd_api/filter_table_with_ptid')
+
+    api.add_resource(PatientHistory, '/ssd_api/patients') ## Patient history
+    api.add_resource(PatientImages, '/ssd_api/patient_images') 
+
     return app
 
 
 if __name__ == '__main__': # pragma: no cover
     app = create_app()
-    if sys.platform == 'linux':
-        app.run(debug=False, port=config.getint('app', 'port'))
-    else:
-        app.run(debug=True, port=config.getint('app', 'port'))
+    app.run(debug=True, port=config.getint('app', 'port'))

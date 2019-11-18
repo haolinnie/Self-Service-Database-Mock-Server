@@ -1,12 +1,16 @@
 # Self-Service Database Mock API Documentation
 Author: [Tiger Nie] <nhl0819@gmail.com>
 Github: <https://github.com/haolinnie/Self-Service-Database-Server>
-
+Testing url: <https://tigernie.com/ssd_api>
 ---
 ### Get list of table names
 Get the names of all the tables in the database
 
 URL: `baseURL/ssd_api/get_table`
+
+Example:
+
+`https://tigernie.com/ssd_api/get_table`
 
 Returns:
 ```json
@@ -69,11 +73,11 @@ Returns (truncated):
 ### Get columns in a table
 Given a **table_name**, return the columns of the table
 
-URL: `baseURL/ssd_api/get_table_cols/?table_name=<string>`
+URL: `baseURL/ssd_api/get_table_cols`
 
 Example: To get the column names of **pt_deid**
 
-`baseURL/ssd_api/get_table_cols/?table_name=pt_deid`
+`https://tigernie.com/ssd_api/get_table_cols?table_name=pt_deid`
 
 Returns:
 ```json
@@ -95,11 +99,11 @@ Given a **table_name** and **col_name**, return the unique values in that column
 Can be used to obtain unique values from a column (e.g. medication) to
 populate a multiple choice filter
 
-URL: `baseURL/ssd_api/get_distinct/?table_name=<string>&col_name=<string>`
+URL: `baseURL/ssd_api/get_distinct`
 
 Example: To get the distinct values in table **pt_deid** column **pt_id**
 
-`baseURL/ssd_api/get_distinct/?table_name=pt_deid&col_name=pt_id`
+`https://tigernie.com/ssd_api/get_distinct?table_name=pt_deid&col_name=pt_id`
 
 Returns:
 ```json
@@ -127,11 +131,11 @@ Given a list (one or more) **pt_id** and a **table_name**, return row data for
 those patients. Note that there can be an arbitrary number of pt_id values,
 just chain them like so `pt_id=<int>&pt_id=<int>&..`
 
-URL: `baseURL/ssd_api/filter_table_with_ptid/?pt_id=<int>&table_name=<string>`
+URL: `baseURL/ssd_api/filter_table_with_ptid?pt_id=<int>&table_name=<string>`
 
 Example: Retrieve data for patients **[20676, 36440]** from table **diagnosis_deid**
 
-`baseURL/ssd_api/filter_table_with_ptid/?pt_id=20676&pt_id=36440&pt_id=50765&table_name=diagnosis_deid` 
+`https://tigernie.com/ssd_api/filter_table_with_ptid?pt_id=20676&pt_id=36440&pt_id=50765&table_name=diagnosis_deid` 
 
 Returns (truncated):
 ```json
@@ -182,3 +186,92 @@ Returns (truncated):
 ```
 
 ---
+### Retrieves Patient History 
+Given a list of **pt_id**, return all the data to populate the Patient History table
+The specified columns include date, medication, therapeutic class, eye diagnoses,
+systemic diagnoses, lab values, exam ID, left vision, right vision, left intraocular pressure,
+and right intraocular pressure. All sorted by date.
+
+URL: `baseURL/ssd_api/patients`
+
+Example: Retrieve patient history for patients **[20676, 36440]** 
+
+`https://tigernie.com/ssd_api/patients?pt_id=20676&pt_id=36440` 
+
+Returns (truncated):
+```json
+{
+    '20676': {
+        'medication': [
+            {'id': 'Spacer/Aerosol-Holding Chambers - Device', 'generic_name': 'Miscellaneous Products', 'therapeutic_class': '2010-12-03 16:19:00'}, 
+            {'id': 'Fluticasone Propionate Nasal Susp 50 MCG/ACT', 'generic_name': 'Respiratory Agents', 'therapeutic_class': '2013-12-08 09:02:00'}, 
+            {'id': 'Apremilast Tab 30 MG', 'generic_name': 'Analgesics & Anesthetics', 'therapeutic_class': '2015-03-19 09:31:00'}
+        ],
+        'eye_diagnosis': [],
+        'systemic_diagnosis': [
+            {'diagnosis': 'Breast screening, unspecified', 'date': '2013-12-04 00:00:00'},
+            {'diagnosis': 'Breast neoplasm screening status (finding)', 'date': '2013-12-04 00:00:00'},
+            {'diagnosis': 'ENCOUNTER FOR THERAPEUTIC DRUG MONITORING', 'date': '2014-05-02 15:28:00'}
+        ], 
+        'lab_values': [
+            {'lab_name': 'FEMORAL NECK(RIGHT): Z-SCORE', 'lab_value': '-0.4', 'unit': None, 'date': '2010-06-26 20:38:00'},
+            {'lab_name': 'TOTAL HIP BILATERAL AVERAGE: BMD', 'lab_value': '0.934', 'unit': 'g/cm2', 'date': '2010-06-26 20:38:00'},
+            {'lab_name': 'TOTAL HIP(RIGHT): Z-SCORE', 'lab_value': '-0.5', 'unit': None, 'date': '2010-06-26 20:38:00'}
+        ],
+        'vision': [
+            {'name': 'FINDINGS - TESTS - EYES - VISUAL ACUITY - VA - METHOD - REFRACTION - MANIFEST REFRACTION - MANIFEST REFRACTION - RIGHT DIST VA', 'value': '20/20', 'smart_data_id': 23773081, 'date': '2014-08-09 00:00:00'}
+            {'name': 'FINDINGS - TESTS - EYES - VISUAL ACUITY - VA - METHOD - REFRACTION - MANIFEST REFRACTION - MANIFEST REFRACTION - LEFT DIST VA', 'value': '20/20-1', 'smart_data_id': 23773161, 'date': '2014-08-09 00:00:00'}
+            {'name': 'FINDINGS - TESTS - EYES - VISUAL ACUITY - VA - METHOD - REFRACTION - MANIFEST REFRACTION - MANIFEST REFRACTION - RIGHT DIST VA', 'value': '20/20', 'smart_data_id': 23768223, 'date': '2017-05-03 00:00:00'}
+        ],
+        'pressure': [
+            {'name': 'FINDINGS - TESTS - EYES - TONOMETRY - IOP - INTRAOCULAR PRESSURE - LEFT', 'value': '14', 'smart_data_id': '2014-08-09 00:00:00'},
+            {'name': 'FINDINGS - TESTS - EYES - TONOMETRY - IOP - INTRAOCULAR PRESSURE - RIGHT', 'value': '14', 'smart_data_id': '2014-08-09 00:00:00'},
+            {'name': 'FINDINGS - TESTS - EYES - TONOMETRY - IOP - INTRAOCULAR PRESSURE - LEFT', 'value': '14', 'smart_data_id': '2017-05-03 00:00:00'}
+        ]
+}
+```
+
+---
+### Retrieves Patient Images   
+Given a list of **pt_id**, return [[pt_id, exam_id, exam_date, image_id, image_procedure, image_laterality, link], …]
+
+URL: `baseURL/ssd_api/patient_images`
+
+Example: Retrieve patient images for patients **[20676, 36440]** 
+
+`https://tigernie.com/ssd_api/patient_images?pt_id=20676&pt_id=36440` 
+
+Returns (truncated):
+```json
+{
+    "20676": [
+        {
+            "exam_id": 27162,
+            "exam_date": "2018-08-09 00:00:00",
+            "images": [
+                {
+                    "image_id": 1313149,
+                    "image_num": 0,
+                    "image_type": "Image",
+                    "image_laterality": "OD",
+                    "image_procedure_id": "Af"
+                },
+                {
+                    "image_id": 1313150,
+                    "image_num": 0,
+                    "image_type": "Image",
+                    "image_laterality": "OS",
+                    "image_procedure_id": "Ir"
+                },
+                {
+                    "image_id": 1313151,
+                    "image_num": 0,
+                    "image_type": "Image",
+                    "image_laterality": "OS",
+                    "image_procedure_id": "Af"
+                }
+            ]
+        }
+    ]
+}
+```
