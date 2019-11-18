@@ -6,23 +6,22 @@ Version: 1.0.0
 
 Python >= 3.5
 
-## Status
-
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/LICENSE)
 [![Build Status](https://travis-ci.com/haolinnie/Self-Service-Database-Server.svg?branch=master)](https://travis-ci.com/haolinnie/Self-Service-Database-Server)
 
 ## Documentation
 
-[Here](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md) is the most up-to-date API documentation.
+[Here is the most up-to-date API documentation.](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md) 
 
 This app is built in Python 3 with the Flask microframework, and Gunicorn is the current production WSGI server of choice, although many others will also get the job done.
+
+A SQLite database is used for the current prototype. Work is being done to migrate to MariaDB (an open source fork of MySQL).
 
 
 ## Deployment steps
 
-Linux recommended, MacOS supported.
+A Linux server is recommended, although MacOS is supported.
 
-Clone the repo (working on easier deployment)
+Clone the repo (working on easier deployment with Docker containers)
 
 ```bash
 git clone https://github.com/haolinnie/Self-Service-Database-Mock-Server.git
@@ -36,7 +35,7 @@ python3 -m venv flask
 source flask/bin/activate
 ```
 
-Install module
+Install the app factory module
 
 ```
 pip3 install --upgrade pip
@@ -50,11 +49,11 @@ chmod a+x deploy.sh
 ./deploy.sh
 ```
 
-For deployment for production on a linux server, consider using `systemd` to configure the app as a daemon.
+For deployment on a linux server, consider using `systemd` to configure the app as a daemon :)
 
 
 ## Todo
 
-Add more API features like searching for a specific entry in a column, and returning relevant data of those patients from other tables
-
-Streamline the deployment process with Docker
+Add more API features to support the front end.
+Streamline the deployment process with Docker.
+Support external DB such as MariaDB and MySQL.

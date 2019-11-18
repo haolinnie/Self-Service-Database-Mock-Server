@@ -28,5 +28,8 @@ def get_documentation():
         # readme += markdown(f.read())
 
     # return readme
-
-    return "https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md"
+    link = '''
+        Link to the documentation: <a href='https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md'>
+        Click me :)</a>
+    '''
+    return link

@@ -5,6 +5,8 @@ flask/
 
 *.pyc
 
+.ipynb_checkpoints
+
 instance/
 
 .pytest_cache/
