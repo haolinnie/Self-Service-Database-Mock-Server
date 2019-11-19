@@ -20,10 +20,19 @@ class TableNames(Resource):
         return jsonify({'table_names': db.get_table_names()})
 
 
+def check_sql_safe(*argv):
+    for arg in argv:
+        if ' ' in arg or ';' in arg or ',' in arg:
+            return False
+    return True
+
+
 class GetTable(Resource):
-    # TODO: Prevent SQL injection attacks
     def get(self, table_name):
-        # Get table from db
+
+        if not check_sql_safe(table_name): # Prevent Injection
+            return jsonify({'ERROR': 'Invalid input'})
+
         try:
             with db.get_db() as connection:
                 cursor = connection.cursor()
@@ -40,23 +49,28 @@ class GetTable(Resource):
 
 
 class GetTableCols(Resource):
-    # TODO: Prevent SQL injection attacks
     def get(self):
         data = parser.parse_args()
         table_name = data.get('table_name')
-        # Get table columns
+
+        if table_name is None:
+            return jsonify({'ERROR': 'Must provide table_name'})
+
+        if not check_sql_safe(table_name): # Prevent Injection
+            return jsonify({'ERROR': 'Invalid input'})
+
         try:
             col_names = db.get_table_columns(table_name)
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
                     "__str__": str(e.__str__)}
+
         return jsonify({'table_name': table_name, 'columns': col_names})
 
 
 class GetDistinctX(Resource):
     def get(self):
-        # print("[DEBUG] Get Distinct Called")
         data = parser.parse_args()
         col_name = data.get('col_name')
         table_name = data.get('table_name')
@@ -66,6 +80,9 @@ class GetDistinctX(Resource):
             return {'ERROR': 'empty table_name'}
         if col_name is None:
             return {'ERROR': 'empty col_name'}
+
+        if not check_sql_safe(table_name, col_name): # Prevent Injection
+            return jsonify({'ERROR': 'Invalid input'})
 
         try:
             cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)

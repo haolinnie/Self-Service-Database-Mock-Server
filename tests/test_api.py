@@ -14,8 +14,10 @@ def test_get_cols(client):
     assert res.status_code == 200
     res = client.get('/ssd_api/get_table_cols?table_name=pt_deid')
     assert res.status_code == 200
-    print(res.json)
-    # assert res.json['table_name'] == 'pt_deid'
+    assert "table_name" in res.json
+    res = client.get('/ssd_api/get_table_cols?table_name=some;injection')
+    assert res.status_code == 200
+    assert "ERROR" in res.json
     res = client.get('/ssd_api/get_table_cols?table_name=bla')
     assert res.status_code == 200
 
