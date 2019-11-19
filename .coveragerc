@@ -2,8 +2,10 @@
 omit =
     *flask*
     *tests*
+    *travis*
 
 [report]
 omit =
     *flask*
     *tests*
+    *travis*
