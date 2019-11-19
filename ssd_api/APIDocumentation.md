@@ -218,9 +218,9 @@ Returns (truncated):
 {
     "20676": {
         "medication": [
-            {"id": "Spacer/Aerosol-Holding Chambers - Device", "generic_name": "Miscellaneous Products", "therapeutic_class": "2010-12-03 16:19:00"}, 
-            {"id": "Fluticasone Propionate Nasal Susp 50 MCG/ACT", "generic_name": "Respiratory Agents", "therapeutic_class": "2013-12-08 09:02:00"}, 
-            {"id": "Apremilast Tab 30 MG", "generic_name": "Analgesics & Anesthetics", "therapeutic_class": "2015-03-19 09:31:00"}
+            {"date": "2010-12-03 16:19:00", "generic_name": "Spacer/Aerosol-Holding Chambers - Device", "id": 12435512, "therapeutic_class": "Miscellaneous Products"},
+            {"date": "2013-12-08 09:02:00", "generic_name": "Fluticasone Propionate Nasal Susp 50 MCG/ACT", "id": 12435513, "therapeutic_class": "Respiratory Agents"},
+            {"date": "2015-03-19 09:31:00", "generic_name": "Apremilast Tab 30 MG", "id": 12435510, "therapeutic_class": "Analgesics & Anesthetics"},        
         ],
         "eye_diagnosis": [],
         "systemic_diagnosis": [

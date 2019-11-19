@@ -17,10 +17,11 @@ parser.add_argument('pt_id', type=int, action='append', help='ERROR: empty pt_id
 
 class TableNames(Resource):
     def get(self):
-        return {'table_names': db.get_table_names()}
+        return jsonify({'table_names': db.get_table_names()})
 
 
 class GetTable(Resource):
+    # TODO: Prevent SQL injection attacks
     def get(self, table_name):
         # Get table from db
         try:
@@ -35,21 +36,22 @@ class GetTable(Resource):
                     "Args": str(e.args),
                     "__str__": str(e.__str__)}
 
-        return {'columns': names, 'data': data}
+        return jsonify({'columns': names, 'data': data})
 
 
 class GetTableCols(Resource):
+    # TODO: Prevent SQL injection attacks
     def get(self):
         data = parser.parse_args()
         table_name = data.get('table_name')
         # Get table columns
         try:
             col_names = db.get_table_columns(table_name)
-            return {'table_name': table_name, 'columns': col_names}
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
                     "__str__": str(e.__str__)}
+        return jsonify({'table_name': table_name, 'columns': col_names})
 
 
 class GetDistinctX(Resource):
@@ -74,7 +76,7 @@ class GetDistinctX(Resource):
                     "Args": str(e.args),
                     "__str__": str(e.__str__)}
         
-        return {"data": data, "table_name": table_name, "col_name": col_name}
+        return jsonify({"data": data, "table_name": table_name, "col_name": col_name})
 
 
 class FilterTableWithPTID(Resource):
@@ -113,7 +115,7 @@ class FilterTableWithPTID(Resource):
                     "Args": str(e.args),
                     "__str__": str(e.__str__)}
 
-        return {'columns': col_names, 'data': res}
+        return jsonify({'columns': col_names, 'data': res})
 
 
 class PatientHistory(Resource):
@@ -134,7 +136,7 @@ class PatientHistory(Resource):
             out_json[str(id)] = {}
 
             # Medication
-            cols = "generic_name, therapeutic_class, order_placed_dt"
+            cols = "medication_id, generic_name, therapeutic_class, order_placed_dt"
             table_name = "medication_deid"
             cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY order_placed_dt
             """.format(cols, table_name, id)
@@ -167,7 +169,7 @@ class PatientHistory(Resource):
             out_json[str(id)]['vision'] = [dict(zip(smart_cols, val)) for val in res if val[0].find('ACUIT') != -1]
             out_json[str(id)]['pressure'] = [dict(zip(smart_cols, val)) for val in res if val[0].find('PRESSURE') != -1]
 
-        return out_json
+        return jsonify(out_json)
 
 
 class PatientImages(Resource):
@@ -199,7 +201,7 @@ class PatientImages(Resource):
                 res = db.db_execute(cmd)
                 curr_exam['images'] = [dict(zip(image_cols, list(val[:-1]) + [image_procedures[val[-1]]] )) for val in res]
 
-        return out_json
+        return jsonify(out_json)
 
 
 def create_app():
