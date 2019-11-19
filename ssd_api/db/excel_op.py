@@ -4,7 +4,7 @@ from db_op import get_db
 
 DATA_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    'data/deid_data_sample.xlsx'
+    '../data/deid_data_sample.xlsx'
 )
 
 def loadExcel(path):

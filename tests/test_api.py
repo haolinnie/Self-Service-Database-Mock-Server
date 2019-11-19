@@ -1,5 +1,5 @@
 
-def test_get_table_name(client):
+def test_get_table_names(client):
     res = client.get('/ssd_api/get_table')
     assert res.status_code == 200
 
@@ -14,6 +14,8 @@ def test_get_cols(client):
     assert res.status_code == 200
     res = client.get('/ssd_api/get_table_cols?table_name=pt_deid')
     assert res.status_code == 200
+    print(res.json)
+    # assert res.json['table_name'] == 'pt_deid'
     res = client.get('/ssd_api/get_table_cols?table_name=bla')
     assert res.status_code == 200
 
