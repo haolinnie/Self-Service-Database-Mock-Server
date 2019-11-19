@@ -2,10 +2,10 @@
 omit =
     *flask*
     *tests*
-    *travis*
+    *virtualenv*
 
 [report]
 omit =
     *flask*
     *tests*
-    *travis*
+    *virtualenv*
