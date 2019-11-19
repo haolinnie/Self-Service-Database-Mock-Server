@@ -1,6 +1,9 @@
 #!/bin/bash
 source flask/bin/activate
-pip install .
-coverage run -m pytest --ignore=flask/
+if [ ! $1 ]
+then
+   pip install .
+fi
+coverage run -m pytest
 coverage report --omit=ssd_api/excel_op.py
 coverage html
