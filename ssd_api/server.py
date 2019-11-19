@@ -1,19 +1,11 @@
 #!../flask/bin/python
 import os
 import sys
-from flask import Flask, jsonify
-from flask import make_response
+from flask import Flask, jsonify, make_response
 from flask_restful import Resource, Api, reqparse
 
-from ssd_api.util import get_documentation
-from ssd_api.db_op import init_app, db_execute
-from ssd_api.db_op import get_db, get_table_names, sqlite3
-from ssd_api.config import Config
-
-config = Config(os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    'setting.config'
-))
+from . import db
+from .util import get_documentation
 
 
 # Initialise request parser
@@ -25,21 +17,23 @@ parser.add_argument('pt_id', type=int, action='append', help='ERROR: empty pt_id
 
 class TableNames(Resource):
     def get(self):
-        return {'table_names': get_table_names()}
+        return {'table_names': db.get_table_names()}
 
 
 class GetTable(Resource):
     def get(self, table_name):
         # Get table from db
         try:
-            with get_db() as connection:
+            with db.get_db() as connection:
                 cursor = connection.cursor()
                 cursor.execute("SELECT * FROM {}".format(table_name))
                 names = list(map(lambda x: x[0], cursor.description))
                 data = cursor.fetchall()
                 cursor.close()
-        except sqlite3.OperationalError:
-            return {"ERROR": "table doesn't exist."}
+        except Exception as e:
+            return {"Exception Type": str(type(e)),
+                    "Args": str(e.args),
+                    "__str__": str(e.__str__)}
 
         return {'columns': names, 'data': data}
 
@@ -48,22 +42,14 @@ class GetTableCols(Resource):
     def get(self):
         data = parser.parse_args()
         table_name = data.get('table_name')
-
-        # error handling
-        if table_name is None:
-            return {'ERROR': 'empty table_name'}
-
         # Get table columns
         try:
-            with get_db() as connection:
-                cursor = connection.cursor()
-                cursor.execute("SELECT * FROM {}".format(table_name))
-                names = list(map(lambda x: x[0], cursor.description))
-                cursor.close()
-        except sqlite3.OperationalError:
-            return {"ERROR": "table doesn't exist."}
-
-        return {'table_name': table_name, 'columns': names}
+            col_names = db.get_table_columns(table_name)
+            return {'table_name': table_name, 'columns': col_names}
+        except Exception as e:
+            return {"Exception Type": str(type(e)),
+                    "Args": str(e.args),
+                    "__str__": str(e.__str__)}
 
 
 class GetDistinctX(Resource):
@@ -81,10 +67,12 @@ class GetDistinctX(Resource):
 
         try:
             cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
-            data = db_execute(cmd)
+            data = db.db_execute(cmd)
             data = [r[0] for r in data]
-        except sqlite3.OperationalError:
-            return {"ERROR": "sqlite3.OperationalError"}
+        except Exception as e:
+            return {"Exception Type": str(type(e)),
+                    "Args": str(e.args),
+                    "__str__": str(e.__str__)}
         
         return {"data": data, "table_name": table_name, "col_name": col_name}
 
@@ -114,14 +102,16 @@ class FilterTableWithPTID(Resource):
 
         # Filter table for pt_id
         try:
-            with get_db() as connection:
+            with db.get_db() as connection:
                 cursor = connection.cursor()
                 cursor.execute(cmd)
                 col_names = list(map(lambda x: x[0], cursor.description))
                 res = cursor.fetchall()
                 cursor.close()
-        except sqlite3.OperationalError:
-            return {"ERROR": "Query error."}
+        except Exception as e:
+            return {"Exception Type": str(type(e)),
+                    "Args": str(e.args),
+                    "__str__": str(e.__str__)}
 
         return {'columns': col_names, 'data': res}
 
@@ -148,7 +138,7 @@ class PatientHistory(Resource):
             table_name = "medication_deid"
             cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY order_placed_dt
             """.format(cols, table_name, id)
-            res = db_execute(cmd)
+            res = db.db_execute(cmd)
             out_json[str(id)]['medication'] = [dict(zip(med_cols, val)) for val in res]
 
             # Diagnosis
@@ -156,7 +146,7 @@ class PatientHistory(Resource):
             table_name = "diagnosis_deid"
             cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY diagnosis_start_dt 
             """.format(cols, table_name, id)
-            res = db_execute(cmd)
+            res = db.db_execute(cmd)
             out_json[str(id)]['eye_diagnosis'] = [dict(zip(diag_cols, val)) for val in res if val[0].find('retina')!=-1]
             out_json[str(id)]['systemic_diagnosis'] = [dict(zip(diag_cols, val)) for val in res if val[0].find('retina')==-1]
 
@@ -165,7 +155,7 @@ class PatientHistory(Resource):
             table_name = "lab_value_deid"
             cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY result_dt
             """.format(cols, table_name, id)
-            res = db_execute(cmd)
+            res = db.db_execute(cmd)
             out_json[str(id)]['lab_values'] = [dict(zip(lab_cols, val)) for val in res]
 
             # Vision & Pressure
@@ -173,7 +163,7 @@ class PatientHistory(Resource):
             table_name = "smart_data_deid"
             cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY value_dt
             """.format(cols, table_name, id)
-            res = db_execute(cmd)
+            res = db.db_execute(cmd)
             out_json[str(id)]['vision'] = [dict(zip(smart_cols, val)) for val in res if val[0].find('ACUIT') != -1]
             out_json[str(id)]['pressure'] = [dict(zip(smart_cols, val)) for val in res if val[0].find('PRESSURE') != -1]
 
@@ -193,12 +183,12 @@ class PatientImages(Resource):
         
         ## image_procedures cache
         cmd = """SELECT image_procedure_id, image_procedure FROM image_procedure"""
-        res = db_execute(cmd)
+        res = db.db_execute(cmd)
         image_procedures = dict(res)
         for id in pt_id:
             cmd = """ SELECT exam_id, exam_date FROM exam_deid
             WHERE pt_id IN({}) ORDER BY exam_date """.format(id)
-            res = db_execute(cmd)
+            res = db.db_execute(cmd)
             out_cols = ('exam_id', 'exam_date')
             out_json[str(id)] = [dict(zip(out_cols, val)) for val in res]
 
@@ -206,24 +196,17 @@ class PatientImages(Resource):
                 curr_exam['images'] = {}
                 cmd = """ SELECT image_id, image_num, image_type, image_laterality, image_procedure_id
                 FROM image_deid WHERE exam_id IN({}) ORDER BY image_num """.format(curr_exam['exam_id'])
-                res = db_execute(cmd)
+                res = db.db_execute(cmd)
                 curr_exam['images'] = [dict(zip(image_cols, list(val[:-1]) + [image_procedures[val[-1]]] )) for val in res]
 
         return out_json
 
 
-def create_app(test_config=None):
+def create_app():
 
     # Instantiate flask app
     app = Flask(__name__, instance_relative_config=True)
-    init_app(app)
-
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
+    db.init_app(app)
 
     # proxy support for Nginx
     from werkzeug.middleware.proxy_fix import ProxyFix
@@ -257,4 +240,4 @@ def create_app(test_config=None):
 
 if __name__ == '__main__': # pragma: no cover
     app = create_app()
-    app.run(debug=True, port=config.getint('app', 'port'))
+    app.run(debug=True, port=5100)
