@@ -7,6 +7,7 @@ Version: 1.0.0
 Python >= 3.5
 
 [![Build Status](https://travis-ci.com/haolinnie/Self-Service-Database-Server.svg?branch=master)](https://travis-ci.com/haolinnie/Self-Service-Database-Server)
+[![Coverage Status](https://coveralls.io/repos/github/haolinnie/Self-Service-Database-Server/badge.svg?branch=master)](https://coveralls.io/github/haolinnie/Self-Service-Database-Server?branch=master)
 
 ## Documentation
 
