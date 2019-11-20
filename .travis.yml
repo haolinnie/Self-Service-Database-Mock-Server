@@ -7,6 +7,9 @@
   install:
     - pip install .
     - pip install pytest coverage
-  script :
+    - pip install pytest-cov
+    - pip install coveralls
+  script:
     - ./run_tests travis
- 
+  after_success:
+    - coveralls
