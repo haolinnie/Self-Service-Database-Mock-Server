@@ -1,21 +1,31 @@
-from .db_op import *
+from .Database import Database
+
+
+def db_execute(cmd):
+    '''
+    Executes a line of SQL
+    NOTE: Only for reading (SELECT) as it does not commit
+    '''
+    with Database.get_db().cursor() as cursor:
+        cursor.execute(cmd)
+        res = cursor.fetchall()
+    return res
 
 
 def get_table_names():
-    # Load all table names
-    with get_db() as connection:
-        cursor = connection.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        table_names = list(map(lambda x: x[0], cursor.fetchall()))
-        cursor.close()
-    return table_names
+    ''' Get table names in the connected database '''
+    with Database.get_db().cursor() as cursor:
+        cursor.execute('''SELECT table_name FROM information_schema.tables
+        WHERE table_schema = %s;''', Database.db_name)
+        table_names = cursor.fetchall()
+    return [v[0] for v in table_names]
 
 
 def get_table_columns(table_name):
-    with get_db() as connection:
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM {}".format(table_name))
-        col_names = list(map(lambda x: x[0], cursor.description))
-        cursor.close()
-    return col_names
+    ''' Get the column names of a table '''
+    with Database.get_db().cursor() as cursor:
+        cursor.execute('''SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE table_name = %s;''', table_name)
+        col_names = cursor.fetchall()
+    return [v[0] for v in col_names]
 

@@ -15,12 +15,12 @@ Python >= 3.5
 
 This app is built in Python 3 with the Flask microframework, and Gunicorn is the current production WSGI server of choice, although many others will also get the job done.
 
-A SQLite database is used for the current prototype. Work is being done to migrate to MariaDB (an open source fork of MySQL).
+A MySQL database is used for the current prototype. MariaDB Server is used during testing.
 
 
 ## Deployment steps
 
-A Linux server is recommended, although MacOS is supported.
+A Linux server is recommended. A MariaDB/MySQL Server must be connected.
 
 Clone the repo (working on easier deployment with Docker containers)
 
@@ -50,11 +50,10 @@ chmod a+x deploy.sh
 ./deploy.sh
 ```
 
-For deployment on a linux server, consider using `systemd` to configure the app as a daemon :)
+For deployment on a linux server, consider using `systemd` to configure the app as a daemon before Dockers are ready.
 
 
 ## Todo
 
 Add more API features to support the front end.
 Streamline the deployment process with Docker.
-Support external DB such as MariaDB and MySQL.

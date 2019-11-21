@@ -16,6 +16,7 @@ setup(
         'itsdangerous==1.1.0',
         'Jinja2==2.10.3',
         'MarkupSafe==1.1.1',
+        'PyMySQL==0.9.3',
         'pytest==5.2.1',
         'python-dateutil==2.8.0',
         'pytz==2019.3',
