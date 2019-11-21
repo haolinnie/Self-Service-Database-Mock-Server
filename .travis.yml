@@ -9,6 +9,9 @@
     - pip install pytest coverage
     - pip install pytest-cov
     - pip install coveralls
+
+  services:
+    - 'mysql'
   script:
     - ./run_tests travis
   after_success:

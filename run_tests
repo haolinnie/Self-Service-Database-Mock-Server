@@ -1,9 +1,13 @@
 #!/bin/bash
 source flask/bin/activate
-if [ ! $1 ]
+if [[ $1 ]] && [[ $1 = 'travis' ]]
 then
+   echo Travis detected: Initialising testing mysql database
+   mysql -u "root" -p "" < create_sample_database.sql
+else
    pip install .
 fi
+
 coverage run -m pytest
 coverage report --omit=ssd_api/excel_op.py
 coverage html
