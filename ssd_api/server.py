@@ -219,15 +219,12 @@ class PatientImages(Resource):
         return jsonify(out_json)
 
 
-def create_app(config=None):
+def create_app(**config):
 
     # Instantiate flask app
     app = Flask(__name__, instance_relative_config=True)
+    Database(**config)
     Database.init_app(app)
-
-    if config is not None:
-        Database.test = config['test']
-    Database.test = False 
 
     # proxy support for Nginx
     from werkzeug.middleware.proxy_fix import ProxyFix
