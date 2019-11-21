@@ -1,5 +1,14 @@
 
-CREATE DATABASE ssd_sample_database;
+-- This file recreates a sample database in MySQL
+-- Creates a 'test_user' with password 'password'
+-- Granting 'test_user' all privilages to the sample database
+
+CREATE USER IF NOT EXISTS 'test_user'@'localhost' IDENTIFIED BY 'password';
+
+CREATE DATABASE IF NOT EXISTS ssd_sample_database;
+USE ssd_sample_database
+
+GRANT ALL PRIVILEGES ON ssd_sample_database.* TO 'test_user'@'localhost';
 
 
 CREATE TABLE IF NOT EXISTS pt_deid (
