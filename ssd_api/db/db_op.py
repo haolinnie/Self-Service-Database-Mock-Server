@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import pymysql
 
 from flask import g
 from flask.cli import with_appcontext
@@ -12,9 +13,11 @@ db_path  = os.path.join(
 
 ### Testing db functions
 
-def test_con(): # pragma: no cover
-    db = sqlite3.connect(db_path)
-    return db
+def test_con(mysqlConfig=None): # pragma: no cover
+    if mysqlConfig is None:
+        return sqlite3.connect(db_path)
+
+    return pymysql.connect('localhost', 'test_user', 'password', 'ssd_sample_database')
 
 def test_execute(cmd): # pragma: no cover
     db = test_con()
@@ -28,25 +31,66 @@ def test_execute(cmd): # pragma: no cover
 
 ### Flask server db functions
 
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(db_path)
-    return g.db
+class Database():
+    test = False;
+    host = 'localhost'
+    username = 'test_user'
+    password = 'password'
+    db_name = 'ssd_sample_database'
 
-def db_execute(cmd):
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute(cmd)
-    res = cursor.fetchall()
-    cursor.close()
-    return res
+    def __init__(self, **kwargs):
+        if 'test' in kwargs:
+            test = kwargs['test']
+        if 'host' in kwargs:
+            host = kwargs['host']
+        if 'username' in kwargs:
+            user = kwargs['username']
+        if 'password' in kwargs:
+            password = kwargs['password']
+        if 'database' in kwargs:
+            db_name in kwargs['database']
 
-def close_db(e=None):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
+    @classmethod
+    def get_db(cls):
+        if 'db' not in g:
+            if cls.test:
+                g.db = sqlite3.connect(db_path)
+            else:
+                g.db = pymysql.connect(cls.host, cls.username, cls.password, cls.db_name)
+        if cls.test:
+            return g.db.cursor()
+        return g.db
 
-def init_app(app):
-    # Tell flask to cleanup
-    app.teardown_appcontext(close_db)
+    @classmethod
+    def db_execute(cls, cmd):
+        with cls.get_db() as cursor:
+            cursor.execute(cmd)
+            res = cursor.fetchall()
+        return res
 
+    @staticmethod
+    def close_db(e=None):
+        db = g.pop('db', None)
+        if db is not None:
+            db.close()
+
+    @classmethod
+    def init_app(cls, app):
+        # Tell flask to cleanup
+        app.teardown_appcontext(cls.close_db)
+
+    @classmethod
+    def get_table_names(cls):
+        with cls.get_db() as cursor:
+            cursor.execute('''SELECT table_name FROM information_schema.tables
+            WHERE table_schema = %s;''', cls.db_name)
+            table_names = cursor.fetchall()
+        return [v[0] for v in table_names]
+
+    @classmethod
+    def get_table_columns(cls, table_name):
+        with cls.get_db() as cursor:
+            cursor.execute('''SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE table_name = %s;''', table_name)
+            col_names = cursor.fetchall()
+        return [v[0] for v in col_names]

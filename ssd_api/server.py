@@ -4,7 +4,8 @@ import sys
 from flask import Flask, jsonify, make_response
 from flask_restful import Resource, Api, reqparse
 
-from . import db
+from . import config_module
+from .db import Database as db
 from .util import get_documentation
 
 
@@ -34,12 +35,10 @@ class GetTable(Resource):
             return jsonify({'ERROR': 'Invalid input'})
 
         try:
-            with db.get_db() as connection:
-                cursor = connection.cursor()
+            with db.get_db() as cursor:
                 cursor.execute("SELECT * FROM {}".format(table_name))
                 names = list(map(lambda x: x[0], cursor.description))
                 data = cursor.fetchall()
-                cursor.close()
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
@@ -121,12 +120,10 @@ class FilterTableWithPTID(Resource):
 
         # Filter table for pt_id
         try:
-            with db.get_db() as connection:
-                cursor = connection.cursor()
+            with db.get_db() as cursor:
                 cursor.execute(cmd)
                 col_names = list(map(lambda x: x[0], cursor.description))
                 res = cursor.fetchall()
-                cursor.close()
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
@@ -205,7 +202,7 @@ class PatientImages(Resource):
         res = db.db_execute(cmd)
         image_procedures = dict(res)
         for id in pt_id:
-            cmd = """ SELECT exam_id, exam_date FROM exam_deid
+            cmd = """SELECT exam_id, exam_date FROM exam_deid
             WHERE pt_id IN({}) ORDER BY exam_date """.format(id)
             res = db.db_execute(cmd)
             out_cols = ('exam_id', 'exam_date')
@@ -213,7 +210,7 @@ class PatientImages(Resource):
 
             for curr_exam in out_json[str(id)]:
                 curr_exam['images'] = {}
-                cmd = """ SELECT image_id, image_num, image_type, image_laterality, image_procedure_id
+                cmd = """SELECT image_id, image_num, image_type, image_laterality, image_procedure_id
                 FROM image_deid WHERE exam_id IN({}) ORDER BY image_num """.format(curr_exam['exam_id'])
                 res = db.db_execute(cmd)
                 curr_exam['images'] = [dict(zip(image_cols, list(val[:-1]) + [image_procedures[val[-1]]] )) for val in res]
@@ -221,11 +218,15 @@ class PatientImages(Resource):
         return jsonify(out_json)
 
 
-def create_app():
+def create_app(config=None):
 
     # Instantiate flask app
     app = Flask(__name__, instance_relative_config=True)
     db.init_app(app)
+    
+    if config is not None:
+        db.test = config['test']
+    db.test = True
 
     # proxy support for Nginx
     from werkzeug.middleware.proxy_fix import ProxyFix
