@@ -1,28 +1,10 @@
-import os
+'''
+Database wrapper class for the pymysql connector to a MySQL Database
+aimed at providing thread-safe connection for Flask
+'''
 import pymysql
-
 from flask import g
 from flask.cli import with_appcontext
-
-
-db_path  = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    '../data/deid_data.db'
-)
-
-### Testing db functions
-
-def test_con(): # pragma: no cover
-    return pymysql.connect('localhost', 'test_user', 'password', 'ssd_sample_database')
-
-def test_execute(cmd): # pragma: no cover
-    db = test_con()
-    cursor = db.cursor()
-    cursor.execute(cmd)
-    res = cursor.fetchall()
-    cursor.close()
-    db.close()
-    return res
 
 
 ### Flask server db functions
@@ -35,6 +17,10 @@ class Database():
     db_name = 'ssd_sample_database'
 
     def __init__(self, **kwargs):
+        '''
+        Set up initialiser to populate database credentials
+        This is probably not secure
+        '''
         if 'test' in kwargs:
             test = kwargs['test']
         if 'host' in kwargs:
@@ -48,17 +34,19 @@ class Database():
 
     @classmethod
     def get_db(cls):
+        '''Make sure there's only one db connection open'''
         if 'db' not in g:
             g.db = pymysql.connect(cls.host, cls.username, cls.password, cls.db_name)
         return g.db
 
+    @classmethod
+    def init_app(cls, app):
+        '''Tell flask to cleanup'''
+        app.teardown_appcontext(cls.close_db)
+
     @staticmethod
     def close_db(e=None):
+        '''Clean up'''
         db = g.pop('db', None)
         if db is not None:
             db.close()
-
-    @classmethod
-    def init_app(cls, app):
-        # Tell flask to cleanup
-        app.teardown_appcontext(cls.close_db)
