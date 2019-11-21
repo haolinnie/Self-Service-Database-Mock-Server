@@ -52,13 +52,6 @@ class Database():
             g.db = pymysql.connect(cls.host, cls.username, cls.password, cls.db_name)
         return g.db
 
-    @classmethod
-    def db_execute(cls, cmd):
-        with cls.get_db().cursor() as cursor:
-            cursor.execute(cmd)
-            res = cursor.fetchall()
-        return res
-
     @staticmethod
     def close_db(e=None):
         db = g.pop('db', None)
@@ -69,19 +62,3 @@ class Database():
     def init_app(cls, app):
         # Tell flask to cleanup
         app.teardown_appcontext(cls.close_db)
-
-    @classmethod
-    def get_table_names(cls):
-        with cls.get_db().cursor() as cursor:
-            cursor.execute('''SELECT table_name FROM information_schema.tables
-            WHERE table_schema = %s;''', cls.db_name)
-            table_names = cursor.fetchall()
-        return [v[0] for v in table_names]
-
-    @classmethod
-    def get_table_columns(cls, table_name):
-        with cls.get_db().cursor() as cursor:
-            cursor.execute('''SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE table_name = %s;''', table_name)
-            col_names = cursor.fetchall()
-        return [v[0] for v in col_names]
