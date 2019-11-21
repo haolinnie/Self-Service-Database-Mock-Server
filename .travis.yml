@@ -12,6 +12,8 @@
 
   services:
     - 'mysql'
+  before_install:
+    - mysql -u root --password="" < create_sample_database.sql
   script:
     - ./run_tests travis
   after_success:

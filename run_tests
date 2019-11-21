@@ -3,7 +3,7 @@ source flask/bin/activate
 if [[ $1 ]] && [[ $1 = 'travis' ]]
 then
    echo Travis detected: Initialising testing mysql database
-   mysql -u "root" -p "" < create_sample_database.sql
+   #mysql -u root --password="" < create_sample_database.sql
 else
    pip install .
 fi
