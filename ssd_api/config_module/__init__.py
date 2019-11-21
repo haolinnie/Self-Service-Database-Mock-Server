@@ -20,6 +20,6 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     DB_SERVER = 'localhost'
     DEBUG = True
-    DATABASE_URI = 'sqlite:///:memory:'
+    DATABASE_URI = ''
 
 

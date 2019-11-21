@@ -1,5 +1,4 @@
 import os
-import sqlite3
 import pymysql
 
 from flask import g
@@ -13,10 +12,7 @@ db_path  = os.path.join(
 
 ### Testing db functions
 
-def test_con(mysqlConfig=None): # pragma: no cover
-    if mysqlConfig is None:
-        return sqlite3.connect(db_path)
-
+def test_con(): # pragma: no cover
     return pymysql.connect('localhost', 'test_user', 'password', 'ssd_sample_database')
 
 def test_execute(cmd): # pragma: no cover
@@ -53,17 +49,12 @@ class Database():
     @classmethod
     def get_db(cls):
         if 'db' not in g:
-            if cls.test:
-                g.db = sqlite3.connect(db_path)
-            else:
-                g.db = pymysql.connect(cls.host, cls.username, cls.password, cls.db_name)
-        if cls.test:
-            return g.db.cursor()
+            g.db = pymysql.connect(cls.host, cls.username, cls.password, cls.db_name)
         return g.db
 
     @classmethod
     def db_execute(cls, cmd):
-        with cls.get_db() as cursor:
+        with cls.get_db().cursor() as cursor:
             cursor.execute(cmd)
             res = cursor.fetchall()
         return res
@@ -81,7 +72,7 @@ class Database():
 
     @classmethod
     def get_table_names(cls):
-        with cls.get_db() as cursor:
+        with cls.get_db().cursor() as cursor:
             cursor.execute('''SELECT table_name FROM information_schema.tables
             WHERE table_schema = %s;''', cls.db_name)
             table_names = cursor.fetchall()
@@ -89,7 +80,7 @@ class Database():
 
     @classmethod
     def get_table_columns(cls, table_name):
-        with cls.get_db() as cursor:
+        with cls.get_db().cursor() as cursor:
             cursor.execute('''SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
             WHERE table_name = %s;''', table_name)
             col_names = cursor.fetchall()

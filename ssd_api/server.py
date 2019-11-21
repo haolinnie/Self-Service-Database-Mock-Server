@@ -35,7 +35,7 @@ class GetTable(Resource):
             return jsonify({'ERROR': 'Invalid input'})
 
         try:
-            with db.get_db() as cursor:
+            with db.get_db().cursor() as cursor:
                 cursor.execute("SELECT * FROM {}".format(table_name))
                 names = list(map(lambda x: x[0], cursor.description))
                 data = cursor.fetchall()
@@ -120,7 +120,7 @@ class FilterTableWithPTID(Resource):
 
         # Filter table for pt_id
         try:
-            with db.get_db() as cursor:
+            with db.get_db().cursor() as cursor:
                 cursor.execute(cmd)
                 col_names = list(map(lambda x: x[0], cursor.description))
                 res = cursor.fetchall()
@@ -223,10 +223,10 @@ def create_app(config=None):
     # Instantiate flask app
     app = Flask(__name__, instance_relative_config=True)
     db.init_app(app)
-    
+
     if config is not None:
         db.test = config['test']
-    db.test = True
+    db.test = False 
 
     # proxy support for Nginx
     from werkzeug.middleware.proxy_fix import ProxyFix
@@ -243,7 +243,7 @@ def create_app(config=None):
     @app.errorhandler(404)
     def not_found(error):
         return make_response(jsonify({'error': 'Not found'}), 404)
-    
+ 
     # Flask_restful api
     api = Api(app)
     api.add_resource(TableNames, '/ssd_api/get_table')

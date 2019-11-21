@@ -7,7 +7,7 @@ from ssd_api import create_app
 
 @pytest.fixture
 def app():
-    app = create_app()
+    app = create_app(config={'test': True})
     yield app
 
 
