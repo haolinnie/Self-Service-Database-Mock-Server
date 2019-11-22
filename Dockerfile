@@ -1,12 +1,11 @@
 FROM python:3.7-slim-buster
 
-RUN adduser ssd_server
+RUN adduser admin_user
 
-WORKDIR /home/ssd_server
+WORKDIR /home/admin_user
 
 COPY ssd_api ssd_api
 COPY setup.py setup.py
-COPY app.py app.py
 COPY deploy.sh deploy.sh
 
 RUN python -m venv flask
@@ -16,8 +15,8 @@ RUN flask/bin/pip install gunicorn
 
 RUN chmod +x deploy.sh
 
-RUN chown -R ssd_server:ssd_server ./
-USER ssd_server
+RUN chown -R admin_user:admin_user ./
+USER admin_user
 
 EXPOSE 5100
 ENTRYPOINT ["./deploy.sh"]

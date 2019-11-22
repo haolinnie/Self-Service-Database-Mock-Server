@@ -13,9 +13,9 @@ Python >= 3.5
 
 [Here is the most up-to-date API documentation.](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md) 
 
-This app is built in Python 3 with the Flask microframework, and Gunicorn is the current production WSGI server of choice, although many others will also get the job done.
+This app is built in Python 3 with the Flask microframework to server data from a MySQL database.
 
-A MySQL database is used for the current prototype. MariaDB Server is used during testing.
+[Here is a nice little API debugger for this project.](https://tigernie.com/ssd_api)
 
 
 ## Deployment steps

@@ -1,7 +1,7 @@
 #!../flask/bin/python
 import os
 import sys
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, render_template
 from flask_restful import Resource, Api, reqparse
 
 from . import db as db_utils
@@ -236,7 +236,8 @@ def create_app(**config):
     @app.route('/')
     @app.route('/ssd_api')
     def index():
-        return get_documentation()
+        # return get_documentation()
+        return render_template('debug.html')
 
     @app.errorhandler(404)
     def not_found(error):
