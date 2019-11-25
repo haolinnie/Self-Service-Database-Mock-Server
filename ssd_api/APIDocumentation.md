@@ -1,4 +1,5 @@
 # Self-Service Database API Documentation
+
 ---
 Author: [Tiger Nie] <nhl0819@gmail.com>
 
@@ -9,7 +10,9 @@ Documentation: <https://github.com/haolinnie/Self-Service-Database-Server/blob/m
 Testing url: <https://tigernie.com/ssd_api>
 
 ---
+
 ### Get list of table names
+
 Get the names of all the tables in the database.
 
 URL: `baseURL/ssd_api/get_table`
@@ -21,6 +24,7 @@ Example:
 `https://tigernie.com/ssd_api/get_table`
 
 Returns:
+
 ```json
 {
     "table_names": [
@@ -39,48 +43,9 @@ Returns:
 ```
 
 ---
-### Get entire table
-Given a **table_name**, return the entire table.
 
-URL: `baseURL/ssd_api/get_table/<string>`
-
-Type: `GET`
-
-Example: To get the entire table of **pt_deid**
-
-`https://tigernie.com/ssd_api/get_table/pt_deid`
-
-Returns (truncated):
-```json
-{
-    "columns": [
-        "index",
-        "pt_id",
-        "dob",
-        "over_90",
-        "ethnicity"
-    ],
-    "data": [
-        [
-            0,
-            20676,
-            "1972-02-15 00:00:00",
-            0,
-            "Not Hispanic or Latino"
-        ],
-        [
-            1,
-            36440,
-            "1950-10-15 00:00:00",
-            0,
-            "Not Hispanic or Latino"
-        ],
-    ]
-}
-```
-
----
 ### Get columns in a table
+
 Given a **table_name**, return the columns of the table.
 
 URL: `baseURL/ssd_api/get_table_cols`
@@ -92,6 +57,7 @@ Example: To get the column names of **pt_deid**
 `https://tigernie.com/ssd_api/get_table_cols?table_name=pt_deid`
 
 Returns:
+
 ```json
 {
     "table_name": "pt_deid",
@@ -106,7 +72,9 @@ Returns:
 ```
 
 ---
+
 ### Get distinct values in a table column
+
 Given a **table_name** and **col_name**, return the unique values in that column.
 Can be used to obtain unique values from a column (e.g. medication) to
 populate a multiple choice filter.
@@ -120,6 +88,7 @@ Example: To get the distinct values in table **pt_deid** column **pt_id**
 `https://tigernie.com/ssd_api/get_distinct?table_name=pt_deid&col_name=pt_id`
 
 Returns:
+
 ```json
 {
     "data": [
@@ -140,8 +109,10 @@ Returns:
 ```
 
 ---
+
 ### Filter a table for specific pt_id
-Given a list of **pt_id** and a **table_name**, return row data for 
+
+Given a list of **pt_id** and a **table_name**, return row data for
 those patients. Note that there can be an arbitrary number of pt_id values,
 just chain them like so `pt_id=<int>&pt_id=<int>&..`.
 
@@ -151,9 +122,10 @@ Type: `GET`
 
 Example: Retrieve data for patients **[20676, 36440]** from table **diagnosis_deid**
 
-`https://tigernie.com/ssd_api/filter_table_with_ptid?pt_id=20676&pt_id=36440&pt_id=50765&table_name=diagnosis_deid` 
+`https://tigernie.com/ssd_api/filter_table_with_ptid?pt_id=20676&pt_id=36440&pt_id=50765&table_name=diagnosis_deid`
 
 Returns (truncated):
+
 ```json
 {
     "columns": [
@@ -202,32 +174,35 @@ Returns (truncated):
 ```
 
 ---
-### Retrieves Patient History 
+
+### Retrieves Patient History
+
 Given a list of **pt_id**, return the `medication[{id, generic_name, therapeutic_class}], eye_diagnosis[{diagnosis, date}], systemic_diagnosis[{diagnosis, date}], lab_values[{lab_name, lab_value, unit, date}], vision[{name, value, smart_data_id, date}], pressure[{name, value, smart_data_id, date}]` for each **pt_id**. This provides all the data to populate the Patient History table. All listed items are sorted by date.
 
 URL: `baseURL/ssd_api/patients`
 
 Type: `GET`
 
-Example: Retrieve patient history for patients **[20676, 36440]** 
+Example: Retrieve patient history for patients **[20676, 36440]**
 
-`https://tigernie.com/ssd_api/patients?pt_id=20676&pt_id=36440` 
+`https://tigernie.com/ssd_api/patients?pt_id=20676&pt_id=36440`
 
 Returns (truncated):
+
 ```json
 {
     "20676": {
         "medication": [
             {"date": "2010-12-03 16:19:00", "generic_name": "Spacer/Aerosol-Holding Chambers - Device", "id": 12435512, "therapeutic_class": "Miscellaneous Products"},
             {"date": "2013-12-08 09:02:00", "generic_name": "Fluticasone Propionate Nasal Susp 50 MCG/ACT", "id": 12435513, "therapeutic_class": "Respiratory Agents"},
-            {"date": "2015-03-19 09:31:00", "generic_name": "Apremilast Tab 30 MG", "id": 12435510, "therapeutic_class": "Analgesics & Anesthetics"},        
+            {"date": "2015-03-19 09:31:00", "generic_name": "Apremilast Tab 30 MG", "id": 12435510, "therapeutic_class": "Analgesics & Anesthetics"},
         ],
         "eye_diagnosis": [],
         "systemic_diagnosis": [
             {"diagnosis": "Breast screening, unspecified", "date": "2013-12-04 00:00:00"},
             {"diagnosis": "Breast neoplasm screening status (finding)", "date": "2013-12-04 00:00:00"},
             {"diagnosis": "ENCOUNTER FOR THERAPEUTIC DRUG MONITORING", "date": "2014-05-02 15:28:00"}
-        ], 
+        ],
         "lab_values": [
             {"lab_name": "FEMORAL NECK(RIGHT): Z-SCORE", "lab_value": "-0.4", "unit": "None", "date": "2010-06-26 20:38:00"},
             {"lab_name": "TOTAL HIP BILATERAL AVERAGE: BMD", "lab_value": "0.934", "unit": "g/cm2", "date": "2010-06-26 20:38:00"},
@@ -247,18 +222,21 @@ Returns (truncated):
 ```
 
 ---
-### Retrieves Patient Images   
+
+### Retrieves Patient Images
+
 Given a list of **pt_id**, return the `exam_id, exam_date, images[]` for each **pt_id**.
 
 URL: `baseURL/ssd_api/patient_images`
 
 Type: `GET`
 
-Example: Retrieve patient images for patients **[20676, 36440]** 
+Example: Retrieve patient images for patients **[20676, 36440]**
 
-`https://tigernie.com/ssd_api/patient_images?pt_id=20676&pt_id=36440` 
+`https://tigernie.com/ssd_api/patient_images?pt_id=20676&pt_id=36440`
 
 Returns (truncated):
+
 ```json
 {
     "20676": [

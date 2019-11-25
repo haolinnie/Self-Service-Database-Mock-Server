@@ -1,13 +1,13 @@
 from .Database import Database
 
 
-def db_execute(cmd):
+def db_execute(cmd, *args):
     '''
     Executes a line of SQL
     NOTE: Only for reading (SELECT) as it does not commit
     '''
     with Database.get_db().cursor() as cursor:
-        cursor.execute(cmd)
+        cursor.execute(cmd, *args)
         res = cursor.fetchall()
     return res
 
