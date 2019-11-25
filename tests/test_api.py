@@ -3,11 +3,6 @@ def test_get_table_names(client):
     res = client.get('/ssd_api/get_table')
     assert res.status_code == 200
 
-def test_get_table(client):
-    res = client.get('/ssd_api/get_table/pt_deid')
-    assert res.status_code == 200
-    res = client.get('/ssd_api/get_table/bla')
-    assert res.status_code == 200
 
 def test_get_cols(client):
     res = client.get('/ssd_api/get_table_cols')
@@ -20,6 +15,7 @@ def test_get_cols(client):
     assert "ERROR" in res.json
     res = client.get('/ssd_api/get_table_cols?table_name=bla')
     assert res.status_code == 200
+
 
 def test_get_distinct(client):
     # Table name required
@@ -35,6 +31,7 @@ def test_get_distinct(client):
     res = client.get('/ssd_api/get_distinct?table_name=pt_deid&col_name=bla')
     assert res.status_code == 200
 
+
 def test_filter_table_with_ptid(client):
     # Require at least 1 pt_id
     res = client.get('/ssd_api/filter_table_with_ptid') 
@@ -49,11 +46,13 @@ def test_filter_table_with_ptid(client):
     res = client.get('/ssd_api/filter_table_with_ptid?pt_id=20676&pt_id=36440&table_name=pt_deid') 
     assert res.status_code == 200
 
+
 def test_patient_history(client):
     res = client.get('/ssd_api/patients')
     assert res.status_code == 200
     res = client.get('/ssd_api/patients?pt_id=20676')
     assert res.status_code == 200
+
 
 def test_patient_images(client):
     res = client.get('/ssd_api/patient_images')
