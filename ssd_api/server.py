@@ -66,8 +66,6 @@ class GetDistinctX(Resource):
         if col_name is None:
             return {'ERROR': 'empty col_name'}, 400
 
-        # TODO: Get rid of NULL data
-
         if not check_sql_safe(table_name, col_name): # Prevent Injection
             return {'ERROR': 'Invalid input'}, 400
 
@@ -80,7 +78,8 @@ class GetDistinctX(Resource):
                     "Args": str(e.args),
                     "__str__": str(e.__str__)}, 400
         
-        return jsonify({"data": data, "table_name": table_name, "col_name": col_name})
+        # Remove null values in return data
+        return jsonify({"data": [v for v in data if v], "table_name": table_name, "col_name": col_name})
 
 
 class FilterTableWithPTID(Resource):
@@ -146,8 +145,6 @@ class Filter(Resource):
                     year=td.year-data['age']['more'], month=td.month,
                     day=td.day-1 if td.month==2 and td.day==29 else td.day
                 )
-
-            # TODO: Check with Kerem about other conditions
             del data['age']
 
         # Create command that will query for age and ethnicity
@@ -177,8 +174,8 @@ class Filter(Resource):
             except KeyError: # 'systemic_diagnosis isn't selected
                 pass
         
-            cmd = ''' SELECT DISTINCT pt_id FROM diagnosis_deid WHERE diagnosis_name LIKE '{}'''.format(
-                "' AND diagnosis_name LIKE '".join(data['diagnosis_name']) + "'"
+            cmd = ''' SELECT DISTINCT pt_id FROM diagnosis_deid WHERE diagnosis_name IN('{}'''.format(
+                "', '".join(data['diagnosis_name']) + "')"
             )
             pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
@@ -190,8 +187,8 @@ class Filter(Resource):
             cmd = '''SELECT DISTINCT pt_id FROM
             image_deid ID INNER JOIN image_procedure IP
             ON ID.image_procedure_id = IP.image_procedure_id
-            WHERE image_procedure LIKE '{}'''.format(
-                "' AND image_procedure LIKE '".join(data['image_procedure_type']) + "'"
+            WHERE image_procedure IN('{}'''.format(
+                "', '".join(data['image_procedure_type']) + "')"
             )
             pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
@@ -208,8 +205,8 @@ class Filter(Resource):
             
             try:
                 cmd = '''SELECT pt_id FROM medication_deid WHERE '''
-                cmd += '''generic_name LIKE '{}'''.format(
-                    "' AND generic_name LIKE '".join(data['medication_generic_name']) + "'"
+                cmd += '''generic_name IN('{}'''.format(
+                    "', '".join(data['medication_generic_name']) + "')"
                 )
                 pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
             except KeyError: # medication_generic_name was not selected
@@ -217,8 +214,8 @@ class Filter(Resource):
 
             try:
                 cmd = '''SELECT pt_id FROM medication_deid WHERE '''
-                cmd += '''therapeutic_class LIKE '{}'''.format(
-                    "' AND therapeutic_class LIKE '".join(data['medication_therapeutic_class']) + "'"
+                cmd += '''therapeutic_class IN('{}'''.format(
+                    "', '".join(data['medication_therapeutic_class']) + "')"
                 )
                 pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
             except KeyError: # medication_deid was not selected
@@ -226,7 +223,9 @@ class Filter(Resource):
 
 
         # left vision
-        # Currently looks for 'less' and 'more' keys
+        # TODO: Vision filtering for the 20/XXX scale is currently
+        # based on character level comparason and is not robust.
+        # Need to figure out a way to compare the fractions
         if 'left_vision' in data:
             cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
                      element_name LIKE '%visual acuity%left%' '''
@@ -271,7 +270,7 @@ class Filter(Resource):
             pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # filterReturn(data, pt_ids)
-        return {'pt_id': [v[0] for v in pt_ids]}
+        return {'pt_id': [] if len(pt_ids)==0 else [v[0] for v in pt_ids]}
 
 
 class PatientHistory(Resource):
