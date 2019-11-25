@@ -39,17 +39,17 @@ class GetTableCols(Resource):
         table_name = data.get('table_name')
 
         if table_name is None:
-            return jsonify({'ERROR': 'Must provide table_name'})
+            return {'ERROR': 'Must provide table_name'}, 400
 
         if not check_sql_safe(table_name): # Prevent Injection
-            return jsonify({'ERROR': 'Invalid input'})
+            return {'ERROR': 'Invalid input'}, 400
 
         try:
             col_names = db_utils.get_table_columns(table_name)
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
-                    "__str__": str(e.__str__)}
+                    "__str__": str(e.__str__)}, 400
 
         return jsonify({'table_name': table_name, 'columns': col_names})
 
@@ -62,14 +62,12 @@ class GetDistinctX(Resource):
 
         # error handling
         if table_name is None:
-            return {'ERROR': 'empty table_name'}
+            return {'ERROR': 'empty table_name'}, 400
         if col_name is None:
-            return {'ERROR': 'empty col_name'}
-
-        # TODO: Get rid of NULL data
+            return {'ERROR': 'empty col_name'}, 400
 
         if not check_sql_safe(table_name, col_name): # Prevent Injection
-            return jsonify({'ERROR': 'Invalid input'})
+            return {'ERROR': 'Invalid input'}, 400
 
         try:
             cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
@@ -78,9 +76,10 @@ class GetDistinctX(Resource):
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
-                    "__str__": str(e.__str__)}
+                    "__str__": str(e.__str__)}, 400
         
-        return jsonify({"data": data, "table_name": table_name, "col_name": col_name})
+        # Remove null values in return data
+        return jsonify({"data": [v for v in data if v], "table_name": table_name, "col_name": col_name})
 
 
 class FilterTableWithPTID(Resource):
@@ -90,9 +89,9 @@ class FilterTableWithPTID(Resource):
         table_name = data.get('table_name')
 
         if not pt_id:
-            return {'ERROR': 'Must provide at least 1 pt_id'}
+            return {'ERROR': 'Must provide at least 1 pt_id'}, 400
         if not table_name:
-            return {'ERROR': 'Must provide table_name'}
+            return {'ERROR': 'Must provide table_name'}, 400
 
         ### Select values from tables with given pt_id
         pt_id = "'" + "', '".join([str(v) for v in pt_id]) + "'"
@@ -115,7 +114,7 @@ class FilterTableWithPTID(Resource):
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
-                    "__str__": str(e.__str__)}
+                    "__str__": str(e.__str__)}, 400
 
         return jsonify({'columns': col_names, 'data': res})
 
@@ -126,16 +125,16 @@ tableColumns = {
 
 class Filter(Resource):
     def get(self):
-        return {'Warning': 'Please use the POST method to filter :)'}
+        return {'Warning': 'Please use the POST method to filter :)'}, 400
 
     def post(self):
         data = json.loads(request.data.decode())['filters']
 
         # Get age constraints
+        td = datetime.date.today()
+        data['dob'] = {'younger_than': datetime.datetime(year=1900, month=1, day=1),
+                       'older_than': td}
         if 'age' in data:
-            td = datetime.date.today()
-            data['dob'] = {'younger_than': datetime.datetime(year=1900, month=1, day=1),
-                           'older_than': td}
             if 'less' in data['age']:
                 data['dob']['younger_than'] = datetime.datetime(
                     year=td.year-data['age']['less'], month=td.month,
@@ -146,14 +145,20 @@ class Filter(Resource):
                     year=td.year-data['age']['more'], month=td.month,
                     day=td.day-1 if td.month==2 and td.day==29 else td.day
                 )
+            del data['age']
 
-            # TODO: Check with Kerem about other conditions
-            # del data['age']
+        # Create command that will query for age and ethnicity
+        cmd = '''SELECT pt_id FROM pt_deid where dob >= %s AND dob <= %s '''
+        # Get ethnicity constraints
+        if 'ethnicity' in data:
+            # Append the ethnicity logic to the first command
+            cmd += ''' AND 
+            ethnicity IN('{}'''.format(
+                "', '".join(data['ethnicity']) + "')"
+            )
 
-        cmd = '''SELECT pt_id FROM pt_deid where dob > %s AND dob < %s '''
+        # Create pt_ids set HERE
         pt_ids = set(db_utils.db_execute(cmd, (data['dob']['younger_than'], data['dob']['older_than'])))
-        if len(pt_ids) == 0:
-            return {'pt_id': None}
 
         # Get eye and systemic diagnosis
         if 'eye_diagnosis' in data or 'systemic_diagnosis' in data:
@@ -166,18 +171,14 @@ class Filter(Resource):
             try:
                 data['diagnosis_name'] += data['systemic_diagnosis']
                 del data['systemic_diagnosis']
-            except KeyError:
+            except KeyError: # 'systemic_diagnosis isn't selected
                 pass
         
-            cmd = ''' SELECT DISTINCT pt_id FROM diagnosis_deid WHERE diagnosis_name LIKE '{}'''.format(
-                "' AND diagnosis_name LIKE '".join(data['diagnosis_name']) + "'"
+            cmd = ''' SELECT DISTINCT pt_id FROM diagnosis_deid WHERE diagnosis_name IN('{}'''.format(
+                "', '".join(data['diagnosis_name']) + "')"
             )
             pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
-        # Get ethnicity constraints
-        # TODO
-        if 'ethnicity' in data:
-            pass
         
         # Get image procedure type
         # Does not need reformatting
@@ -186,11 +187,10 @@ class Filter(Resource):
             cmd = '''SELECT DISTINCT pt_id FROM
             image_deid ID INNER JOIN image_procedure IP
             ON ID.image_procedure_id = IP.image_procedure_id
-            WHERE image_procedure LIKE '{}'''.format(
-                "' AND image_procedure LIKE '".join(data['image_procedure_type']) + "'"
+            WHERE image_procedure IN('{}'''.format(
+                "', '".join(data['image_procedure_type']) + "')"
             )
-            image_pt_ids = set(db_utils.db_execute(cmd))
-            pt_ids = pt_ids.intersection(image_pt_ids)
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # if len(pt_ids) == 0:
         #     return {'pt_id': None}
@@ -200,38 +200,77 @@ class Filter(Resource):
 
         # Medication_generic_name
         # TODO: generic name and therapeutic class can be merged into one SQL call
-        if 'medication_generic_name' in data:
-            cmd = '''SELECT pt_id FROM medication_deid WHERE generic_name LIKE '{}'''.format(
-                "' AND generic_name LIKE '".join(data['medication_generic_name']) + "'"
-            )
-            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+        if 'medication_generic_name' in data or 'medication_therapeutic_class' in data:
+            # Initialise command for medication query
+            
+            try:
+                cmd = '''SELECT pt_id FROM medication_deid WHERE '''
+                cmd += '''generic_name IN('{}'''.format(
+                    "', '".join(data['medication_generic_name']) + "')"
+                )
+                pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+            except KeyError: # medication_generic_name was not selected
+                pass
 
-        # medication_therapeutic_name
-        if 'medication_therapeutic_class' in data:
-            cmd = '''SELECT pt_id FROM medication_deid WHERE therapeutic_class LIKE '{}'''.format(
-                "' AND therapeutic_class LIKE '".join(data['medication_therapeutic_class']) + "'"
-            )
-            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+            try:
+                cmd = '''SELECT pt_id FROM medication_deid WHERE '''
+                cmd += '''therapeutic_class IN('{}'''.format(
+                    "', '".join(data['medication_therapeutic_class']) + "')"
+                )
+                pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+            except KeyError: # medication_deid was not selected
+                pass
 
 
-        breakpoint()
         # left vision
+        # TODO: Vision filtering for the 20/XXX scale is currently
+        # based on character level comparason and is not robust.
+        # Need to figure out a way to compare the fractions
         if 'left_vision' in data:
-            pass
+            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+                     element_name LIKE '%visual acuity%left%' '''
+            if 'less' in data['left_vision']:
+                cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['left_vision']['less'])
+            if 'more' in data['left_vision']:
+                cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['left_vision']['more'])
+            cmd += ' ORDER BY value_dt'
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # right vision
         if 'right_vision' in data:
-            pass
+            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+                     element_name LIKE '%visual acuity%right%' '''
+            if 'less' in data['right_vision']:
+                cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['right_vision']['less'])
+            if 'more' in data['right_vision']:
+                cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['right_vision']['more'])
+            cmd += ' ORDER BY value_dt'
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # left pressure
         if 'left_pressure' in data:
-            pass
+            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+                     element_name LIKE '%intraocular pressure%left%' '''
+            if 'less' in data['left_pressure']:
+                cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['left_pressure']['less'])
+            if 'more' in data['left_pressure']:
+                cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['left_pressure']['more'])
+            cmd += ' ORDER BY value_dt'
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # right pressure
         if 'right_pressure' in data:
-            pass
+            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+                     element_name LIKE '%intraocular pressure%right%' '''
+            if 'less' in data['right_pressure']:
+                cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['right_pressure']['less'])
+            if 'more' in data['right_pressure']:
+                cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['right_pressure']['more'])
+            cmd += ' ORDER BY value_dt'
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
-        return {'pt_id': pt_ids}
+        # filterReturn(data, pt_ids)
+        return {'pt_id': [] if len(pt_ids)==0 else [v[0] for v in pt_ids]}
 
 
 class PatientHistory(Resource):
@@ -240,7 +279,7 @@ class PatientHistory(Resource):
         pt_id = data.get('pt_id')
 
         if not pt_id:
-            return {'ERROR': 'Must provide at least 1 pt_id'}
+            return {'ERROR': 'Must provide at least 1 pt_id'}, 400
 
         out_json = {}
         med_cols = ('id', 'generic_name', 'therapeutic_class', 'date')
@@ -260,12 +299,12 @@ class PatientHistory(Resource):
             out_json[str(id)]['medication'] = [dict(zip(med_cols, val)) for val in res]
 
             # Eye Diagnosis
-            # NOTE: currently using a naive method of matching 'macula', 'retina' and 'myopi'
+            # NOTE: currently using a naive method of matching 'macula', 'retina' and 'opia'
             # to classify eye or systemic diagnosis. This is probably not robust.
             cmd = r"""SELECT diagnosis_name, diagnosis_start_dt
             FROM diagnosis_deid WHERE pt_id={} AND
             (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
-            OR diagnosis_name LIKE '%myopi%') ORDER BY diagnosis_start_dt;""".format(id)
+            OR diagnosis_name LIKE '%opia%') ORDER BY diagnosis_start_dt;""".format(id)
             out_json[str(id)]['eye_diagnosis'] = db_utils.db_execute(cmd)
 
             # Systemic Diagnosis
@@ -308,7 +347,7 @@ class PatientImages(Resource):
         pt_id = data.get('pt_id')
 
         if not pt_id:
-            return {'ERROR': 'Must provide at least 1 pt_id'}
+            return {'ERROR': 'Must provide at least 1 pt_id'}, 400
 
         out_json = {}
         image_cols = ('image_id', 'image_num', 'image_type', 'image_laterality', 'image_procedure_id')
