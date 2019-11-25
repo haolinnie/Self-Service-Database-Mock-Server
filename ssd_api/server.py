@@ -39,17 +39,17 @@ class GetTableCols(Resource):
         table_name = data.get('table_name')
 
         if table_name is None:
-            return jsonify({'ERROR': 'Must provide table_name'})
+            return {'ERROR': 'Must provide table_name'}, 400
 
         if not check_sql_safe(table_name): # Prevent Injection
-            return jsonify({'ERROR': 'Invalid input'})
+            return {'ERROR': 'Invalid input'}, 400
 
         try:
             col_names = db_utils.get_table_columns(table_name)
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
-                    "__str__": str(e.__str__)}
+                    "__str__": str(e.__str__)}, 400
 
         return jsonify({'table_name': table_name, 'columns': col_names})
 
@@ -62,14 +62,14 @@ class GetDistinctX(Resource):
 
         # error handling
         if table_name is None:
-            return {'ERROR': 'empty table_name'}
+            return {'ERROR': 'empty table_name'}, 400
         if col_name is None:
-            return {'ERROR': 'empty col_name'}
+            return {'ERROR': 'empty col_name'}, 400
 
         # TODO: Get rid of NULL data
 
         if not check_sql_safe(table_name, col_name): # Prevent Injection
-            return jsonify({'ERROR': 'Invalid input'})
+            return {'ERROR': 'Invalid input'}, 400
 
         try:
             cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
@@ -78,7 +78,7 @@ class GetDistinctX(Resource):
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
-                    "__str__": str(e.__str__)}
+                    "__str__": str(e.__str__)}, 400
         
         return jsonify({"data": data, "table_name": table_name, "col_name": col_name})
 
@@ -90,9 +90,9 @@ class FilterTableWithPTID(Resource):
         table_name = data.get('table_name')
 
         if not pt_id:
-            return {'ERROR': 'Must provide at least 1 pt_id'}
+            return {'ERROR': 'Must provide at least 1 pt_id'}, 400
         if not table_name:
-            return {'ERROR': 'Must provide table_name'}
+            return {'ERROR': 'Must provide table_name'}, 400
 
         ### Select values from tables with given pt_id
         pt_id = "'" + "', '".join([str(v) for v in pt_id]) + "'"
@@ -115,7 +115,7 @@ class FilterTableWithPTID(Resource):
         except Exception as e:
             return {"Exception Type": str(type(e)),
                     "Args": str(e.args),
-                    "__str__": str(e.__str__)}
+                    "__str__": str(e.__str__)}, 400
 
         return jsonify({'columns': col_names, 'data': res})
 
@@ -126,7 +126,7 @@ tableColumns = {
 
 class Filter(Resource):
     def get(self):
-        return {'Warning': 'Please use the POST method to filter :)'}
+        return {'Warning': 'Please use the POST method to filter :)'}, 400
 
     def post(self):
         data = json.loads(request.data.decode())['filters']
@@ -270,14 +270,8 @@ class Filter(Resource):
             cmd += ' ORDER BY value_dt'
             pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
-        filterReturn(data, pt_ids)
-        return {'pt_id': pt_ids}
-
-
-def filterReturn(data, pt_ids):
-    keys = list(data.keys())
-    breakpoint()
-    
+        # filterReturn(data, pt_ids)
+        return {'pt_id': [v[0] for v in pt_ids]}
 
 
 class PatientHistory(Resource):
@@ -286,7 +280,7 @@ class PatientHistory(Resource):
         pt_id = data.get('pt_id')
 
         if not pt_id:
-            return {'ERROR': 'Must provide at least 1 pt_id'}
+            return {'ERROR': 'Must provide at least 1 pt_id'}, 400
 
         out_json = {}
         med_cols = ('id', 'generic_name', 'therapeutic_class', 'date')
@@ -354,7 +348,7 @@ class PatientImages(Resource):
         pt_id = data.get('pt_id')
 
         if not pt_id:
-            return {'ERROR': 'Must provide at least 1 pt_id'}
+            return {'ERROR': 'Must provide at least 1 pt_id'}, 400
 
         out_json = {}
         image_cols = ('image_id', 'image_num', 'image_type', 'image_laterality', 'image_procedure_id')

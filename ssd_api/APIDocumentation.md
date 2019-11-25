@@ -322,30 +322,10 @@ Input data:
 }
 ```
 
-**NOTE: RETURN NOT YET IMPLEMENTED**
-
 Returns (truncated):
 
 ```json
 {
-    "patient_info": [
-        {
-            "pt_id": 20304,
-            "eye_diagnosis" : "retenal edema",
-            "systemic_diagnosis": "gout",
-            "age": 50,
-            "ethnicity": "asian",
-            "exams": {
-                        "1234": "OCT",
-                        "2345": "OCT"
-                     },
-            "medication_generic_name": "Ketorolac",
-            "medication_therapuetic_name": "CNS Agent",
-            "left_vision": "20/200",
-            "right_vision": "20/100",
-            "left_pressure": 20,
-            "right_pressure": 100,
-        }
-    ]
+    "pt_id": [123,123,123]
 }
 ```
