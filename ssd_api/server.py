@@ -132,10 +132,10 @@ class Filter(Resource):
         data = json.loads(request.data.decode())['filters']
 
         # Get age constraints
+        td = datetime.date.today()
+        data['dob'] = {'younger_than': datetime.datetime(year=1900, month=1, day=1),
+                       'older_than': td}
         if 'age' in data:
-            td = datetime.date.today()
-            data['dob'] = {'younger_than': datetime.datetime(year=1900, month=1, day=1),
-                           'older_than': td}
             if 'less' in data['age']:
                 data['dob']['younger_than'] = datetime.datetime(
                     year=td.year-data['age']['less'], month=td.month,
@@ -148,12 +148,20 @@ class Filter(Resource):
                 )
 
             # TODO: Check with Kerem about other conditions
-            # del data['age']
+            del data['age']
 
-        cmd = '''SELECT pt_id FROM pt_deid where dob > %s AND dob < %s '''
+        # Create command that will query for age and ethnicity
+        cmd = '''SELECT pt_id FROM pt_deid where dob >= %s AND dob <= %s '''
+        # Get ethnicity constraints
+        if 'ethnicity' in data:
+            # Append the ethnicity logic to the first command
+            cmd += ''' AND 
+            ethnicity IN('{}'''.format(
+                "', '".join(data['ethnicity']) + "')"
+            )
+
+        # Create pt_ids set HERE
         pt_ids = set(db_utils.db_execute(cmd, (data['dob']['younger_than'], data['dob']['older_than'])))
-        if len(pt_ids) == 0:
-            return {'pt_id': None}
 
         # Get eye and systemic diagnosis
         if 'eye_diagnosis' in data or 'systemic_diagnosis' in data:
@@ -166,7 +174,7 @@ class Filter(Resource):
             try:
                 data['diagnosis_name'] += data['systemic_diagnosis']
                 del data['systemic_diagnosis']
-            except KeyError:
+            except KeyError: # 'systemic_diagnosis isn't selected
                 pass
         
             cmd = ''' SELECT DISTINCT pt_id FROM diagnosis_deid WHERE diagnosis_name LIKE '{}'''.format(
@@ -174,10 +182,6 @@ class Filter(Resource):
             )
             pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
-        # Get ethnicity constraints
-        # TODO
-        if 'ethnicity' in data:
-            pass
         
         # Get image procedure type
         # Does not need reformatting
@@ -189,8 +193,7 @@ class Filter(Resource):
             WHERE image_procedure LIKE '{}'''.format(
                 "' AND image_procedure LIKE '".join(data['image_procedure_type']) + "'"
             )
-            image_pt_ids = set(db_utils.db_execute(cmd))
-            pt_ids = pt_ids.intersection(image_pt_ids)
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # if len(pt_ids) == 0:
         #     return {'pt_id': None}
@@ -200,38 +203,81 @@ class Filter(Resource):
 
         # Medication_generic_name
         # TODO: generic name and therapeutic class can be merged into one SQL call
-        if 'medication_generic_name' in data:
-            cmd = '''SELECT pt_id FROM medication_deid WHERE generic_name LIKE '{}'''.format(
-                "' AND generic_name LIKE '".join(data['medication_generic_name']) + "'"
-            )
-            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+        if 'medication_generic_name' in data or 'medication_therapeutic_class' in data:
+            # Initialise command for medication query
+            
+            try:
+                cmd = '''SELECT pt_id FROM medication_deid WHERE '''
+                cmd += '''generic_name LIKE '{}'''.format(
+                    "' AND generic_name LIKE '".join(data['medication_generic_name']) + "'"
+                )
+                pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+            except KeyError: # medication_generic_name was not selected
+                pass
 
-        # medication_therapeutic_name
-        if 'medication_therapeutic_class' in data:
-            cmd = '''SELECT pt_id FROM medication_deid WHERE therapeutic_class LIKE '{}'''.format(
-                "' AND therapeutic_class LIKE '".join(data['medication_therapeutic_class']) + "'"
-            )
-            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+            try:
+                cmd = '''SELECT pt_id FROM medication_deid WHERE '''
+                cmd += '''therapeutic_class LIKE '{}'''.format(
+                    "' AND therapeutic_class LIKE '".join(data['medication_therapeutic_class']) + "'"
+                )
+                pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+            except KeyError: # medication_deid was not selected
+                pass
 
 
-        breakpoint()
         # left vision
+        # Currently looks for 'less' and 'more' keys
         if 'left_vision' in data:
-            pass
+            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+                     element_name LIKE '%visual acuity%left%' '''
+            if 'less' in data['left_vision']:
+                cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['left_vision']['less'])
+            if 'more' in data['left_vision']:
+                cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['left_vision']['more'])
+            cmd += ' ORDER BY value_dt'
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # right vision
         if 'right_vision' in data:
-            pass
+            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+                     element_name LIKE '%visual acuity%right%' '''
+            if 'less' in data['right_vision']:
+                cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['right_vision']['less'])
+            if 'more' in data['right_vision']:
+                cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['right_vision']['more'])
+            cmd += ' ORDER BY value_dt'
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # left pressure
         if 'left_pressure' in data:
-            pass
+            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+                     element_name LIKE '%intraocular pressure%left%' '''
+            if 'less' in data['left_pressure']:
+                cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['left_pressure']['less'])
+            if 'more' in data['left_pressure']:
+                cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['left_pressure']['more'])
+            cmd += ' ORDER BY value_dt'
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
         # right pressure
         if 'right_pressure' in data:
-            pass
+            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+                     element_name LIKE '%intraocular pressure%right%' '''
+            if 'less' in data['right_pressure']:
+                cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['right_pressure']['less'])
+            if 'more' in data['right_pressure']:
+                cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['right_pressure']['more'])
+            cmd += ' ORDER BY value_dt'
+            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
 
+        filterReturn(data, pt_ids)
         return {'pt_id': pt_ids}
+
+
+def filterReturn(data, pt_ids):
+    keys = list(data.keys())
+    breakpoint()
+    
 
 
 class PatientHistory(Resource):
@@ -260,12 +306,12 @@ class PatientHistory(Resource):
             out_json[str(id)]['medication'] = [dict(zip(med_cols, val)) for val in res]
 
             # Eye Diagnosis
-            # NOTE: currently using a naive method of matching 'macula', 'retina' and 'myopi'
+            # NOTE: currently using a naive method of matching 'macula', 'retina' and 'opia'
             # to classify eye or systemic diagnosis. This is probably not robust.
             cmd = r"""SELECT diagnosis_name, diagnosis_start_dt
             FROM diagnosis_deid WHERE pt_id={} AND
             (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
-            OR diagnosis_name LIKE '%myopi%') ORDER BY diagnosis_start_dt;""".format(id)
+            OR diagnosis_name LIKE '%opia%') ORDER BY diagnosis_start_dt;""".format(id)
             out_json[str(id)]['eye_diagnosis'] = db_utils.db_execute(cmd)
 
             # Systemic Diagnosis

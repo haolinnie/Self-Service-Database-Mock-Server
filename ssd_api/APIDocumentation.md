@@ -11,6 +11,8 @@ Testing url: <https://tigernie.com/ssd_api>
 
 ---
 
+## API Endpoints
+
 ### Get list of table names
 
 Get the names of all the tables in the database.
@@ -266,6 +268,83 @@ Returns (truncated):
                     "image_procedure_id": "Af"
                 }
             ]
+        }
+    ]
+}
+```
+
+---
+
+### Filter
+
+Given a dictionary of filter parameters, return ....
+
+URL: `baseURL/ssd_api/filter`
+
+Type: `POST`
+
+Input format: Categorical filters (e.g. eye_diagnosis, ethnicity) must be given as a list of strings: `({"eye_diagnosis": ["retinal edema"]})`. Numerical filters (e.g. pressure and vision) must be given as two key value pairs: `({"left_pressure": {"less": 50, "more": 20}, "right_vision": {"less": "20/40"}})`
+
+Example:
+
+`https://tigernie.com/ssd_api/filter`
+
+Input data:
+
+```JSON
+{
+    "filters": {
+        "eye_diagnosis" : ["retinal edema"],
+        "systemic_diagnosis": ["gout"],
+        "age": {
+            "less": 50
+        },
+        "ethnicity": ["asian"],
+        "image_procedure_type": ["IR_OCT"],
+        "labs": {"Calcium": 4},
+        "medication_generic_name": ["Ketorolac"],
+        "medication_therapuetic_name": ["CNS Agent"],
+        "left_vision": {
+            "less": "20/40"
+        },
+        "right_vision": {
+            "less": "20/40",
+            "more": "20/200"
+        },
+         "left_pressure": {
+            "less": 50
+        },
+        "right_pressure": {
+            "equal": 100,
+            "between": [120,200]
+        }
+    }
+}
+```
+
+**NOTE: RETURN NOT YET IMPLEMENTED**
+
+Returns (truncated):
+
+```json
+{
+    "patient_info": [
+        {
+            "pt_id": 20304,
+            "eye_diagnosis" : "retenal edema",
+            "systemic_diagnosis": "gout",
+            "age": 50,
+            "ethnicity": "asian",
+            "exams": {
+                        "1234": "OCT",
+                        "2345": "OCT"
+                     },
+            "medication_generic_name": "Ketorolac",
+            "medication_therapuetic_name": "CNS Agent",
+            "left_vision": "20/200",
+            "right_vision": "20/100",
+            "left_pressure": 20,
+            "right_pressure": 100,
         }
     ]
 }
