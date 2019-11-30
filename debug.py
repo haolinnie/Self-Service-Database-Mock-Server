@@ -9,4 +9,4 @@ if __name__ == '__main__': # pragma: no cover
         'db_name': 'ssd_sample_database'
     }
     app = create_app(**config)
-    app.run(debug=True, port=5200)
+    app.run(debug=True, port=5100)
