@@ -227,7 +227,7 @@ class Filter(Resource):
         # based on character level comparason and is not robust.
         # Need to figure out a way to compare the fractions
         if 'left_vision' in data:
-            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+            cmd = '''SELECT pt_id FROM smart_data_deid WHERE 
                      element_name LIKE '%visual acuity%left%' '''
             if 'less' in data['left_vision']:
                 cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['left_vision']['less'])
@@ -238,7 +238,7 @@ class Filter(Resource):
 
         # right vision
         if 'right_vision' in data:
-            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+            cmd = '''SELECT pt_id FROM smart_data_deid WHERE 
                      element_name LIKE '%visual acuity%right%' '''
             if 'less' in data['right_vision']:
                 cmd += '''AND smrtdta_elem_value >= '{}' '''.format(data['right_vision']['less'])
@@ -249,7 +249,7 @@ class Filter(Resource):
 
         # left pressure
         if 'left_pressure' in data:
-            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+            cmd = '''SELECT pt_id FROM smart_data_deid WHERE 
                      element_name LIKE '%intraocular pressure%left%' '''
             if 'less' in data['left_pressure']:
                 cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['left_pressure']['less'])
@@ -260,7 +260,7 @@ class Filter(Resource):
 
         # right pressure
         if 'right_pressure' in data:
-            cmd = '''SELECT pt_id FROM SMART_DATA_DEID WHERE 
+            cmd = '''SELECT pt_id FROM smart_data_deid WHERE 
                      element_name LIKE '%intraocular pressure%right%' '''
             if 'less' in data['right_pressure']:
                 cmd += '''AND smrtdta_elem_value <= '{}' '''.format(data['right_pressure']['less'])

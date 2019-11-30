@@ -16,3 +16,5 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+ssd_api/data/~$deid_data_sample.xlsx
