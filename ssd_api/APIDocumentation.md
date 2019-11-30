@@ -85,7 +85,7 @@ URL: `baseURL/ssd_api/get_distinct`
 
 Type: `GET`
 
-Example: To get the distinct values in table **pt_deid** column **pt_id**
+Example 1: To get the distinct values in table **pt_deid** column **pt_id**
 
 `https://tigernie.com/ssd_api/get_distinct?table_name=pt_deid&col_name=pt_id`
 
@@ -107,6 +107,41 @@ Returns:
     ],
     "table_name": "pt_deid",
     "col_name": "pt_id"
+}
+```
+
+Example 2: To get a **special** category ('eye_diagnosis' and 'systemic_diagnosis')
+
+`https://tigernie.com/ssd_api/get_distinct?special=eye_diagnosis`
+
+Returns:
+
+```json
+{
+    "col_name": "eye_diagnosis",
+    "data": [
+        "Arterial branch occlusion of retina",
+        "Branch retinal vein occlusion with macular edema (disorder)",
+        "Central retinal vein occlusion (disorder)",
+        "Central vein occlusion of retina",
+        "Chronic iridocyclitis, bilateral",
+        "Chronic iridocyclitis, unspecified",
+        "Cystoid macular degeneration of retina",
+        "Cystoid macular degeneration, bilateral",
+        "Degenerative disorder of macula (disorder)",
+        "Iridocyclitis (disorder)",
+        "Myopia (disorder)",
+        "Retinal edema",
+        "Retinal hemorrhage (finding)",
+        "Retinal neovascularization NOS",
+        "Retinal vasculitis",
+        "Retinal vasculitis (disorder)",
+        "Retinal vasculitis, bilateral",
+        "Retinal vasculitis, unspecified eye",
+        "Tributary (branch) retinal vein occlusion, bilateral, with macular edema",
+        "Unspecified chorioretinal inflammation, left eye"
+    ],
+    "table_name": null
 }
 ```
 
