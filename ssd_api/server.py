@@ -17,8 +17,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('table_name', type=str, help='ERROR: empty table name')
 parser.add_argument('col_name', type=str, help='ERROR: empty column name')
 parser.add_argument('pt_id', type=int, action='append', help='ERROR: empty pt_id_list')
-
-parser.add_argument('')
+parser.add_argument('special', type=str, help='ERROR: special item empty')
 
 
 class TableNames(Resource):
@@ -59,24 +58,45 @@ class GetDistinctX(Resource):
         data = parser.parse_args()
         col_name = data.get('col_name')
         table_name = data.get('table_name')
+        special = data.get('special')
 
-        # error handling
-        if table_name is None:
-            return {'ERROR': 'empty table_name'}, 400
-        if col_name is None:
-            return {'ERROR': 'empty col_name'}, 400
+        if special is None:
+            # error handling
+            if table_name is None:
+                return {'ERROR': 'empty table_name'}, 400
+            if col_name is None:
+                return {'ERROR': 'empty col_name'}, 400
 
-        if not check_sql_safe(table_name, col_name): # Prevent Injection
-            return {'ERROR': 'Invalid input'}, 400
+            if not check_sql_safe(table_name, col_name): # Prevent Injection
+                return {'ERROR': 'Invalid input'}, 400
 
-        try:
-            cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
-            data = db_utils.db_execute(cmd)
-            data = [r[0] for r in data]
-        except Exception as e:
-            return {"Exception Type": str(type(e)),
-                    "Args": str(e.args),
-                    "__str__": str(e.__str__)}, 400
+            try:
+                cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
+                data = db_utils.db_execute(cmd)
+                data = [r[0] for r in data]
+            except Exception as e:
+                return {"Exception Type": str(type(e)),
+                        "Args": str(e.args),
+                        "__str__": str(e.__str__)}, 400
+        else:
+            if special == "eye_diagnosis":
+                col_name = special
+                cmd = r"""SELECT DISTINCT diagnosis_name FROM diagnosis_deid WHERE 
+                (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
+                OR diagnosis_name LIKE '%opia%' OR diagnosis_name LIKE '%iri%')
+                ORDER BY diagnosis_name;"""
+                data = db_utils.db_execute(cmd)
+                data = [r[0] for r in data]
+            elif special == "systemic_diagnosis":
+                col_name = special
+                cmd = r"""SELECT DISTINCT diagnosis_name FROM diagnosis_deid WHERE NOT
+                (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
+                OR diagnosis_name LIKE '%opia%' OR diagnosis_name LIKE '%iri%')
+                ORDER BY diagnosis_name;"""
+                data = db_utils.db_execute(cmd)
+                data = [r[0] for r in data]
+            else:
+                return {'ERROR': 'Special item not recognised'}, 400
         
         # Remove null values in return data
         return jsonify({"data": [v for v in data if v], "table_name": table_name, "col_name": col_name})
@@ -304,14 +324,16 @@ class PatientHistory(Resource):
             cmd = r"""SELECT diagnosis_name, diagnosis_start_dt
             FROM diagnosis_deid WHERE pt_id={} AND
             (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
-            OR diagnosis_name LIKE '%opia%') ORDER BY diagnosis_start_dt;""".format(id)
+            OR diagnosis_name LIKE '%opia%' OR diagnosis_name LIKE '%iri%') 
+            ORDER BY diagnosis_start_dt;""".format(id)
             out_json[str(id)]['eye_diagnosis'] = db_utils.db_execute(cmd)
 
             # Systemic Diagnosis
             cmd = r"""SELECT diagnosis_name, diagnosis_start_dt
             FROM diagnosis_deid WHERE pt_id IN({}) AND NOT
             (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
-            OR diagnosis_name LIKE '%myopi%') ORDER BY diagnosis_start_dt;""".format(id)
+            OR diagnosis_name LIKE '%myopi%' OR diagnosis_name LIKE '%iri%')
+            ORDER BY diagnosis_start_dt;""".format(id)
             out_json[str(id)]['systemic_diagnosis'] = db_utils.db_execute(cmd)
 
             # Lab values

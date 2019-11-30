@@ -45,6 +45,15 @@ def test_get_distinct(client):
     assert res.status_code == 400
     assert "ERROR" in res.json
 
+def test_get_distinct_special(client):
+    res = client.get('/ssd_api/get_distinct?special=eye_diagnosis')
+    assert res.status_code == 200
+    assert res.json['col_name'] == 'eye_diagnosis'
+    res = client.get('/ssd_api/get_distinct?special=systemic_diagnosis')
+    assert res.status_code == 200
+    res = client.get('/ssd_api/get_distinct?special=bla')
+    assert res.status_code == 400
+
 
 def test_filter_table_with_ptid(client):
     # Require at least 1 pt_id
@@ -94,4 +103,6 @@ def test_Filter_post(client):
     # TODO: Add more tests 
     res = client.post('/ssd_api/filter')
     assert res.status_code == 500
+    # res = client.post('/ssd_api/filter', data={'age': {'less': 50}})
+    # assert res.status_code == 200
 
