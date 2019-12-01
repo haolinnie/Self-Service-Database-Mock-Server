@@ -360,6 +360,13 @@ class PatientHistory(Resource):
             res = db_utils.db_execute(cmd)
             out_json[str(id)]['pressure'] = [dict(zip(smart_cols, val)) for val in res]
 
+            # Image types
+            cmd = """ SELECT DISTINCT IP.image_procedure
+            FROM image_deid ID INNER JOIN image_procedure IP
+            ON ID.image_procedure_id = IP.image_procedure_id
+            WHERE ID.pt_id = {};""".format(id)
+            res = db_utils.db_execute(cmd)
+            out_json[str(id)]['image_type'] = [v[0] for v in res]
         return jsonify(out_json)
 
 

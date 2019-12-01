@@ -254,7 +254,12 @@ Returns (truncated):
             {"name": "FINDINGS - TESTS - EYES - TONOMETRY - IOP - INTRAOCULAR PRESSURE - LEFT", "value": "14", "smart_data_id": "2014-08-09 00:00:00"},
             {"name": "FINDINGS - TESTS - EYES - TONOMETRY - IOP - INTRAOCULAR PRESSURE - RIGHT", "value": "14", "smart_data_id": "2014-08-09 00:00:00"},
             {"name": "FINDINGS - TESTS - EYES - TONOMETRY - IOP - INTRAOCULAR PRESSURE - LEFT", "value": "14", "smart_data_id": "2017-05-03 00:00:00"}
-        ]
+        ],
+        "image_type": [
+			"Af",
+			"Ir",
+			"FA"
+		]
 }
 ```
 
