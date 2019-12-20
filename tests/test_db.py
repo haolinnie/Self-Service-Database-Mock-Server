@@ -1,6 +1,6 @@
 import pytest
-import ssd_api.db as db_utils
-from ssd_api.db import Database
+import api.db as db_utils
+from api.db import Database
 
 
 def test_get_close_db(app):

@@ -1,4 +1,3 @@
-#!../flask/bin/python
 import os
 import sys
 import datetime
@@ -6,10 +5,10 @@ from flask import Flask, jsonify, make_response, render_template, request
 from flask_restful import Resource, Api, reqparse
 import json
 
-from . import db as db_utils
-from .db import Database
-from . import config_module
-from .util import get_documentation
+from api import db as db_utils
+from api.db import Database
+from api import config_module
+from api.util import get_documentation
 
 
 # Initialise request parser
@@ -439,7 +438,3 @@ def create_app(**config):
 
     return app
 
-
-if __name__ == '__main__': # pragma: no cover
-    app = create_app()
-    app.run(debug=True, port=5100)

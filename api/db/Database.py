@@ -9,6 +9,8 @@ from flask.cli import with_appcontext
 
 ### Flask server db functions
 
+### TODO: Make the database fail gracefully when it fails to connect
+
 class Database():
     test = False;
     host = 'localhost'
@@ -38,6 +40,7 @@ class Database():
         if 'db' not in g:
             g.db = pymysql.connect(cls.host, cls.username, cls.password, cls.db_name)
         return g.db
+
 
     @classmethod
     def init_app(cls, app):

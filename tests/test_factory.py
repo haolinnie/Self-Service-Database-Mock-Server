@@ -1,4 +1,4 @@
-from ssd_api import create_app
+from api import create_app
 
 
 def test_doc(client):

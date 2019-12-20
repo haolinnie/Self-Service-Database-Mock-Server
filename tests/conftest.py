@@ -2,7 +2,7 @@ import os
 import tempfile
 
 import pytest
-from ssd_api import create_app
+from api import create_app
 
 
 @pytest.fixture
