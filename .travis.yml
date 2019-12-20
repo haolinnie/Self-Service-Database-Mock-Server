@@ -1,20 +1,19 @@
-  language: python
-  python:
-    - "3.5"
-    - "3.6"
-    - "3.7"
-    - "nightly"
-  install:
-    - pip install .
-    - pip install pytest coverage
-    - pip install pytest-cov
-    - pip install coveralls
+language: python
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "nightly"
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip install coveralls
 
-  services:
-    - 'mysql'
-  before_install:
-    - mysql -u root --password="" < create_sample_database.sql
-  script:
-    - ./run_tests travis
-  after_success:
-    - coveralls
+services:
+  - 'mysql'
+before_install:
+  - mysql -u root --password="" < data/create_sample_database.sql
+script:
+  - scripts/run_tests travis
+after_success:
+  - coveralls

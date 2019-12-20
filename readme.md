@@ -2,18 +2,14 @@
 
 Author: Tiger Nie [nhl0819@gmail.com]
 
-Version: 1.0.0
-
-Python >= 3.5
-
 [![Build Status](https://travis-ci.com/haolinnie/Self-Service-Database-Server.svg?branch=master)](https://travis-ci.com/haolinnie/Self-Service-Database-Server)
 [![Coverage Status](https://coveralls.io/repos/github/haolinnie/Self-Service-Database-Server/badge.svg?branch=master)](https://coveralls.io/github/haolinnie/Self-Service-Database-Server?branch=master)
+
+This is the API server for a Self-Service Database UI for Northwestern Memorial Hospital's Ophthalmology department. The app is written in Python 3.7 with MySQL as the database layer. Currently deployable via a bash script with gunicorn and NGINX. Docker recipes are in the works.
 
 ## Documentation
 
 [Here is the most up-to-date API documentation.](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md) 
-
-This app is built in Python 3 with the Flask microframework to server data from a MySQL database.
 
 [Here is a nice little API debugger for this project.](https://tigernie.com/ssd_api)
 
