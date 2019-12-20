@@ -5,9 +5,9 @@ then
    echo Travis detected: Initialising testing mysql database
    #mysql -u root --password="" < create_sample_database.sql
 else
-   pip install .
+   echo No CI
 fi
 
 coverage run -m pytest
-coverage report --omit=ssd_api/excel_op.py
+coverage report --omit=api/excel_op.py
 coverage html
