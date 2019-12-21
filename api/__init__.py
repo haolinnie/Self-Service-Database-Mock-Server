@@ -16,9 +16,9 @@ parser.add_argument("pt_id", type=int, action="append", help="ERROR: empty pt_id
 parser.add_argument("special", type=str, help="ERROR: special item empty")
 
 
-class TableNames(Resource):
-    def get(self):
-        return jsonify({"table_names": db_utils.get_table_names()})
+# class TableNames(Resource):
+#     def get(self):
+#         return jsonify({"table_names": db_utils.get_table_names()})
 
 
 def check_sql_safe(*argv):
@@ -494,7 +494,7 @@ def create_app(**config):
 
     # Flask_restful api
     api = Api(app)
-    api.add_resource(TableNames, "/ssd_api/get_table")
+    # api.add_resource(TableNames, "/ssd_api/get_table")
     api.add_resource(GetTableCols, "/ssd_api/get_table_cols")
     api.add_resource(GetDistinctX, "/ssd_api/get_distinct")
     api.add_resource(FilterTableWithPTID, "/ssd_api/filter_table_with_ptid")
