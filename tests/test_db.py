@@ -17,5 +17,5 @@ def test_get_table_names(app):
 
 def test_get_table_columns(app):
     with app.app_context():
-        res = db_utils.get_table_columns('pt_deid')
+        res = db_utils.get_table_columns("pt_deid")
     assert res is not None

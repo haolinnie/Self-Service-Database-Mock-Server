@@ -1,20 +1,34 @@
-from configparser import ConfigParser
+"""
+Configuration options for the api server.
+TODO: Finish this file and documentation
+"""
+import os
 
 
 class Config(object):
-    def __init__(self, path):
-        self.path = path
-        self.config = ConfigParser()
-        self.config.read(path, encoding='utf-8')
-    
-    def get(self, *args): # pragma: no cover
-        return self.config.get(args[0], args[1])
+    """Base config, uses staging database server."""
 
-    def getint(self, *args): # pragma: no cover
-        return self.config.getint(args[0], args[1])
-    
-    # def getfloat(self, *args):
-    #     return self.config.getfloat(args[0], args[1])
+    DEBUG = False
+    TESTING = False
+    DB_SERVER = "192.168.1.56"
 
-    # def getboolean(self, *args):
-    #     return self.config.getboolean(args[0], args[1])
+    @property
+    def DATABASE_URI(self):  # Note: all caps
+        return "mysql://user@{}/foo".format(self.DB_SERVER)
+
+
+class ProductionConfig(Config):
+    """Uses production database server."""
+
+    DB_SERVER = ""  # <-- Production database server address
+
+
+class DevelopmentConfig(Config):
+    DB_SERVER = "localhost"
+    DEBUG = True
+
+
+class TestingConfig(Config):
+    DB_SERVER = "localhost"
+    DEBUG = True
+    DATABASE_URI = ""

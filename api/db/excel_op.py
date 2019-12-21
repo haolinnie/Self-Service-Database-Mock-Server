@@ -3,9 +3,9 @@ import pandas as pd
 from db_op import get_db
 
 DATA_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    '../data/deid_data_sample.xlsx'
+    os.path.dirname(os.path.abspath(__file__)), "../data/deid_data_sample.xlsx"
 )
+
 
 def loadExcel(path):
     excel_file = pd.ExcelFile(path)
@@ -25,9 +25,9 @@ def excel_to_db():
     connection = get_db()
 
     for name in table_names:
-        print("Adding table "+name+" to db.")
+        print("Adding table " + name + " to db.")
         tables[name].to_sql(name, con=connection)
-    
+
     connection.commit()
 
 
