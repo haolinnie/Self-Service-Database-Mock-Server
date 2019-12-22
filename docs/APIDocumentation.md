@@ -22,7 +22,7 @@ All API responses have `Content-Type: application/json` and CORS headers. All re
 - [Patient Images (patient_images)](#patient-images)
 - [Filter (filter)](#filter)
 
---
+---
 
 ### Get list of table names
 
