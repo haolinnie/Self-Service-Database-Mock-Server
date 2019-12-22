@@ -1,10 +1,21 @@
 """
 Utility stuff
 """
+import configparser
+import logging
+
 from flask import jsonify
 
-# TODO: Database mixin class
-# TODO: More
+
+class Mixin:
+    """Base class for SQLAlchemy Models
+    """
+
+    def to_dict(self):
+        d_out = dict((key, val) for key, val in self.__dict__.items())
+        d_out.pop("_sa_instance_state", None)
+        d_out["_id"] = d_out.pop("id", None)  # rename id key to interface with response
+        return d_out
 
 
 def check_sql_safe(*argv):
@@ -41,3 +52,23 @@ def exception_handler(error):
     """
     return create_response(message=str(error), status=500)
 
+
+def get_database_url(file="credentials.config"):
+    """Load config
+    Example of config file:
+    [mysql_creds]
+    mysql_url = mysql+pymysql://test_user:password@127.0.0.1:3306/ssd_sample_database
+
+    :param file <str> filename
+    :returns str or None if Exception
+    """
+    try:
+        config = configparser.ConfigParser()
+        config.read(file)
+        try:
+            res = config["mysql_creds"]
+            return res["mysql_url"]
+        except KeyError:
+            print("Failed to retrieve MySQL credentials from [{}].".format(file))
+    except:
+        print("Failed to load config file [{}].".format(file))

@@ -37,7 +37,7 @@ source flask/bin/activate
 
 Install the app factory module
 
-```
+```bash
 python -m pip install --upgrade pip
 python -m pip install .
 ```
@@ -53,5 +53,6 @@ For deployment on a linux server, consider using `systemd` to configure the app 
 
 ## Todo
 
+Fix all Todos in the code.
 Add more API features to support the front end.
 Streamline the deployment process with Docker.

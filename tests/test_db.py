@@ -1,12 +1,5 @@
 import pytest
-import api.db as db_utils
-from api.db import Database
-
-
-def test_get_close_db(app):
-    with app.app_context():
-        db_ = Database.get_db()
-        assert db_ is Database.get_db()
+from api.models import db, db_utils
 
 
 def test_get_table_names(app):

@@ -24,8 +24,7 @@ def test_get_cols(client):
 
     # Test wrong table
     res = client.get(url + "?table_name=bla")
-    assert res.json["success"]
-    assert len(res.json["result"]["columns"]) == 0
+    assert not res.json["success"]
 
 
 def test_get_distinct(client):
@@ -85,9 +84,13 @@ def test_filter_table_with_ptid(client):
     # Single pt_id query
     res = client.get(url + "?pt_id=20676&table_name=pt_deid")
     assert res.json["success"]
-    assert "columns" in res.json["result"]
+    assert "data" in res.json["result"]
 
     # Multi pt_id query
     res = client.get(url + "?pt_id=20676&pt_id=36440&table_name=pt_deid")
     assert res.json["success"]
-    assert "columns" in res.json["result"]
+    assert "data" in res.json["result"]
+
+    # Fake table
+    res = client.get(url + "?pt_id=123&table_name=fake_table")
+    assert not res.json["success"]
