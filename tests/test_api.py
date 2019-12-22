@@ -91,3 +91,7 @@ def test_filter_table_with_ptid(client):
     res = client.get(url + "?pt_id=20676&pt_id=36440&table_name=pt_deid")
     assert res.json["success"]
     assert "columns" in res.json["result"]
+
+    # Fake table
+    res = client.get(url + "?pt_id=123&table_name=fake_table")
+    assert not res.json["success"]

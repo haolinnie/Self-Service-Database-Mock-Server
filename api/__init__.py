@@ -26,13 +26,13 @@ def create_app(**config):
     # TODO: Add configurations from ENV
     # TODO: Add logger
 
-    # # Configure to see multiple errors in response
-    # app.config["BUNDLE_ERRORS"] = True
-
     # Register blueprints for API endpoints
-    from api.blueprints import main
+    from api.endpoints import main, filter_, patient_history_, patient_images_
 
     app.register_blueprint(main.main)
+    app.register_blueprint(filter_.filter_)
+    app.register_blueprint(patient_history_.patient_history_)
+    app.register_blueprint(patient_images_.patient_images_)
 
     # Register error handler
     app.register_error_handler(Exception, exception_handler)
