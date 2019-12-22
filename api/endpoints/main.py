@@ -1,7 +1,6 @@
 from flask import Blueprint, request, render_template
 
-from api import db as db_utils
-from api.db import Database
+from api.models import db, db_utils
 from api.core import create_response, check_sql_safe
 
 
@@ -54,7 +53,7 @@ def get_distinct():
 
         try:
             cmd = "SELECT DISTINCT {} FROM {}".format(col_name, table_name)
-            data = db_utils.db_execute(cmd)
+            data = db.session.execute(cmd).fetchall()
             data = [r[0] for r in data if r[0]]
         except Exception as e:
             return create_response(message=str(e), status=420)
@@ -71,7 +70,7 @@ def get_distinct():
             (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
             OR diagnosis_name LIKE '%opia%' OR diagnosis_name LIKE '%iri%')
             ORDER BY diagnosis_name;"""
-            data = db_utils.db_execute(cmd)
+            data = db.session.execute(cmd).fetchall()
             data = [r[0] for r in data]
         elif special == "systemic_diagnosis":
             col_name = special
@@ -79,7 +78,7 @@ def get_distinct():
             (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
             OR diagnosis_name LIKE '%opia%' OR diagnosis_name LIKE '%iri%')
             ORDER BY diagnosis_name;"""
-            data = db_utils.db_execute(cmd)
+            data = db.session.execute(cmd).fetchall()
             data = [r[0] for r in data if r[0]]
         else:
             return create_response(message="Special item not recognised", status=420)
@@ -106,10 +105,9 @@ def filter_table_with_ptid():
 
     # Filter table for pt_id
     try:
-        with Database.get_db().cursor() as cursor:
-            cursor.execute(cmd)
-            col_names = list(map(lambda x: x[0], cursor.description))
-            res = cursor.fetchall()
+        col_names = db_utils.get_table_columns(table_name)
+        res = db.session.execute(cmd).fetchall()
+        res = [tuple(v) for v in res]
     except Exception as e:
         return create_response(message=str(e), status=420)
 

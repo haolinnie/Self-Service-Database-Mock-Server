@@ -3,28 +3,32 @@ from flask import Flask, jsonify, make_response, render_template, request
 from flask_cors import CORS
 
 from api.core import exception_handler, create_response
-from api.db import Database
+from api.config import config_
+from api.models import db
 
 
 def create_app(**config):
-
+    """Flask Application Factory
+    """
     # Instantiate flask app
     app = Flask(__name__, instance_relative_config=True)
+
+    # Set configurations
+    env = os.environ.get("FLASK_ENV", "dev")
+    app.config.from_object(config_[env])
+
+    # Register database
+    db.init_app(app)
 
     # Add CORS headers
     CORS(app)
 
-    # Register database
-    Database(**config)
-    Database.init_app(app)
+    # TODO: Add logger
 
     # proxy support for Nginx
     from werkzeug.middleware.proxy_fix import ProxyFix
 
     app.wsgi_app = ProxyFix(app.wsgi_app)
-
-    # TODO: Add configurations from ENV
-    # TODO: Add logger
 
     # Register blueprints for API endpoints
     from api.endpoints import main, filter_, patient_history_, patient_images_

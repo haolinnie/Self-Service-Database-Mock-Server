@@ -1,7 +1,6 @@
 from flask import Blueprint, request, render_template
 
-from api import db as db_utils
-from api.db import Database
+from api.models import db
 from api.core import create_response, check_sql_safe
 
 
@@ -23,14 +22,14 @@ def patient_images():
 
     ## image_procedures cache
     cmd = """SELECT image_procedure_id, image_procedure FROM image_procedure"""
-    res = db_utils.db_execute(cmd)
+    res = db.session.execute(cmd).fetchall()
     image_procedures = dict(res)
     for id in pt_id:
         cmd = """SELECT exam_id, exam_date FROM exam_deid
         WHERE pt_id IN({}) ORDER BY exam_date """.format(
             id
         )
-        res = db_utils.db_execute(cmd)
+        res = db.session.execute(cmd).fetchall()
         out_cols = ("exam_id", "exam_date")
         out_json[str(id)] = [dict(zip(out_cols, val)) for val in res]
 
@@ -40,7 +39,7 @@ def patient_images():
             FROM image_deid WHERE exam_id IN({}) ORDER BY image_num """.format(
                 curr_exam["exam_id"]
             )
-            res = db_utils.db_execute(cmd)
+            res = db.session.execute(cmd).fetchall()
             curr_exam["images"] = [
                 dict(zip(image_cols, list(val[:-1]) + [image_procedures[val[-1]]]))
                 for val in res

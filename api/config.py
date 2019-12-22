@@ -2,33 +2,33 @@
 Configuration options for the api server.
 TODO: Finish this file and documentation
 """
+
 import os
+from api.core import get_database_url
 
 
-class Config(object):
-    """Base config, uses staging database server."""
+class Config:
+    """Base config
+    """
 
-    DEBUG = False
-    TESTING = False
-    DB_SERVER = "192.168.1.56"
+    SECRET_KEY = "somekey"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    LOG_FILE = "api.log"
 
-    @property
-    def DATABASE_URI(self):  # Note: all caps
-        return "mysql://user@{}/foo".format(self.DB_SERVER)
+
+class DevelopmentConfig(Config):
+    """Development Configuration
+    """
+
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = get_database_url()
 
 
 class ProductionConfig(Config):
     """Uses production database server."""
 
-    DB_SERVER = ""  # <-- Production database server address
+    DEBUG = False
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
 
 
-class DevelopmentConfig(Config):
-    DB_SERVER = "localhost"
-    DEBUG = True
-
-
-class TestingConfig(Config):
-    DB_SERVER = "localhost"
-    DEBUG = True
-    DATABASE_URI = ""
+config_ = {"dev": DevelopmentConfig, "prod": ProductionConfig}

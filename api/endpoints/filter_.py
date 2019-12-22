@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from flask import Blueprint, request
 
-from api import db as db_utils
+from api.models import db, pt_deid
 from api.core import create_response, check_sql_safe
 
 
@@ -12,6 +12,9 @@ filter_ = Blueprint("filter_", __name__)
 @filter_.route("/ssd_api/filter", methods=["POST"])
 def filter():
     data = json.loads(request.data.decode())["filters"]
+
+    # Create BaseQuery object
+    qry = db.session.query(pt_deid)
 
     # Get age constraints
     td = datetime.today()
@@ -34,24 +37,27 @@ def filter():
             )
         del data["age"]
 
+    qry = qry.filter(pt_deid.dob < data["dob"]["older_than"])
+    qry = qry.filter(pt_deid.dob > data["dob"]["younger_than"])
+
     # Create command that will query for age and ethnicity
-    cmd = """SELECT pt_id FROM pt_deid where dob >= %s AND dob <= %s """
+    cmd = """SELECT pt_id FROM pt_deid where dob >= {} AND dob <= {} """
     # Get ethnicity constraints
     if "ethnicity" in data:
-        # Append the ethnicity logic to the first command
-        cmd += """ AND 
-        ethnicity IN('{}""".format(
-            "', '".join(data["ethnicity"]) + "')"
-        )
+        qry.filter(pt_deid.ethnicity.in_(data["ethnicity"]))
 
     # Create pt_ids set HERE
+    breakpoint()
     pt_ids = set(
-        db_utils.db_execute(
+        db.session.execute(
             cmd, (data["dob"]["younger_than"], data["dob"]["older_than"])
-        )
+        ).fetchall()
     )
 
     # Get eye and systemic diagnosis
+    if "eye_diagnosis" in data:
+        pass
+
     if "eye_diagnosis" in data or "systemic_diagnosis" in data:
         data["diagnosis_name"] = []
         try:
@@ -68,7 +74,7 @@ def filter():
         cmd = """ SELECT DISTINCT pt_id FROM diagnosis_deid WHERE diagnosis_name IN('{}""".format(
             "', '".join(data["diagnosis_name"]) + "')"
         )
-        pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
 
     # Get image procedure type
     # Does not need reformatting
@@ -80,7 +86,7 @@ def filter():
         WHERE image_procedure IN('{}""".format(
             "', '".join(data["image_procedure_type"]) + "')"
         )
-        pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
 
     # Labs
     # TODO:
@@ -95,7 +101,7 @@ def filter():
             cmd += """generic_name IN('{}""".format(
                 "', '".join(data["medication_generic_name"]) + "')"
             )
-            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+            pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
         except KeyError:  # medication_generic_name was not selected
             pass
 
@@ -104,7 +110,7 @@ def filter():
             cmd += """therapeutic_class IN('{}""".format(
                 "', '".join(data["medication_therapeutic_class"]) + "')"
             )
-            pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+            pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
         except KeyError:  # medication_deid was not selected
             pass
 
@@ -124,7 +130,7 @@ def filter():
                 data["left_vision"]["more"]
             )
         cmd += " ORDER BY value_dt"
-        pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
 
     # right vision
     if "right_vision" in data:
@@ -139,7 +145,7 @@ def filter():
                 data["right_vision"]["more"]
             )
         cmd += " ORDER BY value_dt"
-        pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
 
     # left pressure
     if "left_pressure" in data:
@@ -154,7 +160,7 @@ def filter():
                 data["left_pressure"]["more"]
             )
         cmd += " ORDER BY value_dt"
-        pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
 
     # right pressure
     if "right_pressure" in data:
@@ -169,7 +175,7 @@ def filter():
                 data["right_pressure"]["more"]
             )
         cmd += " ORDER BY value_dt"
-        pt_ids = pt_ids.intersection(db_utils.db_execute(cmd))
+        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
 
     return create_response(
         data={

@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from api import db as db_utils
+from api.models import db
 from api.core import create_response, check_sql_safe
 
 
@@ -27,7 +27,7 @@ def patients():
         """.format(
             cols, table_name, id
         )
-        res = db_utils.db_execute(cmd)
+        res = db.session.execute(cmd).fetchall()
         out_json[str(id)]["medication"] = [dict(zip(med_cols, val)) for val in res]
 
         # Eye Diagnosis
@@ -40,7 +40,7 @@ def patients():
         ORDER BY diagnosis_start_dt;""".format(
             id
         )
-        out_json[str(id)]["eye_diagnosis"] = db_utils.db_execute(cmd)
+        out_json[str(id)]["eye_diagnosis"] = dict(db.session.execute(cmd).fetchall())
 
         # Systemic Diagnosis
         cmd = r"""SELECT diagnosis_name, diagnosis_start_dt
@@ -50,7 +50,9 @@ def patients():
         ORDER BY diagnosis_start_dt;""".format(
             id
         )
-        out_json[str(id)]["systemic_diagnosis"] = db_utils.db_execute(cmd)
+        out_json[str(id)]["systemic_diagnosis"] = dict(
+            db.session.execute(cmd).fetchall()
+        )
 
         # Lab values
         cols = "name, value, reference_unit,result_dt"
@@ -59,7 +61,7 @@ def patients():
         """.format(
             cols, table_name, id
         )
-        res = db_utils.db_execute(cmd)
+        res = db.session.execute(cmd).fetchall()
         out_json[str(id)]["lab_values"] = [dict(zip(lab_cols, val)) for val in res]
 
         # Vision
@@ -70,7 +72,7 @@ def patients():
         """.format(
             cols, table_name, id
         )
-        res = db_utils.db_execute(cmd)
+        res = db.session.execute(cmd).fetchall()
         out_json[str(id)]["vision"] = [dict(zip(smart_cols, val)) for val in res]
 
         # Pressure
@@ -79,7 +81,7 @@ def patients():
         """.format(
             cols, table_name, id
         )
-        res = db_utils.db_execute(cmd)
+        res = db.session.execute(cmd).fetchall()
         out_json[str(id)]["pressure"] = [dict(zip(smart_cols, val)) for val in res]
 
         # Image types
@@ -89,7 +91,7 @@ def patients():
         WHERE ID.pt_id = {};""".format(
             id
         )
-        res = db_utils.db_execute(cmd)
+        res = db.session.execute(cmd).fetchall()
         out_json[str(id)]["image_type"] = [v[0] for v in res]
 
     return create_response(data=out_json)

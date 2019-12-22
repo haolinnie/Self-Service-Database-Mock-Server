@@ -24,8 +24,7 @@ def test_get_cols(client):
 
     # Test wrong table
     res = client.get(url + "?table_name=bla")
-    assert res.json["success"]
-    assert len(res.json["result"]["columns"]) == 0
+    assert not res.json["success"]
 
 
 def test_get_distinct(client):

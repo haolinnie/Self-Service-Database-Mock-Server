@@ -14,8 +14,8 @@ GRANT ALL PRIVILEGES ON ssd_sample_database.* TO 'test_user'@'localhost';
 CREATE TABLE IF NOT EXISTS pt_deid (
     `pt_id` INT,
     `dob` DATETIME,
-    `over_90` INT,
-    `ethnicity` VARCHAR(22) CHARACTER SET utf8
+    `over_90` SMALLINT,
+    `ethnicity` VARCHAR(50) CHARACTER SET utf8,
 );
 INSERT INTO pt_deid VALUES
     (20676,'1972-02-15 00:00:00',0,'Not Hispanic or Latino'),
@@ -33,11 +33,11 @@ INSERT INTO pt_deid VALUES
 CREATE TABLE IF NOT EXISTS diagnosis_deid (
     `diagnosis_id` INT,
     `pt_id` INT,
-    `diagnosis_code` VARCHAR(16) CHARACTER SET utf8,
-    `diagnosis_code_set` VARCHAR(9) CHARACTER SET utf8,
+    `diagnosis_code` VARCHAR(50) CHARACTER SET utf8,
+    `diagnosis_code_set` VARCHAR(50) CHARACTER SET utf8,
     `diagnosis_start_dt` DATETIME,
     `diagnosis_end_dt` DATETIME,
-    `diagnosis_name` VARCHAR(112) CHARACTER SET utf8
+    `diagnosis_name` VARCHAR(120) CHARACTER SET utf8
 );
 INSERT INTO diagnosis_deid VALUES
     (15017433,50765,'SNOMED#46177005','SNOMED CT','2019-03-01 00:00:00',NULL,'End-stage renal disease (disorder)'),
@@ -145,15 +145,15 @@ INSERT INTO diagnosis_deid VALUES
 CREATE TABLE IF NOT EXISTS lab_value_deid (
     `lab_value_id` INT,
     `pt_id` INT,
-    `name` VARCHAR(32) CHARACTER SET utf8,
-    `loinc_code` VARCHAR(7) CHARACTER SET utf8,
-    `value` VARCHAR(11) CHARACTER SET utf8,
-    `value_numeric` NUMERIC(6, 3),
-    `reference_high` VARCHAR(4) CHARACTER SET utf8,
-    `reference_low` VARCHAR(4) CHARACTER SET utf8,
-    `reference_normal` VARCHAR(11) CHARACTER SET utf8,
-    `reference_unit` VARCHAR(13) CHARACTER SET utf8,
-    `result_category` VARCHAR(6) CHARACTER SET utf8,
+    `name` VARCHAR(50) CHARACTER SET utf8,
+    `loinc_code` VARCHAR(50) CHARACTER SET utf8,
+    `value` VARCHAR(50) CHARACTER SET utf8,
+    `value_numeric` DECIMAL(18, 0),
+    `reference_high` VARCHAR(50) CHARACTER SET utf8,
+    `reference_low` VARCHAR(50) CHARACTER SET utf8,
+    `reference_normal` VARCHAR(50) CHARACTER SET utf8,
+    `reference_unit` VARCHAR(50) CHARACTER SET utf8,
+    `result_category` VARCHAR(50) CHARACTER SET utf8,
     `order_dt` DATETIME,
     `result_dt` DATETIME
 );
@@ -230,17 +230,17 @@ INSERT INTO lab_value_deid VALUES
 CREATE TABLE IF NOT EXISTS medication_deid (
     `medication_id` INT,
     `pt_id` INT,
-    `generic_name` VARCHAR(67) CHARACTER SET utf8,
-    `therapeutic_class` VARCHAR(52) CHARACTER SET utf8,
+    `generic_name` VARCHAR(70) CHARACTER SET utf8,
+    `therapeutic_class` VARCHAR(70) CHARACTER SET utf8,
     `order_placed_dt` DATETIME,
     `order_end_dt` DATETIME,
-    `usage_directions` VARCHAR(75) CHARACTER SET utf8,
-    `order_class` VARCHAR(29) CHARACTER SET utf8,
-    `strength` VARCHAR(28) CHARACTER SET utf8,
-    `form` VARCHAR(30) CHARACTER SET utf8,
-    `number_of_doses` NUMERIC(4, 1),
-    `dose_unit` VARCHAR(11) CHARACTER SET utf8,
-    `frequency` VARCHAR(10) CHARACTER SET utf8
+    `usage_directions` VARCHAR(100) CHARACTER SET utf8,
+    `order_class` VARCHAR(50) CHARACTER SET utf8,
+    `strength` VARCHAR(50) CHARACTER SET utf8,
+    `form` VARCHAR(50) CHARACTER SET utf8,
+    `number_of_doses` INT,
+    `dose_unit` VARCHAR(50) CHARACTER SET utf8,
+    `frequency` VARCHAR(50) CHARACTER SET utf8
 );
 INSERT INTO medication_deid VALUES
     (14797860,59153,'Prenatal Multivit-Min-Fe-FA','Nutritional Products','2015-07-11 09:00:00',NULL,'None Entered','Historic/Pt Reported/Abstract',NULL,NULL,NULL,NULL,NULL),
@@ -338,14 +338,14 @@ INSERT INTO medication_deid VALUES
 CREATE TABLE IF NOT EXISTS medication_administration_deid (
     `medication_administration_id` INT,
     `pt_id` INT,
-    `generic_name` VARCHAR(60) CHARACTER SET utf8,
-    `therapeutic_class` VARCHAR(29) CHARACTER SET utf8,
+    `generic_name` VARCHAR(70) CHARACTER SET utf8,
+    `therapeutic_class` VARCHAR(50) CHARACTER SET utf8,
     `order_placed_dt` DATETIME,
     `order_end_dt` DATETIME,
     `scheduled_administration_dt` DATETIME,
     `administration_dt` DATETIME,
     `discontinue_order_dt` DATETIME,
-    `action_name` VARCHAR(5) CHARACTER SET utf8,
+    `action_name` VARCHAR(50) CHARACTER SET utf8,
     `medication_id` INT
 );
 INSERT INTO medication_administration_deid VALUES
@@ -406,8 +406,8 @@ INSERT INTO medication_administration_deid VALUES
 CREATE TABLE IF NOT EXISTS smart_data_deid (
     `smart_data_id` INT,
     `pt_id` INT,
-    `element_name` VARCHAR(126) CHARACTER SET utf8,
-    `smrtdta_elem_value` VARCHAR(186) CHARACTER SET utf8,
+    `element_name` VARCHAR(150) CHARACTER SET utf8,
+    `smrtdta_elem_value` VARCHAR(200) CHARACTER SET utf8,
     `elem_nw_id_val_num` INT,
     `value_dt` DATETIME
 );
@@ -759,13 +759,13 @@ INSERT INTO smart_data_deid VALUES
 CREATE TABLE IF NOT EXISTS visit_movement_deid (
     `visit_movement_id` INT,
     `pt_id` INT,
-    `department_external_name` VARCHAR(79) CHARACTER SET utf8,
-    `department_name` VARCHAR(32) CHARACTER SET utf8,
+    `department_external_name` VARCHAR(100) CHARACTER SET utf8,
+    `department_name` VARCHAR(50) CHARACTER SET utf8,
     `event_start_dt` DATETIME,
     `event_end_dt` DATETIME,
-    `event_type_name` VARCHAR(11) CHARACTER SET utf8,
-    `event_subtype_name` VARCHAR(8) CHARACTER SET utf8,
-    `patient_class_name` VARCHAR(17) CHARACTER SET utf8
+    `event_type_name` VARCHAR(50) CHARACTER SET utf8,
+    `event_subtype_name` VARCHAR(50) CHARACTER SET utf8,
+    `patient_class_name` VARCHAR(50) CHARACTER SET utf8
 );
 INSERT INTO visit_movement_deid VALUES
     (3358779,59153,'RHEUM STE 14-100','RHEUM STE 14-100','2016-09-30 16:18:19','2016-09-30 16:18:19','-1','-1','-1'),
@@ -834,7 +834,7 @@ INSERT INTO visit_movement_deid VALUES
 
 CREATE TABLE IF NOT EXISTS image_procedure (
     `image_procedure_id` INT,
-    `image_procedure` VARCHAR(40) CHARACTER SET utf8
+    `image_procedure` VARCHAR(50) CHARACTER SET utf8
 );
 INSERT INTO image_procedure VALUES
     (1,'?'),
@@ -929,8 +929,8 @@ CREATE TABLE IF NOT EXISTS image_deid (
     `image_id` INT,
     `pt_id` INT,
     `image_num` INT,
-    `image_type` VARCHAR(5) CHARACTER SET utf8,
-    `image_laterality` VARCHAR(2) CHARACTER SET utf8,
+    `image_type` VARCHAR(50) CHARACTER SET utf8,
+    `image_laterality` VARCHAR(50) CHARACTER SET utf8,
     `exam_id` INT,
     `device_id` INT,
     `image_procedure_id` INT
