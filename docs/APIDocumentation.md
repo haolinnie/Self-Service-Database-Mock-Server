@@ -2,7 +2,13 @@
 
 ## API Endpoints
 
-Add section links here
+- [Get list of table names (get_table)](#get-list-of-table-names)
+- [Get columns in a table (get_table_cols)](#get-columns-in-a-table)
+- [Get distinct values in a table column (get_distinct)](#get-distinct-values-in-a-table-column)
+- [Filter a table for specific pt_id (filter_table_with_ptid)](#filter-a-table-for-specific-pt_id)
+- [Patient History (patients)](#patient-history)
+- [Patient Images (patient_images)](#patient-images)
+- [Filter (filter)](#filter)
 
 ### Get list of table names
 
@@ -188,7 +194,7 @@ Returns (truncated):
 
 ---
 
-### Retrieves Patient History
+### Patient History
 
 Given a list of **pt_id**, return the `medication[{id, generic_name, therapeutic_class}], eye_diagnosis[{diagnosis, date}], systemic_diagnosis[{diagnosis, date}], lab_values[{lab_name, lab_value, unit, date}], vision[{name, value, smart_data_id, date}], pressure[{name, value, smart_data_id, date}]` for each **pt_id**. This provides all the data to populate the Patient History table. All listed items are sorted by date.
 
@@ -280,7 +286,7 @@ Returns (truncated):
 
 ---
 
-### Retrieves Patient Images
+### Patient Images
 
 Given a list of **pt_id**, return the `exam_id, exam_date, images[]` for each **pt_id**.
 

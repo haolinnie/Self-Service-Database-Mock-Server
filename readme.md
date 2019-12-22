@@ -9,9 +9,9 @@ This is the API server for a Self-Service Database UI for Northwestern Memorial 
 
 ## Documentation
 
-[Here is the most up-to-date API documentation.](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md)
+[API documentation.](docs/APIDocumentation.md)
 
-[Here is a nice little API debugger for this project.](https://tigernie.com/ssd_api)
+[API debugger](https://tigernie.com/ssd_api)
 
 ## Deployment steps
 
