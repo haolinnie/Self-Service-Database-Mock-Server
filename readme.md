@@ -5,9 +5,13 @@
 
 Author: Tiger Nie [nhl0819@gmail.com]
 
+Version: 1.1
+
 This is the API server for a Self-Service Database UI for Northwestern Memorial Hospital's Ophthalmology department. The app is written in Python 3.7 with MySQL as the database layer. Currently deployable via a bash script with gunicorn and NGINX. Docker recipes are in the works.
 
 ## Documentation
+
+Please read the API documentation to understand the structure of the endpoints. A graphical debugger is available for quick experimentation with the API.
 
 [API documentation.](docs/APIDocumentation.md)
 

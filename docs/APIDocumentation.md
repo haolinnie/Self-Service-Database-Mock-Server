@@ -1,5 +1,17 @@
 # Self-Service Database API Documentation
 
+All API responses have `Content-Type: application/json` and CORS headers. All responses have the following structure, where the `result` field stores the queried data, `success` indicates whether the API call was successful and `message` contains the error message (if there is one). This response structure is maintained throughout the API for consistency as any exception in the backend is caught and returned in string format in the `message` field.
+
+```json
+{
+  "message": "",
+  "result": {
+    "key": "value"
+  },
+  "success": true
+}
+```
+
 ## API Endpoints
 
 - [Get list of table names (get_table)](#get-list-of-table-names)
@@ -9,6 +21,8 @@
 - [Patient History (patients)](#patient-history)
 - [Patient Images (patient_images)](#patient-images)
 - [Filter (filter)](#filter)
+
+--
 
 ### Get list of table names
 
