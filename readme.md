@@ -1,18 +1,17 @@
 # Self-Service Database Server for Northwestern Medicine
 
-Author: Tiger Nie [nhl0819@gmail.com]
-
 [![Build Status](https://travis-ci.com/haolinnie/Self-Service-Database-Server.svg?branch=master)](https://travis-ci.com/haolinnie/Self-Service-Database-Server)
 [![Coverage Status](https://coveralls.io/repos/github/haolinnie/Self-Service-Database-Server/badge.svg?branch=master)](https://coveralls.io/github/haolinnie/Self-Service-Database-Server?branch=master)
+
+Author: Tiger Nie [nhl0819@gmail.com]
 
 This is the API server for a Self-Service Database UI for Northwestern Memorial Hospital's Ophthalmology department. The app is written in Python 3.7 with MySQL as the database layer. Currently deployable via a bash script with gunicorn and NGINX. Docker recipes are in the works.
 
 ## Documentation
 
-[Here is the most up-to-date API documentation.](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md) 
+[Here is the most up-to-date API documentation.](https://github.com/haolinnie/Self-Service-Database-Server/blob/master/ssd_api/APIDocumentation.md)
 
 [Here is a nice little API debugger for this project.](https://tigernie.com/ssd_api)
-
 
 ## Deployment steps
 
@@ -47,7 +46,6 @@ chmod a+x deploy.sh
 ```
 
 For deployment on a linux server, consider using `systemd` to configure the app as a daemon before Dockers are ready.
-
 
 ## Todo
 
