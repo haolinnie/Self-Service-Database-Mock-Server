@@ -1,9 +1,11 @@
 def test_patient_history(client):
-    # Empty pt_id does not error
-    res = client.get("/ssd_api/patients")
-    assert res.json["success"] == True
+    url = "/ssd_api/patients"
 
-    res = client.get("/ssd_api/patients?pt_id=20676")
+    # Empty pt_id does not error
+    res = client.get(url)
+    assert res.json["success"]
+
+    res = client.get(url + "?pt_id=20676")
     assert res.json["success"]
     assert "20676" in res.json["result"]
     assert "eye_diagnosis" in res.json["result"]["20676"]
@@ -15,10 +17,12 @@ def test_patient_history(client):
 
 
 def test_patient_images(client):
-    # Empty pt_id does not error
-    res = client.get("/ssd_api/patient_images")
-    assert res.json["success"] == True
+    url = "/ssd_api/patient_images"
 
-    res = client.get("/ssd_api/patient_images?pt_id=20676")
+    # Empty pt_id does not error
+    res = client.get(url)
+    assert res.json["success"]
+
+    res = client.get(url + "?pt_id=20676")
     assert res.json["success"]
     assert "20676" in res.json["result"]

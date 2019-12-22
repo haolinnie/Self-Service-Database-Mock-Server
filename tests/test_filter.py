@@ -1,12 +1,14 @@
 def test_filter_get(client):
-    response = client.get("/ssd_api/filter")
-    assert response.json["success"] == False
+    url = "/ssd_api/filter"
+    response = client.get(url)
+    assert not response.json["success"]
     assert response.status_code == 500
 
 
 def test_filter_post(client):
     # TODO: Add more tests
     url = "/ssd_api/filter"
+
     data = {
         "filters": {
             "eye_diagnosis": ["retinal edema"],

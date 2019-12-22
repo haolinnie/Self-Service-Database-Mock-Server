@@ -1,7 +1,7 @@
 from api import create_app
 
 
-def test_doc(client):
+def test_index(client):
     assert client.get("/").status_code == 200
     assert client.get("/ssd_api").status_code == 200
 
