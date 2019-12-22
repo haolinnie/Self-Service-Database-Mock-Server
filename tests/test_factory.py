@@ -6,6 +6,6 @@ def test_doc(client):
     assert client.get("/ssd_api").status_code == 200
 
 
-def test_404(client):
+def test_unknown_url(client):
     res = client.get("/ssd_api/bla")
-    assert res.status_code == 404
+    assert res.status_code == 500

@@ -8,6 +8,6 @@ else
    echo No CI
 fi
 
-coverage run -m pytest
-coverage report --omit=api/excel_op.py
+coverage run -m pytest -v
+coverage report
 coverage html

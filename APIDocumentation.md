@@ -1,6 +1,7 @@
 # Self-Service Database API Documentation
 
 ---
+
 Author: [Tiger Nie] <nhl0819@gmail.com>
 
 Github: <https://github.com/haolinnie/Self-Service-Database-Server>
@@ -29,18 +30,18 @@ Returns:
 
 ```json
 {
-    "table_names": [
-        "pt_deid",
-        "diagnosis_deid",
-        "lab_value_deid",
-        "medication_deid",
-        "medication_administration_deid",
-        "smart_data_deid",
-        "visit_movement_deid",
-        "image_procedure",
-        "exam_deid",
-        "image_deid"
-    ]
+  "table_names": [
+    "pt_deid",
+    "diagnosis_deid",
+    "lab_value_deid",
+    "medication_deid",
+    "medication_administration_deid",
+    "smart_data_deid",
+    "visit_movement_deid",
+    "image_procedure",
+    "exam_deid",
+    "image_deid"
+  ]
 }
 ```
 
@@ -62,14 +63,8 @@ Returns:
 
 ```json
 {
-    "table_name": "pt_deid",
-    "columns": [
-        "index",
-        "pt_id",
-        "dob",
-        "over_90",
-        "ethnicity"
-    ]
+  "table_name": "pt_deid",
+  "columns": ["index", "pt_id", "dob", "over_90", "ethnicity"]
 }
 ```
 
@@ -93,20 +88,20 @@ Returns:
 
 ```json
 {
-    "data": [
-        20676,
-        36440,
-        50765,
-        53754,
-        59153,
-        64153,
-        64656,
-        66166,
-        66172,
-        66475
-    ],
-    "table_name": "pt_deid",
-    "col_name": "pt_id"
+  "data": [
+    20676,
+    36440,
+    50765,
+    53754,
+    59153,
+    64153,
+    64656,
+    66166,
+    66172,
+    66475
+  ],
+  "table_name": "pt_deid",
+  "col_name": "pt_id"
 }
 ```
 
@@ -118,30 +113,30 @@ Returns:
 
 ```json
 {
-    "col_name": "eye_diagnosis",
-    "data": [
-        "Arterial branch occlusion of retina",
-        "Branch retinal vein occlusion with macular edema (disorder)",
-        "Central retinal vein occlusion (disorder)",
-        "Central vein occlusion of retina",
-        "Chronic iridocyclitis, bilateral",
-        "Chronic iridocyclitis, unspecified",
-        "Cystoid macular degeneration of retina",
-        "Cystoid macular degeneration, bilateral",
-        "Degenerative disorder of macula (disorder)",
-        "Iridocyclitis (disorder)",
-        "Myopia (disorder)",
-        "Retinal edema",
-        "Retinal hemorrhage (finding)",
-        "Retinal neovascularization NOS",
-        "Retinal vasculitis",
-        "Retinal vasculitis (disorder)",
-        "Retinal vasculitis, bilateral",
-        "Retinal vasculitis, unspecified eye",
-        "Tributary (branch) retinal vein occlusion, bilateral, with macular edema",
-        "Unspecified chorioretinal inflammation, left eye"
-    ],
-    "table_name": null
+  "col_name": "eye_diagnosis",
+  "data": [
+    "Arterial branch occlusion of retina",
+    "Branch retinal vein occlusion with macular edema (disorder)",
+    "Central retinal vein occlusion (disorder)",
+    "Central vein occlusion of retina",
+    "Chronic iridocyclitis, bilateral",
+    "Chronic iridocyclitis, unspecified",
+    "Cystoid macular degeneration of retina",
+    "Cystoid macular degeneration, bilateral",
+    "Degenerative disorder of macula (disorder)",
+    "Iridocyclitis (disorder)",
+    "Myopia (disorder)",
+    "Retinal edema",
+    "Retinal hemorrhage (finding)",
+    "Retinal neovascularization NOS",
+    "Retinal vasculitis",
+    "Retinal vasculitis (disorder)",
+    "Retinal vasculitis, bilateral",
+    "Retinal vasculitis, unspecified eye",
+    "Tributary (branch) retinal vein occlusion, bilateral, with macular edema",
+    "Unspecified chorioretinal inflammation, left eye"
+  ],
+  "table_name": null
 }
 ```
 
@@ -165,48 +160,48 @@ Returns (truncated):
 
 ```json
 {
-    "columns": [
-        "index",
-        "diagnosis_id",
-        "pt_id",
-        "diagnosis_code",
-        "diagnosis_code_set",
-        "diagnosis_start_dt",
-        "diagnosis_end_dt",
-        "diagnosis_name"
+  "columns": [
+    "index",
+    "diagnosis_id",
+    "pt_id",
+    "diagnosis_code",
+    "diagnosis_code_set",
+    "diagnosis_start_dt",
+    "diagnosis_end_dt",
+    "diagnosis_name"
+  ],
+  "data": [
+    [
+      80,
+      22198049,
+      20676,
+      "V58.83",
+      "ICD-9-CM",
+      "2014-05-02 15:28:00",
+      "2100-11-28 00:00:00",
+      "ENCOUNTER FOR THERAPEUTIC DRUG MONITORING"
     ],
-    "data": [
-        [
-            80,
-            22198049,
-            20676,
-            "V58.83",
-            "ICD-9-CM",
-            "2014-05-02 15:28:00",
-            "2100-11-28 00:00:00",
-            "ENCOUNTER FOR THERAPEUTIC DRUG MONITORING"
-        ],
-        [
-            81,
-            22198050,
-            20676,
-            "V76.10",
-            "ICD-9-CM",
-            "2013-12-04 00:00:00",
-            null,
-            "Breast screening, unspecified"
-        ],
-        [
-            82,
-            22198051,
-            20676,
-            "SNOMED#249366005",
-            "SNOMED CT",
-            "2018-02-18 00:00:00",
-            null,
-            "Bleeding from nose (finding)"
-        ],
+    [
+      81,
+      22198050,
+      20676,
+      "V76.10",
+      "ICD-9-CM",
+      "2013-12-04 00:00:00",
+      null,
+      "Breast screening, unspecified"
+    ],
+    [
+      82,
+      22198051,
+      20676,
+      "SNOMED#249366005",
+      "SNOMED CT",
+      "2018-02-18 00:00:00",
+      null,
+      "Bleeding from nose (finding)"
     ]
+  ]
 }
 ```
 
@@ -256,10 +251,10 @@ Returns (truncated):
             {"name": "FINDINGS - TESTS - EYES - TONOMETRY - IOP - INTRAOCULAR PRESSURE - LEFT", "value": "14", "smart_data_id": "2017-05-03 00:00:00"}
         ],
         "image_type": [
-			"Af",
-			"Ir",
-			"FA"
-		]
+            "Af",
+            "Ir",
+            "FA"
+        ]
 }
 ```
 
@@ -281,35 +276,35 @@ Returns (truncated):
 
 ```json
 {
-    "20676": [
+  "20676": [
+    {
+      "exam_id": 27162,
+      "exam_date": "2018-08-09 00:00:00",
+      "images": [
         {
-            "exam_id": 27162,
-            "exam_date": "2018-08-09 00:00:00",
-            "images": [
-                {
-                    "image_id": 1313149,
-                    "image_num": 0,
-                    "image_type": "Image",
-                    "image_laterality": "OD",
-                    "image_procedure_id": "Af"
-                },
-                {
-                    "image_id": 1313150,
-                    "image_num": 0,
-                    "image_type": "Image",
-                    "image_laterality": "OS",
-                    "image_procedure_id": "Ir"
-                },
-                {
-                    "image_id": 1313151,
-                    "image_num": 0,
-                    "image_type": "Image",
-                    "image_laterality": "OS",
-                    "image_procedure_id": "Af"
-                }
-            ]
+          "image_id": 1313149,
+          "image_num": 0,
+          "image_type": "Image",
+          "image_laterality": "OD",
+          "image_procedure_id": "Af"
+        },
+        {
+          "image_id": 1313150,
+          "image_num": 0,
+          "image_type": "Image",
+          "image_laterality": "OS",
+          "image_procedure_id": "Ir"
+        },
+        {
+          "image_id": 1313151,
+          "image_num": 0,
+          "image_type": "Image",
+          "image_laterality": "OS",
+          "image_procedure_id": "Af"
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
@@ -366,6 +361,6 @@ Returns (truncated):
 
 ```json
 {
-    "pt_id": [123,123,123]
+  "pt_id": [123, 123, 123]
 }
 ```
