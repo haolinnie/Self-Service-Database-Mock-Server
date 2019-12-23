@@ -10,6 +10,7 @@ class diagnosis_deid(Mixin, db.Model):
     diagnosis_id = db.Column(db.INT, unique=True, primary_key=True)
     pt_id = db.Column(db.INT)
 
+    diagnosis_name = db.Column(db.VARCHAR)
     diagnosis_code = db.Column(db.VARCHAR, nullable=False)
     diagnosis_code_set = db.Column(db.VARCHAR)
     diagnosis_start_dt = db.Column(db.DateTime)

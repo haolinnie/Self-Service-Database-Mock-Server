@@ -18,6 +18,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     """Development Configuration
+    Default, or set environmental variable `FLASK_ENV=development`
     """
 
     DEBUG = True
@@ -25,10 +26,12 @@ class DevelopmentConfig(Config):
 
 
 class ProductionConfig(Config):
-    """Uses production database server."""
+    """Uses production database server.
+    Set environmental variable `FLASK_ENV=production`
+    """
 
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
 
 
-config_ = {"dev": DevelopmentConfig, "prod": ProductionConfig}
+config_ = {"development": DevelopmentConfig, "production": ProductionConfig}

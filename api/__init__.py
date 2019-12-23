@@ -7,21 +7,19 @@ from api.config import config_
 from api.models import db
 
 
-def create_app(**config):
+def create_app(**config_override):
     """Flask Application Factory
     """
     # Instantiate flask app
     app = Flask(__name__, instance_relative_config=True)
 
     # Set configurations
-    env = os.environ.get("FLASK_ENV", "dev")
+    env = os.environ.get("FLASK_ENV", "development")
+    print(env)
     app.config.from_object(config_[env])
 
-    # Register database
-    db.init_app(app)
-
-    # Add CORS headers
-    CORS(app)
+    db.init_app(app)  # Register database
+    CORS(app)  # Add CORS headers
 
     # TODO: Add logger
 

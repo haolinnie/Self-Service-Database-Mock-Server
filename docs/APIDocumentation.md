@@ -163,43 +163,27 @@ Returns (truncated):
 {
   "message": "",
   "result": {
-    "columns": [
-      "diagnosis_id",
-      "pt_id",
-      "diagnosis_code",
-      "diagnosis_code_set",
-      "diagnosis_start_dt",
-      "diagnosis_end_dt",
-      "diagnosis_name"
-    ],
     "data": [
-      [
-        22198058,
-        20676,
-        "SNOMED#305058001",
-        "SNOMED CT",
-        "Thu, 17 Sep 2015 00:00:00 GMT",
-        null,
-        "Patient encounter status (finding)"
-      ],
-      [
-        22198049,
-        20676,
-        "V58.83",
-        "ICD-9-CM",
-        "Fri, 02 May 2014 15:28:00 GMT",
-        "Sun, 28 Nov 2100 00:00:00 GMT",
-        "ENCOUNTER FOR THERAPEUTIC DRUG MONITORING"
-      ],
-      [
-        22198050,
-        20676,
-        "V76.10",
-        "ICD-9-CM",
-        "Wed, 04 Dec 2013 00:00:00 GMT",
-        null,
-        "Breast screening, unspecified"
-      ]
+      {
+        "_id": null,
+        "diagnosis_code": "SNOMED#46177005",
+        "diagnosis_code_set": "SNOMED CT",
+        "diagnosis_end_dt": null,
+        "diagnosis_id": 15017433,
+        "diagnosis_name": "End-stage renal disease (disorder)",
+        "diagnosis_start_dt": "Fri, 01 Mar 2019 00:00:00 GMT",
+        "pt_id": 50765
+      },
+      {
+        "_id": null,
+        "diagnosis_code": "709.9",
+        "diagnosis_code_set": "ICD-9-CM",
+        "diagnosis_end_dt": null,
+        "diagnosis_id": 15017434,
+        "diagnosis_name": "Unspecified disorder of skin and subcutaneous tissue",
+        "diagnosis_start_dt": "Fri, 09 Dec 2016 00:00:00 GMT",
+        "pt_id": 50765
+      }
     ]
   },
   "success": true
