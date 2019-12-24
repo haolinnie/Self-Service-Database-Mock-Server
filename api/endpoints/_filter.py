@@ -6,10 +6,10 @@ from api.models import db, pt_deid
 from api.core import create_response, check_sql_safe
 
 
-filter_ = Blueprint("filter_", __name__)
+_filter = Blueprint("_filter", __name__)
 
 
-@filter_.route("/ssd_api/filter", methods=["POST"])
+@_filter.route("/ssd_api/filter", methods=["POST"])
 def filter():
     data = json.loads(request.data.decode())["filters"]
 
