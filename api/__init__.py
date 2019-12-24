@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, jsonify, make_response, render_template, request
 from flask_cors import CORS
 
@@ -29,12 +30,12 @@ def create_app(**config_override):
     app.wsgi_app = ProxyFix(app.wsgi_app)
 
     # Register blueprints for API endpoints
-    from api.endpoints import main, filter_, patient_history_, patient_images_
+    from api.endpoints import _main, _filter, _patient_history, _patient_images
 
-    app.register_blueprint(main.main)
-    app.register_blueprint(filter_.filter_)
-    app.register_blueprint(patient_history_.patient_history_)
-    app.register_blueprint(patient_images_.patient_images_)
+    app.register_blueprint(_main._main)
+    app.register_blueprint(_filter._filter)
+    app.register_blueprint(_patient_history._patient_history)
+    app.register_blueprint(_patient_images._patient_images)
 
     # Register error handler
     app.register_error_handler(Exception, exception_handler)

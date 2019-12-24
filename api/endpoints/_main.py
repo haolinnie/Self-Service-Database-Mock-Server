@@ -3,31 +3,31 @@ from flask import Blueprint, request, render_template
 from sqlalchemy import or_
 
 from api.models import db, db_utils, models
-from api.core import create_response, check_sql_safe
-
-EYE_KWS = ["retina", "macula", "opia", "iri"]
-
-main = Blueprint("main", __name__)
+from api.core import create_response, check_sql_safe, KEYWORDS
 
 
-@main.route("/local_debug")
+_main = Blueprint("_main", __name__)
+EYE_KWS = KEYWORDS["eye_diagnosis_keywords"]
+
+
+@_main.route("/local_debug")
 def local_debug():
     breakpoint()
     return create_response(data={"debug": "debug"})
 
 
-@main.route("/")
-@main.route("/ssd_api", methods=["GET"])
+@_main.route("/")
+@_main.route("/ssd_api", methods=["GET"])
 def index():
     return render_template("debug.html")
 
 
-@main.route("/ssd_api/get_table", methods=["GET"])
+@_main.route("/ssd_api/get_table", methods=["GET"])
 def get_table():
     return create_response(data={"table_names": db_utils.get_table_names()})
 
 
-@main.route("/ssd_api/get_table_cols", methods=["GET"])
+@_main.route("/ssd_api/get_table_cols", methods=["GET"])
 def get_table_cols():
 
     if "table_name" not in request.args:
@@ -42,7 +42,7 @@ def get_table_cols():
     return create_response(data={"table_name": table_name, "columns": col_names})
 
 
-@main.route("/ssd_api/get_distinct", methods=["GET"])
+@_main.route("/ssd_api/get_distinct", methods=["GET"])
 def get_distinct():
     """Get distinct values given a table_name and col_name
     special can be used to get eye_diagnosis and systemic_diagnosis
@@ -112,7 +112,7 @@ def get_distinct():
         )
 
 
-@main.route("/ssd_api/filter_table_with_ptid", methods=["GET"])
+@_main.route("/ssd_api/filter_table_with_ptid", methods=["GET"])
 def filter_table_with_ptid():
     pt_id = request.args.getlist("pt_id")
     table_name = request.args["table_name"]

@@ -4,10 +4,10 @@ from api.models import db
 from api.core import create_response, check_sql_safe
 
 
-patient_images_ = Blueprint("patient_images_", __name__)
+_patient_images = Blueprint("_patient_images", __name__)
 
 
-@patient_images_.route("/ssd_api/patient_images", methods=["GET"])
+@_patient_images.route("/ssd_api/patient_images", methods=["GET"])
 def patient_images():
     pt_id = request.args.getlist("pt_id")
 

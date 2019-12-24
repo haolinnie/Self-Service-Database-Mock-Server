@@ -1,31 +1,44 @@
 """
 Utility stuff
 """
+import json
 import configparser
 import logging
+from typing import Tuple
 
 from flask import jsonify
+from flask.wrappers import Response
 
 
 class Mixin:
     """Base class for SQLAlchemy Models
     """
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """Method to serialise SQLAlchemy response for JSON
+
+        :returns <dict>
+        """
         d_out = dict((key, val) for key, val in self.__dict__.items())
         d_out.pop("_sa_instance_state", None)
         d_out["_id"] = d_out.pop("id", None)  # rename id key to interface with response
         return d_out
 
 
-def check_sql_safe(*argv):
+def check_sql_safe(*argv) -> bool:
+    """Sanitize SQL inputs
+
+    :returns True if safe and False if unsafe.
+    """
     for arg in argv:
         if " " in arg or ";" in arg or "," in arg or "--" in arg:
             return False
     return True
 
 
-def create_response(data=None, status=200, message=""):
+def create_response(
+    data: dict = None, status: int = 200, message: str = ""
+) -> Tuple[Response, int]:
     """Wrapper function to make API responses consistent :)
 
     Data must be a dictionary
@@ -45,7 +58,7 @@ def create_response(data=None, status=200, message=""):
     return jsonify(response), status
 
 
-def exception_handler(error):
+def exception_handler(error: Exception) -> Tuple[Response, int]:
     """Catch all exceptions
     :param Exception
     :returns Tuple(<Flask Response>, <int>)
@@ -53,7 +66,7 @@ def exception_handler(error):
     return create_response(message=str(error), status=500)
 
 
-def get_database_url(file="credentials.config"):
+def get_database_url(file: str = "credentials.config") -> str:
     """Load config
     Example of config file:
     [mysql_creds]
@@ -66,9 +79,26 @@ def get_database_url(file="credentials.config"):
         config = configparser.ConfigParser()
         config.read(file)
         try:
-            res = config["mysql_creds"]
+            res = config["mysql_credentials"]
             return res["mysql_url"]
         except KeyError:
             print("Failed to retrieve MySQL credentials from [{}].".format(file))
     except:
         print("Failed to load config file [{}].".format(file))
+
+
+def get_keywords() -> list:
+    """Load keywords for search
+    
+    :returns str or None if Exception
+    """
+    try:
+        with open("data/keywords.json") as f:
+            v = f.read()
+        return json.loads(v)
+    except FileNotFoundError as e:
+        return None
+
+
+# KEYWORDS dict accessible to all modules
+KEYWORDS = get_keywords()
