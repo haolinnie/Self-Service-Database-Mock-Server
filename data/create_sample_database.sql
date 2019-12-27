@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS pt_deid (
     `pt_id` INT,
     `dob` DATETIME,
     `over_90` SMALLINT,
-    `ethnicity` VARCHAR(50) CHARACTER SET utf8,
+    `ethnicity` VARCHAR(50) CHARACTER SET utf8
 );
 INSERT INTO pt_deid VALUES
     (20676,'1972-02-15 00:00:00',0,'Not Hispanic or Latino'),

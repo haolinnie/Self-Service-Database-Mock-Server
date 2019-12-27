@@ -8,5 +8,5 @@ flask/
 htmlcov/
 instance/
 *.pyc
-*~
 *.sw?
+~*
