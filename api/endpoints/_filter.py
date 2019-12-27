@@ -18,18 +18,26 @@ def filter_get():
 
 @_filter.route("/ssd_api/filter", methods=["POST"])
 def filter_post():
+    """Endpoint that response to filter POST requests
+    This endpoint heavily utilises SQLAlchemy's Object Relational Mapper (ORM),
+    allowing us to avoid explicitly writing SQL code, which seems to be the norm in applications.
+
+    All filter parameters are chained into one query call using SQLAlchemy's 
+    declarative pattern.
+    """
     data = json.loads(request.data.decode())["filters"]
 
     # Create BaseQuery object
-    qry = db.session.query(models["pt_deid"].pt_id).distinct()
+    qry = db.session.query(models["pt_deid"])
 
     # Get age constraints
     td = datetime.today()
-    data["dob"] = {
-        "younger_than": datetime(year=1900, month=1, day=1),
-        "older_than": td,
-    }
     if "age" in data:
+        # construct dob object to store SQL searchable data
+        data["dob"] = {
+            "younger_than": datetime(year=1900, month=1, day=1),
+            "older_than": td,
+        }
         if "less" in data["age"]:
             data["dob"]["younger_than"] = datetime(
                 year=td.year - data["age"]["less"],
@@ -44,9 +52,10 @@ def filter_post():
             )
         del data["age"]
 
-    qry = qry.filter(models["pt_deid"].dob < data["dob"]["older_than"]).filter(
-        models["pt_deid"].dob > data["dob"]["younger_than"]
-    )
+        # Do the actual query
+        qry = qry.filter(models["pt_deid"].dob < data["dob"]["older_than"]).filter(
+            models["pt_deid"].dob > data["dob"]["younger_than"]
+        )
 
     # Get ethnicity constraints
     if "ethnicity" in data:
@@ -54,36 +63,33 @@ def filter_post():
 
     # Get eye and systemic diagnosis
     data["diagnosis_name"] = []
+    and_query = []
     if "eye_diagnosis" in data:
+        # TODO: fix this so it's AND instead of OR
+        # for diag in data["eye_diagnosis"]:
+        #     and_query.append(models["diagnosis_deid"].diagnosis_name == diag)
         data["diagnosis_name"].append(*data["eye_diagnosis"])
 
     if "systemic_diagnosis" in data:
         data["diagnosis_name"].append(*data["systemic_diagnosis"])
 
-    qry = qry.filter(
+    qry = qry.join(models["diagnosis_deid"]).filter(
         models["diagnosis_deid"].diagnosis_name.in_(data["diagnosis_name"])
     )
 
     # Get image procedure type
     # Does not need reformatting
-    # if "image_procedure_type" in data:
-    #     assert type(data["image_procedure_type"]) == type([])
-
-    #     # TODO:
-    #     qry.filter(models["image_deid"].join(models["image_procedure"]))
-
-    #     cmd = """SELECT DISTINCT pt_id FROM
-    #     image_deid ID INNER JOIN image_procedure IP
-    #     ON ID.image_procedure_id = IP.image_procedure_id
-    #     WHERE image_procedure IN('{}""".format(
-    #         "', '".join(data["image_procedure_type"]) + "')"
-    #     )
-    #     pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
+    if "image_procedure_type" in data:
+        assert type(data["image_procedure_type"]) == list
+        qry = qry.join(models["image_deid"]).filter(
+            models["image_procedure"].image_procedure.in_(data["image_procedure_type"])
+        )
 
     # Labs
     # TODO:
 
     # Medication_generic_name
+    qry = qry.join(models["medication_deid"])
     if "medication_generic_name" in data:
         qry = qry.filter(
             models["medication_deid"].generic_name.in_(data["medication_generic_name"])
@@ -97,82 +103,83 @@ def filter_post():
             )
         )
 
-    breakpoint()
+    # Join the smart data deid table
+    qry = qry.join(models["smart_data_deid"])
     # left vision
     # TODO: Vision filtering for the 20/XXX scale is currently
     # based on character level comparason and is not robust.
     # Need to figure out a way to compare the fractions
     if "left_vision" in data:
-        qry = qry.filter(
+        and_query = [
             models["smart_data_deid"].element_name.ilike(KEYWORDS["left_vision"])
-        ).order_by(models["smart_data_deid"].value_dt)
-
-        breakpoint()
+        ]
         if "less" in data["left_vision"]:
-            qry = qry.filter(
-                models["smart_data_deid"].smrtdata_elem_value
+            and_query.append(
+                models["smart_data_deid"].smrtdta_elem_value
                 >= data["left_vision"]["less"]
             )
-
         if "more" in data["left_vision"]:
-            qry = qry.filter(
-                models["smart_data_deid"].smrtdata_elem_value
+            and_query.append(
+                models["smart_data_deid"].smrtdta_elem_value
                 <= data["left_vision"]["more"]
             )
-    breakpoint()
+        qry = qry.filter(db.and_(*and_query))
 
     # right vision
     if "right_vision" in data:
-        qry = qry.filter(
+        and_query = [
             models["smart_data_deid"].element_name.ilike(KEYWORDS["right_vision"])
-        ).order_by(models["smart_data_deid"].value_dt)
-
+        ]
         if "less" in data["right_vision"]:
-            qry = qry.filter(
-                models["smart_data_deid"].smrtdata_elem_value
+            and_query.append(
+                models["smart_data_deid"].smrtdta_elem_value
                 >= data["right_vision"]["less"]
             )
-
         if "more" in data["right_vision"]:
-            qry = qry.filter(
-                models["smart_data_deid"].smrtdata_elem_value
+            and_query.append(
+                models["smart_data_deid"].smrtdta_elem_value
                 <= data["right_vision"]["more"]
             )
-    breakpoint()
+        qry = qry.filter(db.and_(*and_query))
 
     # left pressure
     if "left_pressure" in data:
-        cmd = """SELECT pt_id FROM smart_data_deid WHERE 
-                    element_name LIKE '%intraocular pressure%left%' """
+        and_query = [
+            models["smart_data_deid"].element_name.ilike(KEYWORDS["left_pressure"])
+        ]
         if "less" in data["left_pressure"]:
-            cmd += """AND smrtdta_elem_value <= '{}' """.format(
-                data["left_pressure"]["less"]
+            and_query.append(
+                models["smart_data_deid"].smrtdta_elem_value
+                <= data["left_pressure"]["less"]
             )
         if "more" in data["left_pressure"]:
-            cmd += """AND smrtdta_elem_value >= '{}' """.format(
-                data["left_pressure"]["more"]
+            and_query.append(
+                models["smart_data_deid"].smrtdta_elem_value
+                >= data["left_pressure"]["more"]
             )
-        cmd += " ORDER BY value_dt"
-        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
+        qry = qry.filter(db.and_(*and_query))
 
     # right pressure
     if "right_pressure" in data:
-        cmd = """SELECT pt_id FROM smart_data_deid WHERE 
-                    element_name LIKE '%intraocular pressure%right%' """
+        and_query = [
+            models["smart_data_deid"].element_name.ilike(KEYWORDS["right_pressure"])
+        ]
         if "less" in data["right_pressure"]:
-            cmd += """AND smrtdta_elem_value <= '{}' """.format(
-                data["right_pressure"]["less"]
+            and_query.append(
+                models["smart_data_deid"].smrtdta_elem_value
+                <= data["right_pressure"]["less"]
             )
         if "more" in data["right_pressure"]:
-            cmd += """AND smrtdta_elem_value >= '{}' """.format(
-                data["right_pressure"]["more"]
+            and_query.append(
+                models["smart_data_deid"].smrtdta_elem_value
+                >= data["right_pressure"]["more"]
             )
-        cmd += " ORDER BY value_dt"
-        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
+        qry = qry.filter(db.and_(*and_query))
 
+    pt_ids = [v.pt_id for v in qry.all()]
     return create_response(
         data={
-            "pt_id": [] if len(pt_ids) == 0 else [v[0] for v in pt_ids],
+            "pt_id": pt_ids,
             "time_taken_seconds": (datetime.today() - td).total_seconds(),
         }
     )

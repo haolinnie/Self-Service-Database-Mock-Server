@@ -11,5 +11,5 @@ class smart_data_deid(Mixin, db.Model):
     pt_id = db.Column(db.INT, db.ForeignKey("pt_deid.pt_id"))
 
     element_name = db.Column(db.VARCHAR, nullable=False)
-    smrtdata_elem_value = db.Column(db.VARCHAR)
+    smrtdta_elem_value = db.Column(db.VARCHAR)
     value_dt = db.Column(db.DateTime)
