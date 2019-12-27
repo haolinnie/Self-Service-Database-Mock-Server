@@ -8,8 +8,8 @@ class medication_administration_deid(Mixin, db.Model):
 
     __tablename__ = "medication_administration_deid"
     medication_administration_id = db.Column(db.INT, unique=True, primary_key=True)
-    medication_id = db.Column(db.INT)
-    pt_id = db.Column(db.INT)
+    medication_id = db.Column(db.INT, db.ForeignKey("medication_deid.medication_id"))
+    pt_id = db.Column(db.INT, db.ForeignKey("pt_deid.pt_id"))
 
     generic_name = db.Column(db.VARCHAR)
     therapeutic_class = db.Column(db.VARCHAR)

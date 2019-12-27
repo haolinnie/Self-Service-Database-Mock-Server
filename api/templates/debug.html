@@ -3,47 +3,88 @@
   <head>
     <title>API Debug tool</title>
     <style>
+      html {
+        color: #a2aabc;
+        font-family: monaco;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        /* justify-content: center; */
+        align-items: center;
+        flex-direction: column;
+      }
       body {
-        font-family: verdana;
-        margin: 20px;
+        background-color: #171c28;
+        color: #a2aabc;
+        margin: 0px;
       }
 
       h1 {
         margin: 0px;
         font-size: 20px;
+        color: #ffcc66;
       }
 
       h2 {
         font-size: 16px;
         margin-top: 10px;
-        color: grey;
+        color: #ef6b73;
       }
 
       p {
         font-size: 12px;
       }
 
+      a {
+        color: #ffae57;
+      }
+
       #buttons {
         clear: left;
       }
 
+      button {
+        font-size: 12px;
+        background-color: #171c28;
+        color: #ffae57;
+        margin-top: 10px;
+        border-width: 1px;
+        border-style: solid;
+      }
+
       input {
+        font-size: 12px;
+        background-color: #1d2433;
+        color: #bae67e;
         width: 100%;
+        border-width: 1px;
+        border-style: solid;
+        border-color: initial;
+        padding: 2px;
+        padding-left: 4px;
+        border-radius: 5px;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
       }
 
       form {
-        background: #e8e8e8;
         width: 500px;
         padding: 20px;
+        border-radius: 10px;
         -webkit-border-radius: 10px;
         -moz-border-radius: 10px;
       }
 
       textarea {
+        font-size: 12px;
+        background-color: #1d2433;
+        color: #bae67e;
         padding-top: 10px;
+        padding-left: 10px;
         width: 100%;
         font-family: monaco, monospace;
         font-size: 12px;
+        border-radius: 10px;
         -webkit-border-radius: 10px;
         -moz-border-radius: 10px;
       }
@@ -71,10 +112,6 @@
         <button type="button" onclick="getHTML('DELETE')">DELETE</button>
       </div>
       <h2>Message Body:</h2>
-      <p>
-        (note: for GET requests, parameters must be passed as strings in the
-        URL)
-      </p>
       <textarea name="messagebody" rows="8" cols="100"></textarea>
       <h2>Command Response:</h2>
       <textarea name="response" rows="25" cols="100"></textarea>

@@ -3,14 +3,21 @@ from datetime import datetime
 from flask import Blueprint, request
 
 from api.models import db, models
-from api.core import create_response, check_sql_safe, KEYWORDS
+from api.core import create_response, KEYWORDS
 
 
 _filter = Blueprint("_filter", __name__)
 
 
+@_filter.route("/ssd_api/filter", methods=["GET"])
+def filter_get():
+    return create_response(
+        message="Please use the POST method to submit a query", status=420
+    )
+
+
 @_filter.route("/ssd_api/filter", methods=["POST"])
-def filter():
+def filter_post():
     data = json.loads(request.data.decode())["filters"]
 
     # Create BaseQuery object
@@ -89,41 +96,49 @@ def filter():
                 data["medication_therapeutic_class"]
             )
         )
-    breakpoint()
 
+    breakpoint()
     # left vision
     # TODO: Vision filtering for the 20/XXX scale is currently
     # based on character level comparason and is not robust.
     # Need to figure out a way to compare the fractions
     if "left_vision" in data:
-        qry = qry.filter(models["smart_data_deid"].element_name.like())
-        cmd = """SELECT pt_id FROM smart_data_deid WHERE 
-                    element_name LIKE '%visual acuity%left%' """
+        qry = qry.filter(
+            models["smart_data_deid"].element_name.ilike(KEYWORDS["left_vision"])
+        ).order_by(models["smart_data_deid"].value_dt)
+
+        breakpoint()
         if "less" in data["left_vision"]:
-            cmd += """AND smrtdta_elem_value >= '{}' """.format(
-                data["left_vision"]["less"]
+            qry = qry.filter(
+                models["smart_data_deid"].smrtdata_elem_value
+                >= data["left_vision"]["less"]
             )
+
         if "more" in data["left_vision"]:
-            cmd += """AND smrtdta_elem_value <= '{}' """.format(
-                data["left_vision"]["more"]
+            qry = qry.filter(
+                models["smart_data_deid"].smrtdata_elem_value
+                <= data["left_vision"]["more"]
             )
-        cmd += " ORDER BY value_dt"
-        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
+    breakpoint()
 
     # right vision
     if "right_vision" in data:
-        cmd = """SELECT pt_id FROM smart_data_deid WHERE 
-                    element_name LIKE '%visual acuity%right%' """
+        qry = qry.filter(
+            models["smart_data_deid"].element_name.ilike(KEYWORDS["right_vision"])
+        ).order_by(models["smart_data_deid"].value_dt)
+
         if "less" in data["right_vision"]:
-            cmd += """AND smrtdta_elem_value >= '{}' """.format(
-                data["right_vision"]["less"]
+            qry = qry.filter(
+                models["smart_data_deid"].smrtdata_elem_value
+                >= data["right_vision"]["less"]
             )
+
         if "more" in data["right_vision"]:
-            cmd += """AND smrtdta_elem_value <= '{}' """.format(
-                data["right_vision"]["more"]
+            qry = qry.filter(
+                models["smart_data_deid"].smrtdata_elem_value
+                <= data["right_vision"]["more"]
             )
-        cmd += " ORDER BY value_dt"
-        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
+    breakpoint()
 
     # left pressure
     if "left_pressure" in data:

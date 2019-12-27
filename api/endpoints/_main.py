@@ -7,7 +7,6 @@ from api.core import create_response, check_sql_safe, KEYWORDS
 
 
 _main = Blueprint("_main", __name__)
-EYE_KWS = KEYWORDS["eye_diagnosis_keywords"]
 
 
 @_main.route("/local_debug")
@@ -86,7 +85,10 @@ def get_distinct():
         if special == "eye_diagnosis":
             tb = models["diagnosis_deid"]
             # SQLAlchemy ilike guarantees case-insensitive
-            or_filters = [tb.diagnosis_name.ilike("%{}%".format(kw)) for kw in EYE_KWS]
+            or_filters = [
+                tb.diagnosis_name.ilike("%{}%".format(kw))
+                for kw in KEYWORDS["eye_diagnosis_keywords"]
+            ]
             qry = (
                 db.session.query(tb.diagnosis_name).distinct().filter(or_(*or_filters))
             )
@@ -94,9 +96,12 @@ def get_distinct():
             data = [r[0] for r in data]
         elif special == "systemic_diagnosis":
             tb = models["diagnosis_deid"]
-            or_filters = [tb.diagnosis_name.ilike("%{}%".format(kw)) for kw in EYE_KWS]
+            or_filters = [
+                tb.diagnosis_name.notilike("%{}%".format(kw))
+                for kw in KEYWORDS["eye_diagnosis_keywords"]
+            ]
             qry = (
-                db.session.query(tb.diagnosis_name).distinct().filter(~or_(*or_filters))
+                db.session.query(tb.diagnosis_name).distinct().filter(or_(*or_filters))
             )
             data = qry.all()
             data = [r[0] for r in data]

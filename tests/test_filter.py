@@ -2,7 +2,7 @@ def test_filter_get(client):
     url = "/ssd_api/filter"
     response = client.get(url)
     assert not response.json["success"]
-    assert response.status_code == 500
+    assert response.status_code == 420
 
 
 def test_filter_post(client):
