@@ -1,3 +1,7 @@
 {
-  "eye_diagnosis_keywords": ["retina", "macula", "opia", "iri"]
+  "eye_diagnosis_keywords": ["retina", "macula", "opia", "iri"],
+  "left_vision": "%visual acuity%left%",
+  "right_vision": "%visual acuity%right%",
+  "left_pressure": "%intraocular pressure%left%",
+  "right_pressure": "%intraocular pressure%right%"
 }

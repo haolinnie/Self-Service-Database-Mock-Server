@@ -2,8 +2,8 @@ import json
 from datetime import datetime
 from flask import Blueprint, request
 
-from api.models import db, pt_deid
-from api.core import create_response, check_sql_safe
+from api.models import db, models
+from api.core import create_response, check_sql_safe, KEYWORDS
 
 
 _filter = Blueprint("_filter", __name__)
@@ -14,7 +14,7 @@ def filter():
     data = json.loads(request.data.decode())["filters"]
 
     # Create BaseQuery object
-    qry = db.session.query(pt_deid)
+    qry = db.session.query(models["pt_deid"].pt_id).distinct()
 
     # Get age constraints
     td = datetime.today()
@@ -37,88 +37,66 @@ def filter():
             )
         del data["age"]
 
-    qry = qry.filter(pt_deid.dob < data["dob"]["older_than"])
-    qry = qry.filter(pt_deid.dob > data["dob"]["younger_than"])
-
-    # Create command that will query for age and ethnicity
-    cmd = """SELECT pt_id FROM pt_deid where dob >= {} AND dob <= {} """
-    # Get ethnicity constraints
-    if "ethnicity" in data:
-        qry.filter(pt_deid.ethnicity.in_(data["ethnicity"]))
-
-    # Create pt_ids set HERE
-    breakpoint()
-    pt_ids = set(
-        db.session.execute(
-            cmd, (data["dob"]["younger_than"], data["dob"]["older_than"])
-        ).fetchall()
+    qry = qry.filter(models["pt_deid"].dob < data["dob"]["older_than"]).filter(
+        models["pt_deid"].dob > data["dob"]["younger_than"]
     )
 
+    # Get ethnicity constraints
+    if "ethnicity" in data:
+        qry = qry.filter(models["pt_deid"].ethnicity.in_(data["ethnicity"]))
+
     # Get eye and systemic diagnosis
+    data["diagnosis_name"] = []
     if "eye_diagnosis" in data:
-        pass
+        data["diagnosis_name"].append(*data["eye_diagnosis"])
 
-    if "eye_diagnosis" in data or "systemic_diagnosis" in data:
-        data["diagnosis_name"] = []
-        try:
-            data["diagnosis_name"] += data["eye_diagnosis"]
-            del data["eye_diagnosis"]
-        except KeyError:  ## eye_diagnosis doesn't exist, systemic_diagnosis must
-            pass
-        try:
-            data["diagnosis_name"] += data["systemic_diagnosis"]
-            del data["systemic_diagnosis"]
-        except KeyError:  # 'systemic_diagnosis isn't selected
-            pass
+    if "systemic_diagnosis" in data:
+        data["diagnosis_name"].append(*data["systemic_diagnosis"])
 
-        cmd = """ SELECT DISTINCT pt_id FROM diagnosis_deid WHERE diagnosis_name IN('{}""".format(
-            "', '".join(data["diagnosis_name"]) + "')"
-        )
-        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
+    qry = qry.filter(
+        models["diagnosis_deid"].diagnosis_name.in_(data["diagnosis_name"])
+    )
 
     # Get image procedure type
     # Does not need reformatting
-    if "image_procedure_type" in data:
-        assert type(data["image_procedure_type"]) == type([])
-        cmd = """SELECT DISTINCT pt_id FROM
-        image_deid ID INNER JOIN image_procedure IP
-        ON ID.image_procedure_id = IP.image_procedure_id
-        WHERE image_procedure IN('{}""".format(
-            "', '".join(data["image_procedure_type"]) + "')"
-        )
-        pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
+    # if "image_procedure_type" in data:
+    #     assert type(data["image_procedure_type"]) == type([])
+
+    #     # TODO:
+    #     qry.filter(models["image_deid"].join(models["image_procedure"]))
+
+    #     cmd = """SELECT DISTINCT pt_id FROM
+    #     image_deid ID INNER JOIN image_procedure IP
+    #     ON ID.image_procedure_id = IP.image_procedure_id
+    #     WHERE image_procedure IN('{}""".format(
+    #         "', '".join(data["image_procedure_type"]) + "')"
+    #     )
+    #     pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
 
     # Labs
     # TODO:
 
     # Medication_generic_name
-    # TODO: generic name and therapeutic class can be merged into one SQL call
-    if "medication_generic_name" in data or "medication_therapeutic_class" in data:
-        # Initialise command for medication query
+    if "medication_generic_name" in data:
+        qry = qry.filter(
+            models["medication_deid"].generic_name.in_(data["medication_generic_name"])
+        )
 
-        try:
-            cmd = """SELECT pt_id FROM medication_deid WHERE """
-            cmd += """generic_name IN('{}""".format(
-                "', '".join(data["medication_generic_name"]) + "')"
+    # Medication therapeutic class
+    if "medication_therapeutic_class" in data:
+        qry = qry.filter(
+            models["medication_deid"].therapeutic_class.in_(
+                data["medication_therapeutic_class"]
             )
-            pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
-        except KeyError:  # medication_generic_name was not selected
-            pass
-
-        try:
-            cmd = """SELECT pt_id FROM medication_deid WHERE """
-            cmd += """therapeutic_class IN('{}""".format(
-                "', '".join(data["medication_therapeutic_class"]) + "')"
-            )
-            pt_ids = pt_ids.intersection(db.session.execute(cmd).fetchall())
-        except KeyError:  # medication_deid was not selected
-            pass
+        )
+    breakpoint()
 
     # left vision
     # TODO: Vision filtering for the 20/XXX scale is currently
     # based on character level comparason and is not robust.
     # Need to figure out a way to compare the fractions
     if "left_vision" in data:
+        qry = qry.filter(models["smart_data_deid"].element_name.like())
         cmd = """SELECT pt_id FROM smart_data_deid WHERE 
                     element_name LIKE '%visual acuity%left%' """
         if "less" in data["left_vision"]:
