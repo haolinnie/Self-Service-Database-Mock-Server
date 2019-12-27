@@ -339,13 +339,17 @@ URL: `baseURL/ssd_api/filter`
 
 Type: `POST`
 
-Input format: Categorical filters (e.g. eye_diagnosis, ethnicity) must be given as a list of strings: `({"eye_diagnosis": ["retinal edema"]})`. Numerical filters (e.g. pressure and vision) must be given as two key value pairs: `({"left_pressure": {"less": 50, "more": 20}, "right_vision": {"less": "20/40"}})`
+Input format:
+
+Categorical filters (e.g. eye_diagnosis, ethnicity) must be given as a list of strings: `({"eye_diagnosis": ["retinal edema"]})`.
+
+Numerical filters (e.g. pressure and vision) must be given as two key value pairs: `({"left_pressure": {"less": 50, "more": 20}, "right_vision": {"less": "20/40"}})`
 
 Example:
 
 `https://tigernie.com/ssd_api/filter`
 
-Input data:
+Input data sample:
 
 ```JSON
 {
@@ -353,9 +357,9 @@ Input data:
         "eye_diagnosis" : ["retinal edema"],
         "systemic_diagnosis": ["gout"],
         "age": {
-            "less": 50
+            "less": 60
         },
-        "ethnicity": ["asian"],
+        "ethnicity": ["Not Hispanic or Latino", "Declined", "Hispanic or Latino"],
         "image_procedure_type": ["IR_OCT"],
         "labs": {"Calcium": 4},
         "medication_generic_name": ["Ketorolac"],

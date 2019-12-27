@@ -2,7 +2,7 @@ def test_filter_get(client):
     url = "/ssd_api/filter"
     response = client.get(url)
     assert not response.json["success"]
-    assert response.status_code == 500
+    assert response.status_code == 420
 
 
 def test_filter_post(client):
@@ -12,9 +12,9 @@ def test_filter_post(client):
     data = {
         "filters": {
             "eye_diagnosis": ["retinal edema"],
-            "systemic_diagnosis": ["gout"],
+            "systemic_diagnosis": ["Sarcoidosis"],
             "age": {"less": 50},
-            "ethnicity": ["asian"],
+            "ethnicity": ["Not Hispanic or Latino", "Declined", "Hispanic or Latino"],
             "image_procedure_type": ["IR_OCT"],
             "labs": {"Calcium": 4},
             "medication_generic_name": ["Ketorolac"],
@@ -28,3 +28,5 @@ def test_filter_post(client):
     response = client.post(url, json=data)
     assert response.json["success"]
     assert response.content_type == "application/json"
+
+    data = {"filters": {"eye_diagnosis": ["retinal edema"]}}
