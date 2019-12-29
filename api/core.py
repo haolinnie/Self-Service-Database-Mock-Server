@@ -93,7 +93,7 @@ def get_keywords() -> list:
     :returns str or None if Exception
     """
     try:
-        with open("data/keywords.json") as f:
+        with open("api/keywords.json") as f:
             v = f.read()
         return json.loads(v)
     except FileNotFoundError as e:
