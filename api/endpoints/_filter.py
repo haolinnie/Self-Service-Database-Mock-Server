@@ -22,164 +22,197 @@ def filter_post():
     This endpoint heavily utilises SQLAlchemy's Object Relational Mapper (ORM),
     allowing us to avoid explicitly writing SQL code, which seems to be the norm in applications.
 
-    All filter parameters are chained into one query call using SQLAlchemy's 
-    declarative pattern.
+    A query is constructed for each separate table other than pt_deid, thereby
+    avoiding multiple joins which significantly slows down the search.
     """
     data = json.loads(request.data.decode())["filters"]
 
     # Create BaseQuery object
     qry = db.session.query(models["pt_deid"])
-
-    # Get age constraints
+    # Create pt_ids set with all pt_ids
+    pt_ids = set([v.pt_id for v in qry.all()])
+    # Get current time for age calculation and profiling
     td = datetime.today()
-    if "age" in data:
-        # construct dob object to store SQL searchable data
-        data["dob"] = {
-            "younger_than": datetime(year=1900, month=1, day=1),
-            "older_than": td,
-        }
-        if "less" in data["age"]:
-            data["dob"]["younger_than"] = datetime(
-                year=td.year - data["age"]["less"],
-                month=td.month,
-                day=td.day - 1 if td.month == 2 and td.day == 29 else td.day,
+
+    if "age" in data or "ethnicity" in data:
+        qry = db.session.query(models["pt_deid"])
+        # Get age constraints
+        if "age" in data:
+            # construct dob object to store SQL searchable data
+            data["dob"] = {
+                "younger_than": datetime(year=1900, month=1, day=1),
+                "older_than": td,
+            }
+            if "less" in data["age"]:
+                data["dob"]["younger_than"] = datetime(
+                    year=td.year - data["age"]["less"],
+                    month=td.month,
+                    day=td.day - 1 if td.month == 2 and td.day == 29 else td.day,
+                )
+            if "more" in data["age"]:
+                data["dob"]["older_than"] = datetime(
+                    year=td.year - data["age"]["more"],
+                    month=td.month,
+                    day=td.day - 1 if td.month == 2 and td.day == 29 else td.day,
+                )
+
+            del data["age"] # might be unecessary to free this memory
+
+            qry = qry.filter(models["pt_deid"].dob < data["dob"]["older_than"]).filter(
+                models["pt_deid"].dob > data["dob"]["younger_than"]
             )
-        if "more" in data["age"]:
-            data["dob"]["older_than"] = datetime(
-                year=td.year - data["age"]["more"],
-                month=td.month,
-                day=td.day - 1 if td.month == 2 and td.day == 29 else td.day,
-            )
-        del data["age"]
 
-        # Do the actual query
-        qry = qry.filter(models["pt_deid"].dob < data["dob"]["older_than"]).filter(
-            models["pt_deid"].dob > data["dob"]["younger_than"]
-        )
+        # Get ethnicity constraints
+        if "ethnicity" in data:
+            qry = db.session.query(models["pt_deid"])
+            qry = qry.filter(models["pt_deid"].ethnicity.in_(data["ethnicity"]))
 
-    # Get ethnicity constraints
-    if "ethnicity" in data:
-        qry = qry.filter(models["pt_deid"].ethnicity.in_(data["ethnicity"]))
+        pt_ids = pt_ids.intersection([v.pt_id for v in qry.all()])
 
-    # Get eye and systemic diagnosis
-    data["diagnosis_name"] = []
-    and_query = []
+    # Get eye diagnosis
     if "eye_diagnosis" in data:
-        # TODO: fix this so it's AND instead of OR
-        # for diag in data["eye_diagnosis"]:
-        #     and_query.append(models["diagnosis_deid"].diagnosis_name == diag)
-        data["diagnosis_name"].append(*data["eye_diagnosis"])
+        """This currently uses OR logic, compared to AND
+        """
+        qry = db.session.query(models["pt_deid"])
+        qry = qry.join(models["diagnosis_deid"]).filter(
+            models["diagnosis_deid"].diagnosis_name.in_(data["eye_diagnosis"])
+        )
+        pt_ids = pt_ids.intersection([v.pt_id for v in qry.all()])
 
+    # Get systemic diagnosis
     if "systemic_diagnosis" in data:
-        data["diagnosis_name"].append(*data["systemic_diagnosis"])
-
-    qry = qry.join(models["diagnosis_deid"]).filter(
-        models["diagnosis_deid"].diagnosis_name.in_(data["diagnosis_name"])
-    )
+        """This currently uses OR logic, compared to AND
+        """
+        qry = db.session.query(models["pt_deid"])
+        qry = qry.join(models["diagnosis_deid"]).filter(
+            models["diagnosis_deid"].diagnosis_name.in_(data["systemic_diagnosis"])
+        )
+        pt_ids = pt_ids.intersection([v.pt_id for v in qry.all()])
 
     # Get image procedure type
-    # Does not need reformatting
     if "image_procedure_type" in data:
+        """TODO: This filter with 2 joins is quite slow - needs improvement
+        """
         assert type(data["image_procedure_type"]) == list
-        qry = qry.join(models["image_deid"]).filter(
-            models["image_procedure"].image_procedure.in_(data["image_procedure_type"])
-        )
+        qry = db.session.query(models["pt_deid"])
+        qry = qry.join(models["image_deid"]).join(models["image_procedure"])
+        and_query = [
+            models["image_procedure"].image_procedure == img_proc_type
+            for img_proc_type in data["image_procedure_type"]
+        ]
+        qry = qry.filter(db.and_(*and_query))
+        pt_ids = pt_ids.intersection([v.pt_id for v in qry.all()])
 
     # Labs
     # TODO:
+    
 
     # Medication_generic_name
-    qry = qry.join(models["medication_deid"])
     if "medication_generic_name" in data:
+        """Currently using OR instead of AND logic
+        """
+        qry = db.session.query(models["pt_deid"])
+        qry = qry.join(models["medication_deid"])
         qry = qry.filter(
             models["medication_deid"].generic_name.in_(data["medication_generic_name"])
         )
+        pt_ids = pt_ids.intersection([v.pt_id for v in qry.all()])
 
     # Medication therapeutic class
     if "medication_therapeutic_class" in data:
+        """Currently using OR instead of AND logic
+        """
+        qry = db.session.query(models["pt_deid"])
+        qry = qry.join(models["medication_deid"])
         qry = qry.filter(
             models["medication_deid"].therapeutic_class.in_(
                 data["medication_therapeutic_class"]
             )
         )
+        pt_ids = pt_ids.intersection([v.pt_id for v in qry.all()])
 
-    # Join the smart data deid table
-    qry = qry.join(models["smart_data_deid"])
-    # left vision
-    # TODO: Vision filtering for the 20/XXX scale is currently
-    # based on character level comparason and is not robust.
-    # Need to figure out a way to compare the fractions
-    if "left_vision" in data:
-        and_query = [
-            models["smart_data_deid"].element_name.ilike(KEYWORDS["left_vision"])
-        ]
-        if "less" in data["left_vision"]:
-            and_query.append(
-                models["smart_data_deid"].smrtdta_elem_value
-                >= data["left_vision"]["less"]
-            )
-        if "more" in data["left_vision"]:
-            and_query.append(
-                models["smart_data_deid"].smrtdta_elem_value
-                <= data["left_vision"]["more"]
-            )
-        qry = qry.filter(db.and_(*and_query))
 
-    # right vision
-    if "right_vision" in data:
-        and_query = [
-            models["smart_data_deid"].element_name.ilike(KEYWORDS["right_vision"])
-        ]
-        if "less" in data["right_vision"]:
-            and_query.append(
-                models["smart_data_deid"].smrtdta_elem_value
-                >= data["right_vision"]["less"]
-            )
-        if "more" in data["right_vision"]:
-            and_query.append(
-                models["smart_data_deid"].smrtdta_elem_value
-                <= data["right_vision"]["more"]
-            )
-        qry = qry.filter(db.and_(*and_query))
+    # Smart data
+    if "left_vision" in data or "right_vision" in data or "left_pressure" in data or "right_pressure" in data:
+        qry = db.session.query(models["pt_deid"])
+        # Join the smart data deid table
+        qry = qry.join(models["smart_data_deid"])
+        # left vision
+        # TODO: Vision filtering for the 20/XXX scale is currently
+        # based on character level comparason and is not robust.
+        # Need to figure out a way to compare the fractions
+        if "left_vision" in data:
+            and_query = [
+                models["smart_data_deid"].element_name.ilike(KEYWORDS["left_vision"])
+            ]
+            if "less" in data["left_vision"]:
+                and_query.append(
+                    models["smart_data_deid"].smrtdta_elem_value
+                    >= data["left_vision"]["less"]
+                )
+            if "more" in data["left_vision"]:
+                and_query.append(
+                    models["smart_data_deid"].smrtdta_elem_value
+                    <= data["left_vision"]["more"]
+                )
+            qry = qry.filter(db.and_(*and_query))
 
-    # left pressure
-    if "left_pressure" in data:
-        and_query = [
-            models["smart_data_deid"].element_name.ilike(KEYWORDS["left_pressure"])
-        ]
-        if "less" in data["left_pressure"]:
-            and_query.append(
-                models["smart_data_deid"].smrtdta_elem_value
-                <= data["left_pressure"]["less"]
-            )
-        if "more" in data["left_pressure"]:
-            and_query.append(
-                models["smart_data_deid"].smrtdta_elem_value
-                >= data["left_pressure"]["more"]
-            )
-        qry = qry.filter(db.and_(*and_query))
+        # right vision
+        if "right_vision" in data:
+            and_query = [
+                models["smart_data_deid"].element_name.ilike(KEYWORDS["right_vision"])
+            ]
+            if "less" in data["right_vision"]:
+                and_query.append(
+                    models["smart_data_deid"].smrtdta_elem_value
+                    >= data["right_vision"]["less"]
+                )
+            if "more" in data["right_vision"]:
+                and_query.append(
+                    models["smart_data_deid"].smrtdta_elem_value
+                    <= data["right_vision"]["more"]
+                )
+            qry = qry.filter(db.and_(*and_query))
 
-    # right pressure
-    if "right_pressure" in data:
-        and_query = [
-            models["smart_data_deid"].element_name.ilike(KEYWORDS["right_pressure"])
-        ]
-        if "less" in data["right_pressure"]:
-            and_query.append(
-                models["smart_data_deid"].smrtdta_elem_value
-                <= data["right_pressure"]["less"]
-            )
-        if "more" in data["right_pressure"]:
-            and_query.append(
-                models["smart_data_deid"].smrtdta_elem_value
-                >= data["right_pressure"]["more"]
-            )
-        qry = qry.filter(db.and_(*and_query))
+        # left pressure
+        if "left_pressure" in data:
+            and_query = [
+                models["smart_data_deid"].element_name.ilike(KEYWORDS["left_pressure"])
+            ]
+            if "less" in data["left_pressure"]:
+                and_query.append(
+                    models["smart_data_deid"].smrtdta_elem_value
+                    <= data["left_pressure"]["less"]
+                )
+            if "more" in data["left_pressure"]:
+                and_query.append(
+                    models["smart_data_deid"].smrtdta_elem_value
+                    >= data["left_pressure"]["more"]
+                )
+            qry = qry.filter(db.and_(*and_query))
 
-    pt_ids = [v.pt_id for v in qry.all()]
+        # right pressure
+        if "right_pressure" in data:
+            and_query = [
+                models["smart_data_deid"].element_name.ilike(KEYWORDS["right_pressure"])
+            ]
+            if "less" in data["right_pressure"]:
+                and_query.append(
+                    models["smart_data_deid"].smrtdta_elem_value
+                    <= data["right_pressure"]["less"]
+                )
+            if "more" in data["right_pressure"]:
+                and_query.append(
+                    models["smart_data_deid"].smrtdta_elem_value
+                    >= data["right_pressure"]["more"]
+                )
+            qry = qry.filter(db.and_(*and_query))
+
+        pt_ids = pt_ids.intersection([v.pt_id for v in qry.all()])
+
     return create_response(
         data={
-            "pt_id": pt_ids,
+            "pt_id": list( pt_ids ),
             "time_taken_seconds": (datetime.today() - td).total_seconds(),
         }
     )

@@ -6,8 +6,8 @@ def test_filter_get(client):
 
 
 def test_filter_post(client):
-    # TODO: Add more tests
     url = "/ssd_api/filter"
+    # TODO: Add more tests
 
     data = {
         "filters": {
@@ -29,4 +29,53 @@ def test_filter_post(client):
     assert response.json["success"]
     assert response.content_type == "application/json"
 
+    # Test age
+    data = { "filters": { "age" : {"less": 40} } }
+    response = client.post(url, json=data)
+    assert response.json["success"]
+    assert response.json["result"]["pt_id"] == [59153]
+
+    # Test ethnicity
+    data = { "filters": { "ethnicity" : ["Hispanic or Latino"] } }
+    response = client.post(url, json=data)
+    assert response.json["success"]
+    assert response.json["result"]["pt_id"] == [64153]
+
+    # Test eye_diagnosis
     data = {"filters": {"eye_diagnosis": ["retinal edema"]}}
+    response = client.post(url, json=data)
+    assert response.json["success"]
+    assert response.json["result"]["pt_id"] == [36440, 64153]
+
+    # Test systemic_diagnosis
+    data = {"filters": {"systemic_diagnosis": ["Gout (disorder)"]}}
+    response = client.post(url, json=data)
+    assert response.json["success"]
+    assert response.json["result"]["pt_id"] == [50765]
+
+    # Test image_procedure_type
+    data = { "filters": { "image_procedure_type": ["IR_OCT"] } }
+    response = client.post(url, json=data)
+    assert response.json["success"]
+    assert response.json["result"]["pt_id"] == [66475, 50765, 36440, 64153, 66172]
+
+    # Test labs : TODO:
+
+    # Test medication_generic_name
+    data = { "filters": { "medication_generic_name": ["Ketorolac"] } }
+    response = client.post(url, json=data)
+    assert response.json["success"]
+    assert response.json["result"]["pt_id"] == [66475]
+
+    # Test medication_therapeutic_class 
+    data = { "filters": { "medication_therapeutic_class": ["Nutritional Products"] } }
+    response = client.post(url, json=data)
+    assert response.json["success"]
+    assert response.json["result"]["pt_id"] == [59153]
+
+
+    # TODO: Test vision
+
+    # TODO: Test pressure
+
+
