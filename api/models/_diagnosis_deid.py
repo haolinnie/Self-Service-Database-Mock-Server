@@ -17,3 +17,16 @@ class diagnosis_deid(Mixin, db.Model):
     diagnosis_name = db.Column(
         db.VARCHAR
     )  ## This isn't in the sqldbm.com model but is in the sample data
+
+    @staticmethod
+    def get_pt_id_by_diagnosis_names(diagnosis_names: list) -> list:
+        """Get pt_id by diagnosis_name
+        Currently uses OR logic -- consider AND in the future
+
+        :param diagnosis_names <list<str>> list of diagnosis_name
+        :returns <list<int>> list of pt_id
+        """
+        qry = diagnosis_deid.query.with_entities(diagnosis_deid.pt_id).distinct()
+        qry = qry.filter(diagnosis_deid.diagnosis_name.in_(diagnosis_names))
+
+        return [v.pt_id for v in qry.all()]

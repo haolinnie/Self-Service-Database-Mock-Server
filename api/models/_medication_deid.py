@@ -21,3 +21,38 @@ class medication_deid(Mixin, db.Model):
     number_of_doses = db.Column(db.INT)
     dose_unit = db.Column(db.VARCHAR)
     frequency = db.Column(db.VARCHAR)
+
+    @staticmethod
+    def get_pt_id_by_generic_name(mgn: list) -> list:
+        """Get pt_id by medication_generic_name
+        
+        :param mgn <list<str>> list of medication_generic_name
+        :returns <list<int>> list of pt_id
+        """
+        # Initialise query
+        qry = medication_deid.query.with_entities(medication_deid.pt_id).distinct()
+
+        # do query
+        qry = qry.filter(
+            medication_deid.generic_name.in_(mgn)
+        )
+
+        return [v.pt_id for v in qry.all()]
+
+    @staticmethod
+    def get_pt_id_by_therapeutic_class(mtc: list) -> list:
+        """Get pt_id by medication_generic_name
+        
+        :param mgn <list<str>> list of medication_generic_name
+        :returns <list<int>> list of pt_id
+        """
+        # Initialise query
+        qry = medication_deid.query.with_entities(medication_deid.pt_id).distinct()
+
+        # do query
+        qry = qry.filter(
+            medication_deid.therapeutic_class.in_(mtc)
+        )
+
+        return [v.pt_id for v in qry.all()]
+

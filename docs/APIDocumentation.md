@@ -363,7 +363,7 @@ Input data sample:
         "image_procedure_type": ["IR_OCT"],
         "labs": {"Calcium": 4},
         "medication_generic_name": ["Ketorolac"],
-        "medication_therapuetic_class": ["CNS Agent"],
+        "medication_therapuetic_class": ["Nutritional Products"],
         "left_vision": {
             "less": "20/40"
         },
