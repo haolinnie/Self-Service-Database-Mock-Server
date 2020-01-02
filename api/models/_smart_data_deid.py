@@ -1,5 +1,5 @@
 from .base import db
-from api.core import Mixin, KEYWORDS
+from ..core import Mixin, KEYWORDS
 
 
 class smart_data_deid(Mixin, db.Model):

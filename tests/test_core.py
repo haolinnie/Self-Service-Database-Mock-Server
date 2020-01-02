@@ -12,7 +12,7 @@ def test_create_response():
     try:
         response = create_response(data="hi")
     except Exception as e:
-        assert type(e) == TypeError
+        assert isinstance(e, TypeError)
 
 
 def test_exception_handler(app):

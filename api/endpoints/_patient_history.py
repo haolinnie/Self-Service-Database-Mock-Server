@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
-from api.models import db
-from api.core import create_response, check_sql_safe
+from ..models import db
+from ..core import create_response, check_sql_safe
 
 
 _patient_history = Blueprint("_patient_history", __name__)

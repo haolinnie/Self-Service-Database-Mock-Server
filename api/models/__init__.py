@@ -25,7 +25,3 @@ models = {
 }
 
 
-## TODO: Add foreign key relationships to the models
-# For now it doesn't make a practical difference as we are
-# doing read-only queries
-

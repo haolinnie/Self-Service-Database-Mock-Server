@@ -2,8 +2,8 @@ from datetime import datetime
 from flask import Blueprint, request, render_template
 from sqlalchemy import or_
 
-from api.models import db, db_utils, models
-from api.core import create_response, check_sql_safe, KEYWORDS
+from ..models import db, models
+from ..core import create_response, check_sql_safe, KEYWORDS
 
 
 _main = Blueprint("_main", __name__)
@@ -23,7 +23,7 @@ def index():
 
 @_main.route("/ssd_api/get_table", methods=["GET"])
 def get_table():
-    return create_response(data={"table_names": db_utils.get_table_names()})
+    return create_response(data={"table_names": list(models.keys())})
 
 
 @_main.route("/ssd_api/get_table_cols", methods=["GET"])
@@ -31,12 +31,9 @@ def get_table_cols():
 
     if "table_name" not in request.args:
         return create_response(message="table_name missing", status=420)
+
     table_name = request.args["table_name"]
-
-    if not check_sql_safe(table_name):  # Prevent Injection
-        return create_response(message="Invalid input", status=420)
-
-    col_names = db_utils.get_table_columns(table_name)
+    col_names = models[table_name].__table__.columns.keys()
 
     return create_response(data={"table_name": table_name, "columns": col_names})
 

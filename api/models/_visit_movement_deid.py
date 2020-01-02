@@ -1,5 +1,5 @@
 from .base import db
-from api.core import Mixin
+from ..core import Mixin
 
 
 class visit_movement_deid(Mixin, db.Model):

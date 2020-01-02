@@ -1,6 +1,6 @@
-from .base import db
-from api.core import Mixin
 from datetime import datetime
+from .base import db
+from ..core import Mixin
 
 
 class pt_deid(Mixin, db.Model):
@@ -13,6 +13,14 @@ class pt_deid(Mixin, db.Model):
     over_90 = db.Column(db.SMALLINT)
     ethnicity = db.Column(db.VARCHAR)
 
+    @staticmethod
+    def get_all_pt_ids():
+        """Get all pt_id available
+        """
+        qry = pt_deid.query.with_entities(pt_deid.pt_id).distinct()
+        return [v.pt_id for v in qry.all()]
+
+        
     @staticmethod
     def get_pt_id_by_age_or_ethnicity(ethnicity: list=None, younger_than: datetime=None, older_than: datetime=None) -> list:
         """Filter pt_id by age and/or ethnicity
