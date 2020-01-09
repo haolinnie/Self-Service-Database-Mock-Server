@@ -75,18 +75,27 @@
         -moz-border-radius: 10px;
       }
 
-      textarea {
-        font-size: 12px;
-        background-color: #1d2433;
-        color: #bae67e;
-        padding-top: 10px;
-        padding-left: 10px;
+      .ace_editor {
+        margin: auto;
+        height: 200px;
         width: 100%;
-        font-family: monaco, monospace;
-        font-size: 12px;
-        border-radius: 10px;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
+      }
+      .ace-monokai {
+        background-color: #1d2433;
+        color: #a2aabc;
+      }
+      .ace-monokai .ace_gutter {
+        background: #1d2433;
+        color: #ffae57;
+      }
+
+      .ace-monokai {
+        background-color: #1d2433;
+        color: #f8f8f2;
+      }
+
+      .ace-monokai .ace_marker-layer .ace_active-line {
+        background: #1d2433;
       }
     </style>
   </head>
@@ -99,12 +108,7 @@
         >Documentation</a
       >
       <h2>URL:</h2>
-      <input
-        name="commandurl"
-        type="text"
-        size="60"
-        value="/ssd_api/get_table"
-      />
+      <input name="commandurl" type="text" size="60" value="/ssd_api/filter" />
       <div id="buttons">
         <button type="button" onclick="getHTML('GET')">GET</button>
         <button type="button" onclick="getHTML('PUT')">PUT</button>
@@ -112,14 +116,46 @@
         <button type="button" onclick="getHTML('DELETE')">DELETE</button>
       </div>
       <h2>Message Body:</h2>
-      <textarea name="messagebody" rows="8" cols="100"></textarea>
+      <pre id="editor">
+{
+    "filters": {
+        "age": {
+            "less": 50
+        }
+    }
+}</pre
+      >
+
       <h2>Command Response:</h2>
-      <textarea name="response" rows="25" cols="100"></textarea>
+      <pre id="editor2"></pre>
     </form>
   </body>
 </html>
 
+<script
+  src="https://pagecdn.io/lib/ace/1.4.7/ace.js"
+  type="text/javascript"
+  charset="utf-8"
+></script>
 <script language="JavaScript">
+  var editor = ace.edit("editor", {
+    theme: "ace/theme/monokai",
+    mode: "ace/mode/json",
+    maxLines: 30,
+    minLines: 3,
+    wrap: false,
+    autoScrollEditorIntoView: true
+  });
+
+  var editor2 = ace.edit("editor2", {
+    theme: "ace/theme/monokai",
+    mode: "ace/mode/json",
+    maxLines: 30,
+    minLines: 2,
+    wrap: false,
+    autoScrollEditorIntoView: true
+  });
+
   function getHTML(command) {
     if (window.XMLHttpRequest) {
       var http = new XMLHttpRequest();
@@ -127,16 +163,13 @@
 
       http.onreadystatechange = function() {
         if (http.readyState == 4) {
-          document.commandform.response.value =
-            "Bad JSON: " + http.responseText;
-          document.commandform.response.value = JSON.stringify(
-            JSON.parse(http.responseText),
-            null,
-            "\t"
+          editor2.setValue(
+            JSON.stringify(JSON.parse(http.responseText), null, "\t"),
+            -1
           );
         }
       };
-      http.send(document.commandform.messagebody.value);
+      http.send(editor.getValue());
     }
     return false;
   }
