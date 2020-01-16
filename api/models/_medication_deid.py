@@ -1,5 +1,5 @@
-from .base import db
-from ..core import Mixin
+from api.core import Mixin
+from api.models.base import db
 
 
 class medication_deid(Mixin, db.Model):
@@ -33,9 +33,7 @@ class medication_deid(Mixin, db.Model):
         qry = medication_deid.query.with_entities(medication_deid.pt_id).distinct()
 
         # do query
-        qry = qry.filter(
-            medication_deid.generic_name.in_(mgn)
-        )
+        qry = qry.filter(medication_deid.generic_name.in_(mgn))
 
         return [v.pt_id for v in qry.all()]
 
@@ -50,9 +48,6 @@ class medication_deid(Mixin, db.Model):
         qry = medication_deid.query.with_entities(medication_deid.pt_id).distinct()
 
         # do query
-        qry = qry.filter(
-            medication_deid.therapeutic_class.in_(mtc)
-        )
+        qry = qry.filter(medication_deid.therapeutic_class.in_(mtc))
 
         return [v.pt_id for v in qry.all()]
-

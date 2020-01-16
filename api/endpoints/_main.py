@@ -2,8 +2,8 @@ from datetime import datetime
 from flask import Blueprint, request, render_template
 from sqlalchemy import or_
 
-from ..models import db, models
-from ..core import create_response, check_sql_safe, KEYWORDS
+from api.models import db, models
+from api.core import create_response, check_sql_safe, KEYWORDS
 
 
 _main = Blueprint("_main", __name__)

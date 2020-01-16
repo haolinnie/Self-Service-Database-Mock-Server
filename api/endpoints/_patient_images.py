@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template
 
-from ..models import db
-from ..core import create_response, check_sql_safe
+from api.models import db
+from api.core import create_response, check_sql_safe
 
 
 _patient_images = Blueprint("_patient_images", __name__)

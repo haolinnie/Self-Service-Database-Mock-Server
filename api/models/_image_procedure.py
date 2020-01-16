@@ -1,5 +1,5 @@
-from .base import db
-from ..core import Mixin
+from api.core import Mixin
+from api.models.base import db
 
 
 class image_procedure(Mixin, db.Model):

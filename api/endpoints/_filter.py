@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from flask import Blueprint, request
 
-from ..models import (
+from api.models import (
     pt_deid,
     diagnosis_deid,
     lab_value_deid,
@@ -15,7 +15,7 @@ from ..models import (
     image_procedure
 
 )
-from ..core import (
+from api.core import (
     create_response,
     KEYWORDS
 )
