@@ -1,11 +1,13 @@
 [run]
 omit =
     *flask*
+    *venv*
     *tests*
     *virtualenv*
 
 [report]
 omit =
     *flask*
+    *venv*
     *tests*
     *virtualenv*

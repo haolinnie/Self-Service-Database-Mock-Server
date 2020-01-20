@@ -24,13 +24,13 @@ Please read the API documentation to understand the structure of the endpoints. 
 ### Download the source code
 
 ```bash
-git clone https://github.com/haolinnie/Self-Service-Database-Mock-Server.git
-cd Self-Service-Database-Mock-Server
+git clone https://github.com/haolinnie/Self-Service-Database-Server.git
+cd Self-Service-Database-Server
 ```
 
 ### Prerequisites
 
-- Python 3.7.x
+- Python 3.6+
 - MariaDB 10.4.10 (or equivalent MySQL server)
 
 ### Setup a development environment

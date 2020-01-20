@@ -9,12 +9,6 @@ from api.core import create_response, check_sql_safe, KEYWORDS
 _main = Blueprint("_main", __name__)
 
 
-@_main.route("/local_debug")
-def local_debug():
-    breakpoint()
-    return create_response(data={"debug": "debug"})
-
-
 @_main.route("/")
 @_main.route("/ssd_api", methods=["GET"])
 def index():
@@ -127,4 +121,3 @@ def filter_table_with_ptid():
         return create_response(message=str(e), status=420)
 
     return create_response(data={"data": data})
-
