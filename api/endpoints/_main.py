@@ -3,7 +3,7 @@ from flask import Blueprint, request, render_template
 from sqlalchemy import or_
 
 from api.models import db, models
-from api.core import create_response, check_sql_safe, KEYWORDS
+from api.core import create_response, KEYWORDS
 
 
 _main = Blueprint("_main", __name__)
@@ -44,12 +44,9 @@ def get_distinct():
         col_name = request.args["col_name"]
         table_name = request.args["table_name"]
 
-        if not check_sql_safe(table_name, col_name):  # Prevent Injection
-            return create_response(message="Invalid input", status=420)
-
         if table_name not in models:
             return create_response(
-                message="Table '{}' is not available.".format(table_name)
+                message="Table '{}' is not available.".format(table_name), status=420
             )
 
         try:

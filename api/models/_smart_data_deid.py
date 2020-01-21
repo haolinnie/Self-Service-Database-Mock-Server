@@ -58,23 +58,35 @@ class smart_data_deid(Mixin, db.Model):
     @staticmethod
     def get_pt_id_by_left_vision(val_range):
         return _filter_vis_pres_range(
-            KEYWORDS["left_vision"], val_range, "20/%", vision=True
+            KEYWORDS["left_vision"],
+            val_range,
+            KEYWORDS["vision_value_regex"],
+            vision=True,
         )
 
     @staticmethod
     def get_pt_id_by_right_vision(val_range):
         return _filter_vis_pres_range(
-            KEYWORDS["right_vision"], val_range, "20/%", vision=True
+            KEYWORDS["right_vision"],
+            val_range,
+            KEYWORDS["vision_value_regex"],
+            vision=True,
         )
 
     @staticmethod
     def get_pt_id_by_left_pressure(val_range):
         return _filter_vis_pres_range(
-            KEYWORDS["left_pressure"], val_range, "%[0-9]%", vision=False
+            KEYWORDS["left_pressure"],
+            val_range,
+            KEYWORDS["pressure_value_regex"],
+            vision=False,
         )
 
     @staticmethod
     def get_pt_id_by_right_pressure(val_range):
         return _filter_vis_pres_range(
-            KEYWORDS["right_pressure"], val_range, "%[0-9]%", vision=False
+            KEYWORDS["right_pressure"],
+            val_range,
+            KEYWORDS["pressure_value_regex"],
+            vision=False,
         )

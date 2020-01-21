@@ -22,5 +22,8 @@ run_server:
 	export FLASK_RUN_PORT=5100
 	venv/bin/flask run
 
+deploy:
+	./scripts/deploy.sh
+
 test:
 	./scripts/run_tests

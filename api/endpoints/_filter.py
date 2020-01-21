@@ -14,7 +14,7 @@ from api.models import (
     exam_deid,
     image_procedure,
 )
-from api.core import create_response, KEYWORDS
+from api.core import create_response
 
 
 _filter = Blueprint("_filter", __name__)
