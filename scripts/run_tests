@@ -1,11 +1,10 @@
 #!/bin/bash
-source venv/bin/activate
 if [[ $1 ]] && [[ $1 = 'travis' ]]
 then
-   echo Travis detected: Initialising testing mysql database
-   #mysql -u root --password="" < create_sample_database.sql
+   echo Travis detected
 else
    echo No CI
+    source venv/bin/activate
 fi
 
 coverage run -m pytest -v
