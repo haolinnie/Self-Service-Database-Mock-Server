@@ -1,5 +1,6 @@
 FILTER_URL = "/ssd_api/filter"
 
+
 def test_filter_get(client):
     response = client.get(FILTER_URL)
     assert not response.json["success"]
@@ -30,16 +31,17 @@ def test_filter_post(client):
 
 def test_filter_age_ethnicity(client):
     # Test age
-    data = { "filters": { "age" : {"less": 40} } }
+    data = {"filters": {"age": {"less": 40}}}
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
     assert response.json["result"]["pt_id"] == [59153]
 
     # Test ethnicity
-    data = { "filters": { "ethnicity" : ["Hispanic or Latino"] } }
+    data = {"filters": {"ethnicity": ["Hispanic or Latino"]}}
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
     assert response.json["result"]["pt_id"] == [64153]
+
 
 def test_filter_diagnosis(client):
     # Test eye_diagnosis
@@ -54,44 +56,51 @@ def test_filter_diagnosis(client):
     assert response.json["success"]
     assert response.json["result"]["pt_id"] == [50765]
 
+
 def test_filter_images(client):
     # Test image_procedure_type
-    data = { "filters": { "image_procedure_type": ["IR_OCT"] } }
+    data = {"filters": {"image_procedure_type": ["IR_OCT"]}}
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
     assert response.json["result"]["pt_id"] == [66475, 50765, 36440, 64153, 66172]
+
 
 def test_filter_labs(client):
     # Test labs : TODO:
     pass
 
+
 def test_filter_medication(client):
     # Test medication_generic_name
-    data = { "filters": { "medication_generic_name": ["Ketorolac"] } }
+    data = {"filters": {"medication_generic_name": ["Ketorolac"]}}
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
     assert response.json["result"]["pt_id"] == [66475]
 
-    # Test medication_therapeutic_class 
-    data = { "filters": { "medication_therapeutic_class": ["Nutritional Products"] } }
+    # Test medication_therapeutic_class
+    data = {"filters": {"medication_therapeutic_class": ["Nutritional Products"]}}
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
     assert response.json["result"]["pt_id"] == [59153]
 
-def test_filter_pressure_vision(client):
-    # TODO: Test vision
 
-    # : Test pressure
+def test_filter_vision(client):
+    # TODO: Test vision
+    pass
+
+
+def test_filter_pressure(client):
+    # Test pressure
     data = {"filters": {"left_pressure": {"less": 10}}}
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
-    assert response.json["result"]["pt_id"] == [64656, 64153, 66166]
+    assert response.json["result"]["pt_id"] == [64656, 66166]
 
-    data = {"filters": {"left_pressure": {"more": 20 }}}
+    data = {"filters": {"left_pressure": {"more": 20}}}
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
-    assert response.json["result"]["pt_id"] == [36440 , 66172]
-    
+    assert response.json["result"]["pt_id"] == [36440, 66172]
+
     data = {"filters": {"right_pressure": {"less": 9}}}
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
@@ -101,5 +110,3 @@ def test_filter_pressure_vision(client):
     response = client.post(FILTER_URL, json=data)
     assert response.json["success"]
     assert response.json["result"]["pt_id"] == [50765, 64656, 36440, 64153, 66172]
-
-

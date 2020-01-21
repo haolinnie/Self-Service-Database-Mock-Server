@@ -2,17 +2,11 @@ from datetime import datetime
 from flask import Blueprint, request, render_template
 from sqlalchemy import or_
 
-from ..models import db, models
-from ..core import create_response, check_sql_safe, KEYWORDS
+from api.models import db, models
+from api.core import create_response, KEYWORDS
 
 
 _main = Blueprint("_main", __name__)
-
-
-@_main.route("/local_debug")
-def local_debug():
-    breakpoint()
-    return create_response(data={"debug": "debug"})
 
 
 @_main.route("/")
@@ -50,12 +44,9 @@ def get_distinct():
         col_name = request.args["col_name"]
         table_name = request.args["table_name"]
 
-        if not check_sql_safe(table_name, col_name):  # Prevent Injection
-            return create_response(message="Invalid input", status=420)
-
         if table_name not in models:
             return create_response(
-                message="Table '{}' is not available.".format(table_name)
+                message="Table '{}' is not available.".format(table_name), status=420
             )
 
         try:
@@ -127,4 +118,3 @@ def filter_table_with_ptid():
         return create_response(message=str(e), status=420)
 
     return create_response(data={"data": data})
-

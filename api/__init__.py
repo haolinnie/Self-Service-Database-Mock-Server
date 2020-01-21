@@ -3,10 +3,10 @@ from flask import Flask
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from .core import exception_handler, create_response
-from .config import _config
-from .models import db
-from .endpoints import _main, _filter, _patient_history, _patient_images
+from api.core import exception_handler, create_response
+from api.config import _config
+from api.models import db
+from api.endpoints import _main, _filter, _patient_history, _patient_images
 
 
 def create_app(**config_override):

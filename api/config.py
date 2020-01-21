@@ -4,7 +4,7 @@ TODO: Finish this file and documentation
 """
 
 import os
-from .core import get_database_url
+from api.core import get_database_url
 
 
 class Config:

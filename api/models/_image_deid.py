@@ -1,6 +1,6 @@
-from .base import db
-from ..core import Mixin
-from ._image_procedure import image_procedure
+from api.core import Mixin
+from api.models.base import db
+from api.models._image_procedure import image_procedure
 
 
 class image_deid(Mixin, db.Model):
@@ -27,12 +27,15 @@ class image_deid(Mixin, db.Model):
         :returns <list<int>> pt_id
         """
         # Initialise query
-        qry = image_deid.query.with_entities(image_deid.pt_id).distinct().join(image_procedure)
+        qry = (
+            image_deid.query.with_entities(image_deid.pt_id)
+            .distinct()
+            .join(image_procedure)
+        )
 
         # construct list of AND queries
         and_query = [
-            image_procedure.image_procedure == img_proc_type
-            for img_proc_type in ipt
+            image_procedure.image_procedure == img_proc_type for img_proc_type in ipt
         ]
 
         # do the query, get distinct pt_id

@@ -7,9 +7,9 @@ install:
   - pip install coveralls
 
 services:
-  - 'mysql'
+  - 'docker'
 before_install:
-  - mysql -u root --password="" < data/create_sample_database.sql
+  - make start_dev_db
 script:
   - scripts/run_tests travis
 after_success:

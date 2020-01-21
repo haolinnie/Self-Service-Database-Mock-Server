@@ -1,5 +1,5 @@
-from .base import db
-from ..core import Mixin
+from api.core import Mixin
+from api.models.base import db
 
 
 class diagnosis_deid(Mixin, db.Model):

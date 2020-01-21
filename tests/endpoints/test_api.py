@@ -47,8 +47,12 @@ def test_get_distinct(client):
     res = client.get(url + "?col_name=pt_id")
     assert not res.json["success"]
 
-    # Wrong column name
+    # Unavailable column name
     res = client.get(url + "?table_name=pt_deid&col_name=bla")
+    assert not res.json["success"]
+
+    # Unavailable table name
+    res = client.get(url + "?table_name=bla&col_name=bla")
     assert not res.json["success"]
 
     # Test injection

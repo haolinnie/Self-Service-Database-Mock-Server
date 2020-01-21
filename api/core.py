@@ -79,10 +79,10 @@ def get_database_url(file: str = "credentials.config") -> str:
         config = configparser.ConfigParser()
         config.read(file)
         try:
-            res = config["mysql_credentials"]
-            return res["mysql_url"]
+            res = config["mssql_credentials"]
+            return res["mssql_url"]
         except KeyError:
-            print("Failed to retrieve MySQL credentials from [{}].".format(file))
+            print("Failed to retrieve SQL Server credentials from [{}].".format(file))
     except:
         print("Failed to load config file [{}].".format(file))
 
