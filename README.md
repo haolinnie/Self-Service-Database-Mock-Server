@@ -9,7 +9,9 @@ Author: Tiger Nie [nhl0819@gmail.com]
 
 Version: 1.1
 
-This is the API server for a Self-Service Database UI for Northwestern Memorial Hospital's Ophthalmology department. The app is written in Python 3.7 with MySQL as the database layer. Currently deployable via a bash script with gunicorn and NGINX. Docker recipes are in the works.
+This is the API server for a Self-Service Database UI for Northwestern Memorial Hospital's Ophthalmology department. The app is written in Python 3.7 with MS SQL as the database layer.
+
+A sample is deployed at https://tigernie.com/ssd_api
 
 ## API Documentation
 
@@ -21,59 +23,124 @@ Please read the API documentation to understand the structure of the endpoints. 
 
 ## Getting Started
 
-### Download the source code
+Prerequisites
+
+- Python 3.6+
+- Docker
+- MS SQL Server (Docker image works, script to generate a sample database is provided)
+
+Setting up for
+
+- [Development](#development)
+- [Production](#production)
+
+### Development
+
+Download the source code
 
 ```bash
 git clone https://github.com/haolinnie/Self-Service-Database-Server.git
 cd Self-Service-Database-Server
 ```
 
-### Prerequisites
+#### Create a sample MS SQL database in docker
 
-- Python 3.6+
-- MariaDB 10.4.10 (or equivalent MySQL server)
-
-### Setup a development environment
-
-#### Create a sample MySQL database
-
-A script will generate a test user with username: test_user and password: password, and generate the database schema along with 10 patients.
+This pulls a MS SQL Server Ubuntu image from docker, starts a container and dumps sample data into the MS SQL Server.
 
 ```bash
-mysql < data/create_sample_database.sql
+make start_dev_db
 ```
 
-#### Create and activate virtual environment
+OR
 
 ```bash
-python3 -m venv flask
-source flask/bin/activate
+# Run the MS SQL docker image
+docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong(!)Password' \
+   -p 1433:1433 --name sql1 \
+   -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
+
+# Copy sample data into the image
+docker cp data/create_sample_database_mssql.sql sql1:/tmp
+
+# Initialise sample data in the database
+docker exec -it sql1 /opt/mssql-tools/bin/sqlcmd \
+   -S localhost -U SA -P "yourStrong(!)Password" \
+   -i '/tmp/create_sample_database_mssql.sql'
 ```
 
-#### Install python dependencies
+Alternatively, use your existing database server. If so, you must modify the `mssql_url` field in `credentials.config`. The format is
+
+`mssql_url = <SQL dialect>+<SQL driver>://<username>:<password>@<url>:<port>/<database name>`
+
+Only modify username, password, url, port and database name
+
+#### Create a virtual environment and install python dependencies
 
 ```bash
-pip3 install -r requirements.txt
-pip3 install -r requirements-dev.txt
+make setup
 ```
 
-### Test the server
-
-Start a development server
+OR
 
 ```bash
-python3 debug.py
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
-Start a production server
+### Run tests
 
 ```bash
-chmod a+x deploy.sh
-./deploy.sh
+make test
 ```
 
-## Deployment
+OR
 
-A sample is deployed at https://tigernie.com/ssd_api
+```bash
+source venv/bin/activate
+coverage run -m pytest -v
+coverage report
+coverage html
+```
 
-Docker is being worked on for a more streamlined deployment process.
+
+### Production
+
+Download the source code
+
+```bash
+git clone https://github.com/haolinnie/Self-Service-Database-Server.git
+cd Self-Service-Database-Server
+```
+
+Modify the `mssql_url` field in `credentials.config` to plug in your database. Only modify username, password, url, port and database name
+
+`mssql_url = <SQL dialect>+<SQL driver>://<username>:<password>@<url>:<port>/<database name>`
+
+Build the docker image
+
+```bash
+make build_api_docker
+```
+
+OR
+
+```bash
+docker build -t ssd_server:latest .
+```
+
+Run the docker image in a container
+
+```bash
+make run_api_docker
+```
+
+OR
+
+```bash
+docker run -d --rm -p 5100:5100 --name ssd_container ssd_server
+```
+
+The app runs on port 5100 by default. To change the port, modify both the `Dockerfile` and the `docker run` port number.

@@ -17,6 +17,16 @@ db_shell:
 destroy_dev_db:
 	./scripts/dev_db/kill_db.sh
 
+build_api_docker:
+	./scripts/api/docker_build.sh
+
+run_api_docker:
+	./scripts/api/docker_run.sh
+
+destroy_api_docker:
+	./scripts/api/docker_kill.sh
+
+
 run_server:
 	export FLASK_APP="api:create_app()"
 	export FLASK_RUN_PORT=5100

@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t ssd_server:latest .
+sudo docker build -t ssd_server:latest .
