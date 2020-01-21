@@ -12,13 +12,9 @@ from api.models import (
     visit_movement_deid,
     image_deid,
     exam_deid,
-    image_procedure
-
+    image_procedure,
 )
-from api.core import (
-    create_response,
-    KEYWORDS
-)
+from api.core import create_response, KEYWORDS
 
 
 _filter = Blueprint("_filter", __name__)
@@ -52,7 +48,7 @@ def filter_post():
         # construct dob object to store SQL searchable data
         data["dob"] = {
             "younger_than": datetime(year=1900, month=1, day=1),
-            "older_than": td
+            "older_than": td,
         }
         if "less" in data["age"]:
             data["dob"]["younger_than"] = datetime(
@@ -67,16 +63,14 @@ def filter_post():
                 day=td.day - 1 if td.month == 2 and td.day == 29 else td.day,
             )
         curr_ids = pt_deid.get_pt_id_by_age_or_ethnicity(
-                younger_than=data["dob"]["younger_than"],
-                older_than=data["dob"]["older_than"]
+            younger_than=data["dob"]["younger_than"],
+            older_than=data["dob"]["older_than"],
         )
         pt_ids = pt_ids.intersection(curr_ids)
 
     # Ethnicity
     if "ethnicity" in data:
-        curr_ids = pt_deid.get_pt_id_by_age_or_ethnicity(
-                ethnicity=data["ethnicity"],
-        )
+        curr_ids = pt_deid.get_pt_id_by_age_or_ethnicity(ethnicity=data["ethnicity"],)
         pt_ids = pt_ids.intersection(curr_ids)
 
     # Get eye diagnosis
@@ -90,14 +84,18 @@ def filter_post():
     if "systemic_diagnosis" in data:
         """This currently uses OR logic, compared to AND
         """
-        curr_ids = diagnosis_deid.get_pt_id_by_diagnosis_names(data["systemic_diagnosis"])
+        curr_ids = diagnosis_deid.get_pt_id_by_diagnosis_names(
+            data["systemic_diagnosis"]
+        )
         pt_ids = pt_ids.intersection(curr_ids)
 
     # Get image procedure type
     if "image_procedure_type" in data:
         """This uses AND logic
         """
-        curr_ids = image_deid.get_pt_id_by_image_procedure_type(data["image_procedure_type"])
+        curr_ids = image_deid.get_pt_id_by_image_procedure_type(
+            data["image_procedure_type"]
+        )
         pt_ids = pt_ids.intersection(curr_ids)
 
     # Labs
@@ -107,58 +105,72 @@ def filter_post():
     if "medication_generic_name" in data:
         """Currently using OR instead of AND logic
         """
-        curr_ids = medication_deid.get_pt_id_by_generic_name(data["medication_generic_name"])
+        curr_ids = medication_deid.get_pt_id_by_generic_name(
+            data["medication_generic_name"]
+        )
         pt_ids = pt_ids.intersection(curr_ids)
 
     # Medication therapeutic class
     if "medication_therapeutic_class" in data:
         """Currently using OR instead of AND logic
         """
-        curr_ids = medication_deid.get_pt_id_by_therapeutic_class(data["medication_therapeutic_class"])
+        curr_ids = medication_deid.get_pt_id_by_therapeutic_class(
+            data["medication_therapeutic_class"]
+        )
         pt_ids = pt_ids.intersection(curr_ids)
 
+    ### Smart data
+    # Left vision
+    # TODO: Figure out a robust way to send "less" and "more" data
+    # Currently parsing the number after "/" and converting to Int, which
+    # will break if someone sends in something else
+    def _parse_vision_inp(inp):
+        if inp is None:
+            return None
+        return int(inp.split("/")[1].split("-")[0].split("+")[0])
 
-    # Smart data
-    if "left_vision" in data or "right_vision" in data or "left_pressure" in data or "right_pressure" in data:
-        # TODO: Vision filtering for the 20/XXX scale is currently
-        # based on character level comparason and is not robust.
-        # Need to figure out a way to compare the fractions
+    if "left_vision" in data:
+        curr_ids = smart_data_deid.get_pt_id_by_left_vision(
+            [
+                _parse_vision_inp(data.get("left_vision").get("less")),
+                _parse_vision_inp(data.get("left_vision").get("more")),
+            ]
+        )
+        pt_ids = pt_ids.intersection(curr_ids)
 
-        # left vision
-        if "left_vision" in data:
-            curr_ids = smart_data_deid.get_pt_id_by_vision_pressure(
-                    left_vision_less=data.get("left_vision").get("less"),
-                    left_vision_more=data.get("left_vision").get("more")
-            )
-            pt_ids = pt_ids.intersection(curr_ids)
+    # Right vision
+    if "right_vision" in data:
+        curr_ids = smart_data_deid.get_pt_id_by_right_vision(
+            [
+                _parse_vision_inp(data.get("right_vision").get("less")),
+                _parse_vision_inp(data.get("right_vision").get("more")),
+            ]
+        )
+        pt_ids = pt_ids.intersection(curr_ids)
 
-        # right vision
-        if "right_vision" in data:
-            curr_ids = smart_data_deid.get_pt_id_by_vision_pressure(
-                    right_vision_less=data.get("right_vision").get("less"),
-                    right_vision_more=data.get("right_vision").get("more")
-            )
-            pt_ids = pt_ids.intersection(curr_ids)
+    # left pressure
+    if "left_pressure" in data:
+        curr_ids = smart_data_deid.get_pt_id_by_left_pressure(
+            [
+                data.get("left_pressure").get("more"),
+                data.get("left_pressure").get("less"),
+            ]
+        )
+        pt_ids = pt_ids.intersection(curr_ids)
 
-        # left pressure
-        if "left_pressure" in data:
-            curr_ids = smart_data_deid.get_pt_id_by_vision_pressure(
-                    left_pressure_less=data.get("left_pressure").get("less"),
-                    left_pressure_more=data.get("left_pressure").get("more")
-            )
-            pt_ids = pt_ids.intersection(curr_ids)
-
-        # right pressure
-        if "right_pressure" in data:
-            curr_ids = smart_data_deid.get_pt_id_by_vision_pressure(
-                    right_pressure_less=data.get("right_pressure").get("less"),
-                    right_pressure_more=data.get("right_pressure").get("more")
-            )
-            pt_ids = pt_ids.intersection(curr_ids)
+    # right pressure
+    if "right_pressure" in data:
+        curr_ids = smart_data_deid.get_pt_id_by_right_pressure(
+            [
+                data.get("right_pressure").get("more"),
+                data.get("right_pressure").get("less"),
+            ]
+        )
+        pt_ids = pt_ids.intersection(curr_ids)
 
     return create_response(
         data={
-            "pt_id": list( pt_ids ),
+            "pt_id": list(pt_ids),
             "time_taken_seconds": (datetime.today() - td).total_seconds(),
         }
     )

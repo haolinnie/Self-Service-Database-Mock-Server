@@ -2,6 +2,47 @@ from api.core import Mixin, KEYWORDS
 from api.models.base import db
 
 
+def _vision_filter(lst, more_than, less_than):
+    """Helper function that takes a list of 
+    
+    """
+    more_than = 0 if more_than is None else more_than
+    less_than = 1000 if less_than is None else less_than
+    return [
+        (pt_id, val)
+        for pt_id, val in lst
+        if more_than <= int(val.split("/")[1].split("-")[0].split("+")[0]) <= less_than
+    ]
+
+
+def _pressure_filter(lst, more_than, less_than):
+    more_than = 0 if more_than is None else more_than
+    less_than = 1000 if less_than is None else less_than
+    return [(pt_id, val) for pt_id, val in lst if more_than <= int(val) <= less_than]
+
+
+def _filter_vis_pres_range(
+    elem_keywords, value_range, value_validation_regex, vision=False
+):
+    qry = smart_data_deid.query.with_entities(
+        smart_data_deid.pt_id, smart_data_deid.smrtdta_elem_value
+    )
+    qry = qry.filter(
+        db.and_(
+            smart_data_deid.element_name.ilike(elem_keywords),
+            smart_data_deid.smrtdta_elem_value.ilike(value_validation_regex),
+        )
+    )
+    pt_ids = qry.all()
+
+    if vision:
+        pt_ids = list(set(v[0] for v in _vision_filter(pt_ids, *value_range)))
+    else:  # Pressure
+        pt_ids = list(set(v[0] for v in _pressure_filter(pt_ids, *value_range)))
+
+    return pt_ids
+
+
 class smart_data_deid(Mixin, db.Model):
     """smart_data_deid table
     """
@@ -15,67 +56,25 @@ class smart_data_deid(Mixin, db.Model):
     value_dt = db.Column(db.DateTime)
 
     @staticmethod
-    def get_pt_id_by_vision_pressure(
-        left_vision_less=None,
-        left_vision_more=None,
-        right_vision_less=None,
-        right_vision_more=None,
-        left_pressure_less=None,
-        left_pressure_more=None,
-        right_pressure_less=None,
-        right_pressure_more=None,
-    ):
-        """Get pt_id by vision
+    def get_pt_id_by_left_vision(val_range):
+        return _filter_vis_pres_range(
+            KEYWORDS["left_vision"], val_range, "20/%", vision=True
+        )
 
-        :param
-        :returns
-        """
-        # Initialise query
-        qry = smart_data_deid.query.with_entities(smart_data_deid.pt_id).distinct()
+    @staticmethod
+    def get_pt_id_by_right_vision(val_range):
+        return _filter_vis_pres_range(
+            KEYWORDS["right_vision"], val_range, "20/%", vision=True
+        )
 
-        # Do query
-        if left_vision_less != None or left_vision_more != None:
-            and_query = [smart_data_deid.element_name.ilike(KEYWORDS["left_vision"])]
-            if left_vision_less != None:
-                and_query.append(smart_data_deid.smrtdta_elem_value >= left_vision_less)
-            if left_vision_more != None:
-                and_query.append(smart_data_deid.smrtdta_elem_value <= left_vision_more)
-            qry = qry.filter(db.and_(*and_query))
+    @staticmethod
+    def get_pt_id_by_left_pressure(val_range):
+        return _filter_vis_pres_range(
+            KEYWORDS["left_pressure"], val_range, "%[0-9]%", vision=False
+        )
 
-        if right_vision_less != None or right_vision_more != None:
-            and_query = [smart_data_deid.element_name.ilike(KEYWORDS["right_vision"])]
-            if right_vision_less != None:
-                and_query.append(
-                    smart_data_deid.smrtdta_elem_value >= right_vision_less
-                )
-            if right_vision_more != None:
-                and_query.append(
-                    smart_data_deid.smrtdta_elem_value <= right_vision_more
-                )
-            qry = qry.filter(db.and_(*and_query))
-
-        if left_pressure_less != None or left_pressure_more != None:
-            and_query = [smart_data_deid.element_name.ilike(KEYWORDS["left_pressure"])]
-            if left_pressure_less != None:
-                and_query.append(
-                    smart_data_deid.smrtdta_elem_value <= left_pressure_less
-                )
-            if left_pressure_more != None:
-                and_query.append(
-                    smart_data_deid.smrtdta_elem_value >= left_pressure_more
-                )
-            qry = qry.filter(db.and_(*and_query))
-
-        if right_pressure_less != None or right_pressure_more != None:
-            and_query = [smart_data_deid.element_name.ilike(KEYWORDS["right_pressure"])]
-            if right_pressure_less != None:
-                and_query.append(
-                    smart_data_deid.smrtdta_elem_value <= right_pressure_less
-                )
-            if right_pressure_more != None:
-                and_query.append(
-                    smart_data_deid.smrtdta_elem_value >= right_pressure_more
-                )
-            qry = qry.filter(db.and_(*and_query))
-
-        return [v.pt_id for v in qry.all()]
+    @staticmethod
+    def get_pt_id_by_right_pressure(val_range):
+        return _filter_vis_pres_range(
+            KEYWORDS["right_pressure"], val_range, "%[0-9]%", vision=False
+        )
