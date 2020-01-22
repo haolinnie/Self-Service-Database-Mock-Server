@@ -1,10 +1,46 @@
 from flask import Blueprint, request
 
 from api.models import db
-from api.core import create_response, check_sql_safe
-
+from api.core import (
+    create_response,
+    check_sql_safe,
+    KEYWORDS,
+    _generate_like_or_filters,
+)
+from api.models import (
+    pt_deid,
+    diagnosis_deid,
+    lab_value_deid,
+    medication_deid,
+    medication_deid,
+    smart_data_deid,
+    visit_movement_deid,
+    image_deid,
+    exam_deid,
+    image_procedure,
+)
 
 _patient_history = Blueprint("_patient_history", __name__)
+
+KEYWORDS["eye_diagnosis_keywords"]
+
+# TODO:
+# Rewrite this endpoint with the ORM model
+
+
+def _to_list_of_dict(data, cols):
+    return [dict(zip(cols, val)) for val in data]
+
+
+def _filter_diagnosis(curr_id, or_filters):
+    """Helper function to filter the diagnosis_deid table with a patient id and keywords (eye or systemic diagnosis)
+    """
+    qry = diagnosis_deid.query.with_entities(
+        diagnosis_deid.diagnosis_name, diagnosis_deid.diagnosis_start_dt
+    )
+    qry = qry.filter(db.and_(diagnosis_deid.pt_id == curr_id, db.or_(*or_filters)))
+    qry = qry.order_by(diagnosis_deid.diagnosis_start_dt.desc())
+    return qry.all()
 
 
 @_patient_history.route("/ssd_api/patients", methods=["GET"])
@@ -16,83 +52,72 @@ def patients():
     diag_cols = ("diagnosis", "date")
     lab_cols = ("lab_name", "lab_value", "unit", "date")
     smart_cols = ("name", "value", "smart_data_id", "date")
-    for id in pt_id:
+    for curr_id in pt_id:
         # Initialise dict for current pt_id
-        out_json[str(id)] = {}
+        out_json[str(curr_id)] = {}
 
         # Medication
-        cols = "medication_id, generic_name, therapeutic_class, order_placed_dt"
-        table_name = "medication_deid"
-        cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY order_placed_dt
-        """.format(
-            cols, table_name, id
+        qry = (
+            medication_deid.query.with_entities(
+                medication_deid.medication_id,
+                medication_deid.generic_name,
+                medication_deid.therapeutic_class,
+                medication_deid.order_placed_dt,
+            )
+            .filter(medication_deid.pt_id == curr_id)
+            .order_by(medication_deid.order_placed_dt.desc())
         )
-        res = db.session.execute(cmd).fetchall()
-        out_json[str(id)]["medication"] = [dict(zip(med_cols, val)) for val in res]
+
+        out_json[str(curr_id)]["medication"] = _to_list_of_dict(qry.all(), med_cols)
 
         # Eye Diagnosis
-        # NOTE: currently using a naive method of matching 'macula', 'retina' and 'opia'
-        # to classify eye or systemic diagnosis. This is probably not robust.
-        cmd = r"""SELECT diagnosis_name, diagnosis_start_dt
-        FROM diagnosis_deid WHERE pt_id={} AND
-        (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
-        OR diagnosis_name LIKE '%opia%' OR diagnosis_name LIKE '%iri%') 
-        ORDER BY diagnosis_start_dt;""".format(
-            id
+        or_filters = _generate_like_or_filters(
+            diagnosis_deid.diagnosis_name, KEYWORDS["eye_diagnosis_keywords"]
         )
-        out_json[str(id)]["eye_diagnosis"] = dict(db.session.execute(cmd).fetchall())
+        out_json[str(curr_id)]["eye_diagnosis"] = dict(
+            _filter_diagnosis(curr_id, or_filters)
+        )
 
         # Systemic Diagnosis
-        cmd = r"""SELECT diagnosis_name, diagnosis_start_dt
-        FROM diagnosis_deid WHERE pt_id IN({}) AND NOT
-        (diagnosis_name LIKE '%retina%' OR diagnosis_name LIKE '%macula%'
-        OR diagnosis_name LIKE '%myopi%' OR diagnosis_name LIKE '%iri%')
-        ORDER BY diagnosis_start_dt;""".format(
-            id
+        or_filters = _generate_like_or_filters(
+            diagnosis_deid.diagnosis_name,
+            KEYWORDS["eye_diagnosis_keywords"],
+            unlike=True,
         )
-        out_json[str(id)]["systemic_diagnosis"] = dict(
-            db.session.execute(cmd).fetchall()
+        out_json[str(curr_id)]["systemic_diagnosis"] = dict(
+            _filter_diagnosis(curr_id, or_filters)
         )
 
         # Lab values
-        cols = "name, value, reference_unit,result_dt"
-        table_name = "lab_value_deid"
-        cmd = """ SELECT {} FROM {} WHERE pt_id IN({}) ORDER BY result_dt
-        """.format(
-            cols, table_name, id
+        qry = (
+            lab_value_deid.query.with_entities(
+                lab_value_deid.name,
+                lab_value_deid.value,
+                lab_value_deid.reference_unit,
+                lab_value_deid.result_dt,
+            )
+            .filter(lab_value_deid.pt_id == curr_id)
+            .order_by(lab_value_deid.result_dt.desc())
         )
-        res = db.session.execute(cmd).fetchall()
-        out_json[str(id)]["lab_values"] = [dict(zip(lab_cols, val)) for val in res]
+
+        out_json[str(curr_id)]["lab_values"] = _to_list_of_dict(qry.all(), lab_cols)
 
         # Vision
-        cols = "element_name, smrtdta_elem_value, smart_data_id, value_dt"
-        table_name = "smart_data_deid"
-        cmd = """ SELECT {} FROM {} WHERE pt_id IN({})
-        AND element_name LIKE '%visual acuity%' ORDER BY value_dt
-        """.format(
-            cols, table_name, id
-        )
-        res = db.session.execute(cmd).fetchall()
-        out_json[str(id)]["vision"] = [dict(zip(smart_cols, val)) for val in res]
+        res = smart_data_deid.get_data_for_pt_id(pt_id, vision=True)
+        out_json[str(curr_id)]["vision"] = _to_list_of_dict(res, smart_cols)
 
         # Pressure
-        cmd = """ SELECT {} FROM {} WHERE pt_id IN({})
-        AND element_name LIKE '%intraocular pressure%' ORDER BY value_dt
-        """.format(
-            cols, table_name, id
-        )
-        res = db.session.execute(cmd).fetchall()
-        out_json[str(id)]["pressure"] = [dict(zip(smart_cols, val)) for val in res]
+        res = smart_data_deid.get_data_for_pt_id(pt_id, pressure=True)
+        out_json[str(curr_id)]["pressure"] = _to_list_of_dict(res, smart_cols)
 
         # Image types
         cmd = """ SELECT DISTINCT IP.image_procedure
         FROM image_deid ID INNER JOIN image_procedure IP
         ON ID.image_procedure_id = IP.image_procedure_id
         WHERE ID.pt_id = {};""".format(
-            id
+            curr_id
         )
         res = db.session.execute(cmd).fetchall()
-        out_json[str(id)]["image_type"] = [v[0] for v in res]
+        out_json[str(curr_id)]["image_type"] = [v[0] for v in res]
 
     return create_response(data=out_json)
-

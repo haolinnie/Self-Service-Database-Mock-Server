@@ -20,10 +20,25 @@ from api.core import create_response
 _filter = Blueprint("_filter", __name__)
 
 
+def _parse_vision_inp(inp):
+    if inp is None:
+        return None
+    return int(inp.split("/")[1].split("-")[0].split("+")[0])
+
+
 @_filter.route("/ssd_api/filter", methods=["GET"])
 def filter_get():
     return create_response(
         message="Please use the POST method to submit a query", status=420
+    )
+
+
+def _age_to_dob(age):
+    td = datetime.today()
+    return datetime(
+        year=td.year - age,
+        month=td.month,
+        day=td.day - 1 if td.month == 2 and td.day == 29 else td.day,
     )
 
 
@@ -51,17 +66,11 @@ def filter_post():
             "older_than": td,
         }
         if "less" in data["age"]:
-            data["dob"]["younger_than"] = datetime(
-                year=td.year - data["age"]["less"],
-                month=td.month,
-                day=td.day - 1 if td.month == 2 and td.day == 29 else td.day,
-            )
+            data["dob"]["younger_than"] = _age_to_dob(data["age"]["less"])
+
         if "more" in data["age"]:
-            data["dob"]["older_than"] = datetime(
-                year=td.year - data["age"]["more"],
-                month=td.month,
-                day=td.day - 1 if td.month == 2 and td.day == 29 else td.day,
-            )
+            data["dob"]["older_than"] = _age_to_dob(data["age"]["more"])
+
         curr_ids = pt_deid.get_pt_id_by_age_or_ethnicity(
             younger_than=data["dob"]["younger_than"],
             older_than=data["dob"]["older_than"],
@@ -124,11 +133,6 @@ def filter_post():
     # TODO: Figure out a robust way to send "less" and "more" data
     # Currently parsing the number after "/" and converting to Int, which
     # will break if someone sends in something else
-    def _parse_vision_inp(inp):
-        if inp is None:
-            return None
-        return int(inp.split("/")[1].split("-")[0].split("+")[0])
-
     if "left_vision" in data:
         curr_ids = smart_data_deid.get_pt_id_by_left_vision(
             [

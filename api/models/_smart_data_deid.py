@@ -3,7 +3,8 @@ from api.models.base import db
 
 
 def _vision_filter(lst, more_than, less_than):
-    """Helper function that takes a list of 
+    """Helper function that takes a list of tuples<pt_id, val>
+    filter for val between more_than and less_than for vision
     
     """
     more_than = 0 if more_than is None else more_than
@@ -16,6 +17,9 @@ def _vision_filter(lst, more_than, less_than):
 
 
 def _pressure_filter(lst, more_than, less_than):
+    """Helper function that takes a list of tuples<pt_id, val>
+    filter for val between more_than and less_than for pressure
+    """
     more_than = 0 if more_than is None else more_than
     less_than = 1000 if less_than is None else less_than
     return [(pt_id, val) for pt_id, val in lst if more_than <= int(val) <= less_than]
@@ -90,3 +94,33 @@ class smart_data_deid(Mixin, db.Model):
             KEYWORDS["pressure_value_regex"],
             vision=False,
         )
+
+    @staticmethod
+    def get_data_for_pt_id(pt_id, pressure=False, vision=False):
+        if not pressure ^ vision:
+            raise ValueError(
+                "get_data_for_pt_id: set either pressure or vision to True"
+            )
+
+        if pressure:
+            kws = KEYWORDS["pressure"]
+        elif vision:
+            kws = KEYWORDS["vision"]
+
+        qry = (
+            smart_data_deid.query.with_entities(
+                smart_data_deid.element_name,
+                smart_data_deid.smrtdta_elem_value,
+                smart_data_deid.smart_data_id,
+                smart_data_deid.value_dt,
+            )
+            .filter(
+                db.and_(
+                    smart_data_deid.pt_id == curr_id,
+                    smart_data_deid.element_name.ilike(kws),
+                )
+            )
+            .order_by(smart_data_deid.value_dt.desc())
+        )
+        res = qry.all()
+        return res

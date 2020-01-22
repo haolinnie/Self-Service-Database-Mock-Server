@@ -102,3 +102,13 @@ def get_keywords() -> list:
 
 # KEYWORDS dict accessible to all modules
 KEYWORDS = get_keywords()
+
+
+def _generate_like_or_filters(param, kws, unlike=False):
+    if unlike:
+        or_filters = [param.notilike(kw) for kw in kws]
+    elif not unlike:
+        or_filters = [param.ilike(kw) for kw in kws]
+    else:
+        raise ValueError("_generate_like_or_filters: 'unlike' must be a boolean")
+    return or_filters

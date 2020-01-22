@@ -3,7 +3,7 @@ from flask import Blueprint, request, render_template
 from sqlalchemy import or_
 
 from api.models import db, models
-from api.core import create_response, KEYWORDS
+from api.core import create_response, KEYWORDS, _generate_like_or_filters
 
 
 _main = Blueprint("_main", __name__)
@@ -70,24 +70,24 @@ def get_distinct():
         """Get distinct eye_diagnosis or systemic_diagnosis
         """
         special = request.args["special"]
+        tb = models["diagnosis_deid"]
+
         if special == "eye_diagnosis":
-            tb = models["diagnosis_deid"]
             # SQLAlchemy ilike guarantees case-insensitive
-            or_filters = [
-                tb.diagnosis_name.ilike("%{}%".format(kw))
-                for kw in KEYWORDS["eye_diagnosis_keywords"]
-            ]
+            or_filters = _generate_like_or_filters(
+                tb.diagnosis_name, KEYWORDS["eye_diagnosis_keywords"]
+            )
             qry = (
                 db.session.query(tb.diagnosis_name).distinct().filter(or_(*or_filters))
             )
             data = qry.all()
             data = [r[0] for r in data]
+
         elif special == "systemic_diagnosis":
-            tb = models["diagnosis_deid"]
-            or_filters = [
-                tb.diagnosis_name.notilike("%{}%".format(kw))
-                for kw in KEYWORDS["eye_diagnosis_keywords"]
-            ]
+
+            or_filters = _generate_like_or_filters(
+                tb.diagnosis_name, KEYWORDS["eye_diagnosis_keywords"], unlike=True
+            )
             qry = (
                 db.session.query(tb.diagnosis_name).distinct().filter(or_(*or_filters))
             )
