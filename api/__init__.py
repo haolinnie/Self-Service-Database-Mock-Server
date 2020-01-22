@@ -11,6 +11,8 @@ from api.endpoints import _main, _filter, _patient_history, _patient_images
 
 def create_app(**config_override):
     """Flask Application Factory
+
+    config_override isn't current used 
     """
     # Instantiate flask app
     app = Flask(__name__, instance_relative_config=True)

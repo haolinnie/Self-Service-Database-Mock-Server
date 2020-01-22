@@ -8,7 +8,7 @@ CREATE TABLE pt_deid (
     pt_id INT,
     dob DATETIME,
     over_90 SMALLINT,
-    ethnicity VARCHAR(50)
+    race_1 VARCHAR(50)
 );
 INSERT INTO pt_deid VALUES
     (20676,'1972-02-15 00:00:00',0,'Not Hispanic or Latino'),

@@ -25,17 +25,6 @@ class Mixin:
         return d_out
 
 
-def check_sql_safe(*argv) -> bool:
-    """Sanitize SQL inputs
-
-    :returns True if safe and False if unsafe.
-    """
-    for arg in argv:
-        if " " in arg or ";" in arg or "," in arg or "--" in arg:
-            return False
-    return True
-
-
 def create_response(
     data: dict = None, status: int = 200, message: str = ""
 ) -> Tuple[Response, int]:
@@ -87,10 +76,10 @@ def get_database_url(file: str = "credentials.config") -> str:
         print("Failed to load config file [{}].".format(file))
 
 
-def get_keywords() -> list:
+def get_keywords() -> dict:
     """Load keywords for search
     
-    :returns str or None if Exception
+    :returns dict or None if Exception
     """
     try:
         with open("api/keywords.json") as f:
@@ -102,3 +91,15 @@ def get_keywords() -> list:
 
 # KEYWORDS dict accessible to all modules
 KEYWORDS = get_keywords()
+
+
+def _generate_like_or_filters(param, kws, unlike=False):
+    if unlike:  # Use notilike
+        or_filters = [param.notilike(kw) for kw in kws]
+    else:  # Use like
+        or_filters = [param.ilike(kw) for kw in kws]
+    return or_filters
+
+
+def _to_list_of_dict(data: list, cols: list) -> list:
+    return [dict(zip(cols, val)) for val in data]

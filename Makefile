@@ -1,4 +1,9 @@
 
+all: setup start_dev_db build_api_docker start_api_docker
+
+start: all
+
+destroy: destroy_dev_db destroy_api_docker
 
 setup:
 	rm -rf venv
@@ -20,7 +25,8 @@ destroy_dev_db:
 build_api_docker:
 	./scripts/api/docker_build.sh
 
-run_api_docker:
+
+start_api_docker:
 	./scripts/api/docker_run.sh
 
 destroy_api_docker:
@@ -30,10 +36,13 @@ destroy_api_docker:
 run_server:
 	export FLASK_APP="api:create_app()"
 	export FLASK_RUN_PORT=5100
+	echo $(FLASK_APP)
 	venv/bin/flask run
+
 
 deploy:
 	./scripts/deploy.sh
+
 
 test:
 	./scripts/run_tests
