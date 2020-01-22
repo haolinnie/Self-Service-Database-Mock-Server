@@ -3,9 +3,9 @@ from flask import Blueprint, request
 from api.models import db
 from api.core import (
     create_response,
-    check_sql_safe,
     KEYWORDS,
     _generate_like_or_filters,
+    _to_list_of_dict,
 )
 from api.models import (
     pt_deid,
@@ -22,17 +22,8 @@ from api.models import (
 
 _patient_history = Blueprint("_patient_history", __name__)
 
-KEYWORDS["eye_diagnosis_keywords"]
 
-# TODO:
-# Rewrite this endpoint with the ORM model
-
-
-def _to_list_of_dict(data, cols):
-    return [dict(zip(cols, val)) for val in data]
-
-
-def _filter_diagnosis(curr_id, or_filters):
+def _filter_diagnosis(curr_id: int, or_filters: list) -> list:
     """Helper function to filter the diagnosis_deid table with a patient id and keywords (eye or systemic diagnosis)
     """
     qry = diagnosis_deid.query.with_entities(
@@ -111,13 +102,8 @@ def patients():
         out_json[str(curr_id)]["pressure"] = _to_list_of_dict(res, smart_cols)
 
         # Image types
-        cmd = """ SELECT DISTINCT IP.image_procedure
-        FROM image_deid ID INNER JOIN image_procedure IP
-        ON ID.image_procedure_id = IP.image_procedure_id
-        WHERE ID.pt_id = {};""".format(
-            curr_id
-        )
-        res = db.session.execute(cmd).fetchall()
-        out_json[str(curr_id)]["image_type"] = [v[0] for v in res]
+        out_json[str(curr_id)][
+            "image_type"
+        ] = image_deid.get_image_procedure_from_pt_id(curr_id)
 
     return create_response(data=out_json)

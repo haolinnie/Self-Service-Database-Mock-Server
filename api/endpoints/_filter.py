@@ -71,7 +71,7 @@ def filter_post():
         if "more" in data["age"]:
             data["dob"]["older_than"] = _age_to_dob(data["age"]["more"])
 
-        curr_ids = pt_deid.get_pt_id_by_age_or_ethnicity(
+        curr_ids = pt_deid.get_pt_id_by_age_or_race_1(
             younger_than=data["dob"]["younger_than"],
             older_than=data["dob"]["older_than"],
         )
@@ -79,7 +79,7 @@ def filter_post():
 
     # Ethnicity
     if "ethnicity" in data:
-        curr_ids = pt_deid.get_pt_id_by_age_or_ethnicity(ethnicity=data["ethnicity"],)
+        curr_ids = pt_deid.get_pt_id_by_age_or_race_1(race_1=data["ethnicity"],)
         pt_ids = pt_ids.intersection(curr_ids)
 
     # Get eye diagnosis

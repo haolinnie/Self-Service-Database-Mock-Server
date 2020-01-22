@@ -12,7 +12,7 @@ class pt_deid(Mixin, db.Model):
     pt_id = db.Column(db.INT, unique=True, primary_key=True)
     dob = db.Column(db.DateTime, nullable=False)
     over_90 = db.Column(db.SMALLINT)
-    ethnicity = db.Column(db.VARCHAR)
+    race_1 = db.Column(db.VARCHAR)
 
     @staticmethod
     def get_all_pt_ids():
@@ -22,14 +22,12 @@ class pt_deid(Mixin, db.Model):
         return [v.pt_id for v in qry.all()]
 
     @staticmethod
-    def get_pt_id_by_age_or_ethnicity(
-        ethnicity: list = None,
-        younger_than: datetime = None,
-        older_than: datetime = None,
+    def get_pt_id_by_age_or_race_1(
+        race_1: list = None, younger_than: datetime = None, older_than: datetime = None,
     ) -> list:
-        """Filter pt_id by age and/or ethnicity
+        """Filter pt_id by age and/or race_1
 
-        :param ethnicity <list<str>>
+        :param race_1 <list<str>>
         :param younger_than <DateTime> earliest DoB
         :param older_than <DateTime> latest DoB
         :returns <list<int>> pt_id
@@ -41,7 +39,7 @@ class pt_deid(Mixin, db.Model):
             qry = qry.filter(pt_deid.dob > younger_than)
         if older_than != None:
             qry = qry.filter(pt_deid.dob < older_than)
-        if ethnicity:
-            qry = qry.filter(pt_deid.ethnicity.in_(ethnicity))
+        if race_1:
+            qry = qry.filter(pt_deid.race_1.in_(race_1))
 
         return [v.pt_id for v in qry.all()]

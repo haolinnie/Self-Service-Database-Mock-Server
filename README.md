@@ -21,7 +21,11 @@ Please read the API documentation to understand the structure of the endpoints. 
 
 [API debugger](https://tigernie.com/ssd_api)
 
-## Getting Started
+## Getting Started on Windows
+
+Please check the [Wiki]() of this repo.
+
+## Getting Started on Unix
 
 Prerequisites
 

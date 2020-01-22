@@ -116,7 +116,7 @@ class smart_data_deid(Mixin, db.Model):
             )
             .filter(
                 db.and_(
-                    smart_data_deid.pt_id == curr_id,
+                    smart_data_deid.pt_id == pt_id,
                     smart_data_deid.element_name.ilike(kws),
                 )
             )

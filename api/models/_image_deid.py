@@ -15,9 +15,16 @@ class image_deid(Mixin, db.Model):
     )
     exam_id = db.Column(db.INT, db.ForeignKey("exam_deid.exam_id"))
 
+    image_num = db.Column(db.INT)
     image_type = db.Column(db.VARCHAR, nullable=False)
     image_laterality = db.Column(db.VARCHAR, nullable=False)
     device_id = db.Column(db.INT)
+
+    image_procedure = db.relationship(
+        "image_procedure",
+        primaryjoin="image_procedure.image_procedure_id == image_deid.image_procedure_id",
+        backref="image_deid",
+    )
 
     @staticmethod
     def get_pt_id_by_image_procedure_type(ipt: list) -> list:
@@ -42,3 +49,13 @@ class image_deid(Mixin, db.Model):
         qry = qry.filter(db.and_(*and_query))
 
         return [v.pt_id for v in qry.all()]
+
+    @staticmethod
+    def get_image_procedure_from_pt_id(pt_id: int) -> list:
+        qry = (
+            image_deid.query.join(image_procedure)
+            .with_entities(image_procedure.image_procedure)
+            .filter(image_deid.pt_id == pt_id)
+            .distinct()
+        )
+        return [v[0] for v in qry.all()]
