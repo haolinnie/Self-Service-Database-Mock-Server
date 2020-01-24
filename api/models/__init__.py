@@ -8,6 +8,7 @@ from api.models._visit_movement_deid import visit_movement_deid
 from api.models._image_deid import image_deid
 from api.models._exam_deid import exam_deid
 from api.models._image_procedure import image_procedure
+from api.models.User import User, Role
 from api.models.base import db
 
 
@@ -23,5 +24,3 @@ models = {
     "exam_deid": exam_deid,
     "image_procedure": image_procedure,
 }
-
-

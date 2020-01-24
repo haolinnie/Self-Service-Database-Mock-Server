@@ -19,3 +19,8 @@ class medication_administration_deid(Mixin, db.Model):
     administration_dt = db.Column(db.DateTime)
     discontinue_order_dt = db.Column(db.DateTime)
     action_name = db.Column(db.VARCHAR)
+
+    def __repr__(self):
+        return "<medication_administration_deid {!r}, pt_id {!r}".format(
+            self.medication_administration_id, self.pt_id
+        )

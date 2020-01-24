@@ -14,6 +14,31 @@ class pt_deid(Mixin, db.Model):
     over_90 = db.Column(db.SMALLINT)
     race_1 = db.Column(db.VARCHAR)
 
+    diagnosis_deid = db.relationship(
+        "diagnosis_deid", backref="pt_deid", lazy="dynamic"
+    )
+    exam_deid = db.relationship("exam_deid", backref="pt_deid", lazy="dynamic")
+    image_deid = db.relationship("image_deid", backref="pt_deid", lazy="dynamic")
+
+    lab_value_deid = db.relationship(
+        "lab_value_deid", backref="pt_deid", lazy="dynamic"
+    )
+    medication_administration_deid = db.relationship(
+        "medication_administration_deid", backref="pt_deid", lazy="dynamic"
+    )
+    medication_deid = db.relationship(
+        "medication_deid", backref="pt_deid", lazy="dynamic"
+    )
+    smart_data_deid = db.relationship(
+        "smart_data_deid", backref="pt_deid", lazy="dynamic"
+    )
+    visit_movement_deid = db.relationship(
+        "visit_movement_deid", backref="pt_deid", lazy="dynamic"
+    )
+
+    def __repr__(self):
+        return "<pt_deid {!r}>".format(self.pt_id)
+
     @staticmethod
     def get_all_pt_ids():
         """Get all pt_id available

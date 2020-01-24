@@ -14,13 +14,22 @@ class medication_deid(Mixin, db.Model):
     therapeutic_class = db.Column(db.VARCHAR)
     order_placed_dt = db.Column(db.DateTime)
     order_end_dt = db.Column(db.DateTime)
-    usage_direction = db.Column(db.VARCHAR)
+    usage_directions = db.Column(db.VARCHAR)
     order_class = db.Column(db.VARCHAR)
     strength = db.Column(db.VARCHAR)
     form = db.Column(db.VARCHAR)
     number_of_doses = db.Column(db.INT)
     dose_unit = db.Column(db.VARCHAR)
     frequency = db.Column(db.VARCHAR)
+
+    medication_administration_deid = db.relationship(
+        "medication_administration_deid", backref="medication_deid", lazy="dynamic"
+    )
+
+    def __repr__(self):
+        return "<medication_deid {!r}, pt_id {!r}".format(
+            self.medication_id, self.pt_id
+        )
 
     @staticmethod
     def get_pt_id_by_generic_name(mgn: list) -> list:

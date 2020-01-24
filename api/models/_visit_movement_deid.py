@@ -17,3 +17,8 @@ class visit_movement_deid(Mixin, db.Model):
     event_type_name = db.Column(db.VARCHAR)
     event_subtype_name = db.Column(db.VARCHAR)
     patient_class_name = db.Column(db.VARCHAR)
+
+    def __repr__(self):
+        return "<visit_movement_deid {!r}, pt_id {!r}>".format(
+            self.visit_movement_id, self.pt_id
+        )

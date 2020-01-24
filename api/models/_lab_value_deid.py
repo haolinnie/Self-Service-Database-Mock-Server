@@ -21,3 +21,6 @@ class lab_value_deid(Mixin, db.Model):
     order_dt = db.Column(db.DateTime)
     result_dt = db.Column(db.DateTime)
     value_numeric = db.Column(db.DECIMAL(18, 0))
+
+    def __repr__(self):
+        return "<lab_value_deid {!r}, pt_id {!r}".format(self.lab_value_id, self.pt_id)

@@ -59,6 +59,11 @@ class smart_data_deid(Mixin, db.Model):
     smrtdta_elem_value = db.Column(db.VARCHAR)
     value_dt = db.Column(db.DateTime)
 
+    def __repr__(self):
+        return "<smart_data_deid {!r}, pt_id {!r}>".format(
+            self.smart_data_id, self.pt_id
+        )
+
     @staticmethod
     def get_pt_id_by_left_vision(val_range):
         return _filter_vis_pres_range(

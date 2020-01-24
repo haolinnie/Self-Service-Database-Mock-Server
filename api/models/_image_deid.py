@@ -20,11 +20,8 @@ class image_deid(Mixin, db.Model):
     image_laterality = db.Column(db.VARCHAR, nullable=False)
     device_id = db.Column(db.INT)
 
-    image_procedure = db.relationship(
-        "image_procedure",
-        primaryjoin="image_procedure.image_procedure_id == image_deid.image_procedure_id",
-        backref="image_deid",
-    )
+    def __repr__(self):
+        return "<image_deid {!r}, pt_id {!r}>".format(self.image_id, self.pt_id)
 
     @staticmethod
     def get_pt_id_by_image_procedure_type(ipt: list) -> list:

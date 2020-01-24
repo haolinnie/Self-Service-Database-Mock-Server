@@ -18,6 +18,9 @@ class diagnosis_deid(Mixin, db.Model):
         db.VARCHAR
     )  ## This isn't in the sqldbm.com model but is in the sample data
 
+    def __repr__(self):
+        return "<diagnosis_deid {!r}, pt_id {!r}>".format(self.diagnosis_id, self.pt_id)
+
     @staticmethod
     def get_pt_id_by_diagnosis_names(diagnosis_names: list) -> list:
         """Get pt_id by diagnosis_name
