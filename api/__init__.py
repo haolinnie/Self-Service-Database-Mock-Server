@@ -5,7 +5,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from api.core import exception_handler, create_response
 from api.config import _config
-from api.models import db
+from api.models import db, models
 from api.endpoints import _main, _filter, _patient_history, _patient_images
 
 
@@ -40,5 +40,10 @@ def create_app(**config_override):
 
     # Register error handler
     app.register_error_handler(Exception, exception_handler)
+
+    # Shell context
+    @app.shell_context_processor
+    def make_shell_context():
+        return dict(db=db, models=models)
 
     return app
