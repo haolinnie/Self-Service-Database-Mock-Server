@@ -55,7 +55,7 @@ def exception_handler(error: Exception) -> Tuple[Response, int]:
     return create_response(message=str(error), status=500)
 
 
-def get_database_url(file: str = "credentials.config") -> str:
+def get_database_url(file: str = "credentials.config") -> dict:
     """Load config
     Example of config file:
     [mysql_creds]
@@ -68,8 +68,7 @@ def get_database_url(file: str = "credentials.config") -> str:
         config = configparser.ConfigParser()
         config.read(file)
         try:
-            res = config["mssql_credentials"]
-            return res["mssql_url"]
+            return config["mssql_credentials"]
         except KeyError:
             print("Failed to retrieve SQL Server credentials from [{}].".format(file))
     except:

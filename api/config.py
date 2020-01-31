@@ -22,7 +22,9 @@ class DevelopmentConfig(Config):
     """
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = get_database_url()
+    credentials = get_database_url()
+    SQLALCHEMY_DATABASE_URI = credentials["mssql_url_1"]
+    SQLALCHEMY_BINDS = {"image_exams_db": credentials["mssql_url_2"]}
 
 
 class ProductionConfig(Config):

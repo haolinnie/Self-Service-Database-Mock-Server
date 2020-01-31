@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo docker exec -it sql1 bash
+sudo docker exec -it mssql2 bash

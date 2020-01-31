@@ -25,7 +25,6 @@ def test_exception_handler(app):
 
 def test_get_database_url():
     res = get_database_url()
-    assert isinstance(res, str)
 
 
 def test_get_keywords():

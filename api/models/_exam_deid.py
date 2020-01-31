@@ -6,6 +6,7 @@ class exam_deid(Mixin, db.Model):
     """exam_deid table
     """
 
+    __bind_key__ = "image_exams_db"
     __tablename__ = "exam_deid"
     exam_id = db.Column(db.INT, unique=True, primary_key=True)
     pt_id = db.Column(db.INT, db.ForeignKey("pt_deid.pt_id"))

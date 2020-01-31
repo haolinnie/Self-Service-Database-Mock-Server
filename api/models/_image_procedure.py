@@ -6,6 +6,7 @@ class image_procedure(Mixin, db.Model):
     """image_procedure table
     """
 
+    __bind_key__ = "image_exams_db"
     __tablename__ = "image_procedure"
     image_procedure_id = db.Column(db.INT, unique=True, primary_key=True)
     image_procedure = db.Column(db.VARCHAR, nullable=False)
