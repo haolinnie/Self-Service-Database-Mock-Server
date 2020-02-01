@@ -1,7 +1,8 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request
 
 from api.models import db
 from api.core import create_response, _to_list_of_dict
+from api.auth import auth
 from api.models import (
     pt_deid,
     diagnosis_deid,
@@ -20,6 +21,7 @@ _patient_images = Blueprint("_patient_images", __name__)
 
 
 @_patient_images.route("/ssd_api/patient_images", methods=["GET"])
+@auth.login_required
 def patient_images():
     arg_pt_ids = request.args.getlist("pt_id")
     pt_ids = pt_deid.query.filter(pt_deid.pt_id.in_(arg_pt_ids))

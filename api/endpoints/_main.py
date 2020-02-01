@@ -4,6 +4,7 @@ from sqlalchemy import or_
 
 from api.models import db, models
 from api.core import create_response, KEYWORDS, _generate_like_or_filters
+from api.auth import auth
 
 
 _main = Blueprint("_main", __name__)
@@ -12,17 +13,22 @@ _main = Blueprint("_main", __name__)
 @_main.route("/")
 @_main.route("/ssd_api", methods=["GET"])
 def index():
+    """ Graphical API debugger
+    """
     return render_template("debug.html")
 
 
 @_main.route("/ssd_api/get_table", methods=["GET"])
 def get_table():
+    """ Return all available tables
+    """
     return create_response(data={"table_names": list(models.keys())})
 
 
 @_main.route("/ssd_api/get_table_cols", methods=["GET"])
 def get_table_cols():
-
+    """ Get column names for a given table
+    """
     if "table_name" not in request.args:
         return create_response(message="table_name missing", status=420)
 
@@ -33,6 +39,7 @@ def get_table_cols():
 
 
 @_main.route("/ssd_api/get_distinct", methods=["GET"])
+@auth.login_required
 def get_distinct():
     """Get distinct values given a table_name and col_name
     special can be used to get eye_diagnosis and systemic_diagnosis
@@ -106,6 +113,7 @@ def get_distinct():
 
 
 @_main.route("/ssd_api/filter_table_with_ptid", methods=["GET"])
+@auth.login_required
 def filter_table_with_ptid():
     pt_id = request.args.getlist("pt_id")
     table_name = request.args["table_name"]

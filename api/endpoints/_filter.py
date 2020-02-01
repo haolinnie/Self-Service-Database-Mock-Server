@@ -15,6 +15,7 @@ from api.models import (
     image_procedure,
 )
 from api.core import create_response
+from api.auth import auth
 
 
 _filter = Blueprint("_filter", __name__)
@@ -26,13 +27,6 @@ def _parse_vision_inp(inp):
     return int(inp.split("/")[1].split("-")[0].split("+")[0])
 
 
-@_filter.route("/ssd_api/filter", methods=["GET"])
-def filter_get():
-    return create_response(
-        message="Please use the POST method to submit a query", status=420
-    )
-
-
 def _age_to_dob(age):
     td = datetime.today()
     return datetime(
@@ -42,7 +36,16 @@ def _age_to_dob(age):
     )
 
 
+@_filter.route("/ssd_api/filter", methods=["GET"])
+@auth.login_required
+def filter_get():
+    return create_response(
+        message="Please use the POST method to submit a query", status=420
+    )
+
+
 @_filter.route("/ssd_api/filter", methods=["POST"])
+@auth.login_required
 def filter_post():
     """Endpoint that response to filter POST requests
     This endpoint heavily utilises SQLAlchemy's Object Relational Mapper (ORM),

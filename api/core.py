@@ -68,7 +68,7 @@ def get_database_url(file: str = "credentials.config") -> dict:
         config = configparser.ConfigParser()
         config.read(file)
         try:
-            return config["mssql_credentials"]
+            return config["database"]
         except KeyError:
             print("Failed to retrieve SQL Server credentials from [{}].".format(file))
     except:

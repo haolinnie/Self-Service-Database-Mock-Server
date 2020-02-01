@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 
 from api.models import db
+from api.auth import auth
 from api.core import (
     create_response,
     KEYWORDS,
@@ -24,6 +25,7 @@ _patient_history = Blueprint("_patient_history", __name__)
 
 
 @_patient_history.route("/ssd_api/patients", methods=["GET"])
+@auth.login_required
 def patients():
     arg_pt_ids = request.args.getlist("pt_id")
 

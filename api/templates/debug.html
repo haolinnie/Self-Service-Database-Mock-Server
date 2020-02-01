@@ -160,6 +160,10 @@
     if (window.XMLHttpRequest) {
       var http = new XMLHttpRequest();
       http.open(command, document.commandform.commandurl.value, true);
+      http.setRequestHeader("Content-Type", "application/json");
+      http.setRequestHeader("Authorization", "Basic " + btoa("debug" + ":" + "debug"))
+
+
 
       http.onreadystatechange = function() {
         if (http.readyState == 4) {

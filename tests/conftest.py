@@ -7,8 +7,7 @@ from api import create_app
 
 @pytest.fixture
 def app():
-    config = {"test": True}
-    app = create_app(**config)
+    app = create_app(testing=True)
     yield app
 
 
