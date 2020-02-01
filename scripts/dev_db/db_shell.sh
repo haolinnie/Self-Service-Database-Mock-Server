@@ -1,2 +1,2 @@
 #!/bin/bash
-sqlcmd -S $(scripts/get_docker_ip),1434 -U SA -P "yourStrong_Password"
+sqlcmd -S $(scripts/get_docker_ip mssql2),4434 -U SA -P "yourStrong_Password"
