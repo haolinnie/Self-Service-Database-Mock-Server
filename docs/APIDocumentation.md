@@ -1,5 +1,7 @@
 # Self-Service Database API Documentation
 
+All API endpoints (with the exception of creating a new user for now) require [HTTP Basic Access Authentication](https://en.wikipedia.org/wiki/Basic_access_authentication). This means that requests are required to contain a header field in the form of `Authorization: Basic <credentials>`, where credentials is the base64 encoding of id and password joined by a single colon `:`.
+
 All API responses have `Content-Type: application/json` and CORS headers. All responses have the following structure, where the `result` field stores the queried data, `success` indicates whether the API call was successful and `message` contains the error message (if there is one). This response structure is maintained throughout the API for consistency as any exception in the backend is caught and returned in string format in the `message` field.
 
 ```json
@@ -14,6 +16,8 @@ All API responses have `Content-Type: application/json` and CORS headers. All re
 
 ## API Endpoints
 
+- [User authentication](#user-authentication)
+- [Generate auth token](#generate-auth-token)
 - [Get list of table names (get_table)](#get-list-of-table-names)
 - [Get columns in a table (get_table_cols)](#get-columns-in-a-table)
 - [Get distinct values in a table column (get_distinct)](#get-distinct-values-in-a-table-column)
@@ -21,6 +25,124 @@ All API responses have `Content-Type: application/json` and CORS headers. All re
 - [Patient History (patients)](#patient-history)
 - [Patient Images (patient_images)](#patient-images)
 - [Filter (filter)](#filter)
+
+---
+### User authentication
+
+
+This endpoint can query for existing users (auth required), create users and delete users (auth required).
+
+URL: `baseURL/ssd_api/users`
+
+#### Create User
+
+Type: `POST`
+
+Put the username in the `username` field and password in the `password` field in the JSON data of a post request. Must set `Content-Type` to `application/json`.
+
+Example:
+
+```bash
+curl -i -X POST -H "Content-Type: application/json" -d '{"username":"tiger","password":"flask"}' https://tigernie.com/ssd_api/users
+```
+
+Returns (Success):
+
+```json
+{
+  "message": "Created user",
+  "result": {
+    "username": "tiger"
+  },
+  "success": true
+}
+```
+
+Returns (User already exists):
+
+```json
+{
+  "message": "User 'tiger' exists",
+  "result": null,
+  "success": false
+}
+```
+
+#### Query for existing users (Auth required)
+
+Type: `GET`
+
+This request requires authorization (either the username and password or an existing auth token).
+
+Example (Using username and password):
+
+```bash
+curl -u <username>:<password> -i -X GET https://tigernie.com/ssd_api/users
+```
+
+Example (Using auth token):
+
+```bash
+curl -u <token>:nouse -i -X GET https://tigernie.com/ssd_api/users
+```
+
+Returns (success):
+
+```json
+{
+  "message": "",
+  "result": {
+    "users": [
+      "debug",
+      "tiger"
+    ]
+  },
+  "success": true
+}
+```
+
+Returns (Auth failed):
+```bash
+Unauthorized Access
+```
+
+#### Delete an user (Auth required)
+
+Type: `DELETE`
+
+This will delete the user who's authorization was attached with the request.
+
+Example:
+
+```bash
+curl -u <username>:<password> -i -X GET https://tigernie.com/ssd_api/users
+```
+
+---
+### Generate Auth Token
+
+This will generate a [sign-in token](https://www.w3.org/2001/sw/Europe/events/foaf-galway/papers/fp/token_based_authentication/) for a user. A user enters the name and password into the client. The client then sends these credentials to the authentication server (here). The server authenticates client credentials, and generates an access token. This access token contains enough information to identify an user and contains an expiration time (10 minutes). As the token does not reveal any information about the user's username and password and it expires after a period of time, interception of this token by an attacker will not result in significant breach of the system.
+
+URL: `baseURL/ssd_api/token`
+
+Example:
+
+```bash
+curl -u <username>:<password> -i -X GET http://127.0.0.1:5100/ssd_api/token
+```
+
+Returns:
+
+```json
+{
+  "message": "",
+  "result": {
+    "token": <token>
+  },
+  "success": true
+}
+```
+
 
 ---
 

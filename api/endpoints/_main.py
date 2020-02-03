@@ -26,6 +26,7 @@ def get_table():
 
 
 @_main.route("/ssd_api/get_table_cols", methods=["GET"])
+@auth.login_required
 def get_table_cols():
     """ Get column names for a given table
     """
@@ -36,7 +37,7 @@ def get_table_cols():
     col_names = models[table_name].__table__.columns.keys()
 
     return create_response(data={"table_name": table_name, "columns": col_names})
-
+`
 
 @_main.route("/ssd_api/get_distinct", methods=["GET"])
 @auth.login_required
