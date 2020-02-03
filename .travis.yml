@@ -14,25 +14,15 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
-  - sudo docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' \
-       -p 4433:1433 --name mssql1 \
-       -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
-
-  - sudo docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' \
-       -p 4434:1433 --name mssql2 \
-       -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
-
+  - sudo docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' -p 4433:1433 --name mssql1 -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
+  - sudo docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' -p 4434:1433 --name mssql2 -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
   - sudo docker ps
 
   - sudo docker cp data/sample_db_mssql1.sql mssql1:/tmp
-  - sudo docker exec -it mssql1 /opt/mssql-tools/bin/sqlcmd \
-        -S 0.0.0.0 -U "SA" -P "yourStrong_Password" \
-        -i '/tmp/sample_db_mssql1.sql'
+  - sudo docker exec -it mssql1 /opt/mssql-tools/bin/sqlcmd -S 0.0.0.0 -U "SA" -P "yourStrong_Password" -i '/tmp/sample_db_mssql1.sql'
 
   - sudo docker cp data/sample_db_mssql2.sql mssql2:/tmp
-  - sudo docker exec -it mssql2 /opt/mssql-tools/bin/sqlcmd \
-       -S 0.0.0.0 -U "SA" -P "yourStrong_Password" \
-       -i '/tmp/sample_db_mssql2.sql'
+  - sudo docker exec -it mssql2 /opt/mssql-tools/bin/sqlcmd -S 0.0.0.0 -U "SA" -P "yourStrong_Password" -i '/tmp/sample_db_mssql2.sql'
 
 install:
   - pip install -r requirements.txt
