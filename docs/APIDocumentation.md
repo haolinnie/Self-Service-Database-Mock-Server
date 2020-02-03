@@ -137,7 +137,7 @@ Returns:
 {
   "message": "",
   "result": {
-    "token": <token>
+    "token": "<token>"
   },
   "success": true
 }
