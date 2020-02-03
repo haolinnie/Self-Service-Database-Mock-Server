@@ -1,10 +1,10 @@
 #!/bin/bash
-if [[ $1 ]] && [[ $1 = 'travis' ]]
+if [[ $CI ]]
 then
-   echo Travis detected
+   echo CI detected
 else
    echo No CI
-    source venv/bin/activate
+   source venv/bin/activate
 fi
 
 coverage run -m pytest -v

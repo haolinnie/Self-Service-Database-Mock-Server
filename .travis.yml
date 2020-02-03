@@ -1,21 +1,18 @@
 language: python
+
 python:
   - "3.6"
   - "3.7"
   - "3.8"
+
 os:
   - linux
-  - windows
-
-install:
-  - pip install -r requirements.txt
-  - pip install -r requirements-dev.txt
-  - pip install coveralls
 
 services:
   - 'docker'
 
 before_install:
+  - apt update && apt upgrade docker
   - docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' \
        -p 4433:1433 --name mssql1 \
        -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
@@ -36,7 +33,13 @@ before_install:
        -S 0.0.0.0 -U "SA" -P "yourStrong_Password" \
        -i '/tmp/sample_db_mssql2.sql'
 
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip install coveralls
+
 script:
-  - scripts/run_tests travis
+  - make test
+
 after_success:
   - coveralls
