@@ -12,24 +12,24 @@ services:
   - 'docker'
 
 before_install:
-  - apt update && apt upgrade docker
-  - docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' \
+  - sudo apt update && sudo apt upgrade docker
+  - sudo docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' \
        -p 4433:1433 --name mssql1 \
        -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
 
-  - docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' \
+  - sudo docker run --rm -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=yourStrong_Password' \
        -p 4434:1433 --name mssql2 \
        -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
 
-  - docker ps
+  - sudo docker ps
 
-  - docker cp data/sample_db_mssql1.sql mssql1:/tmp
-  - docker exec -it mssql1 /opt/mssql-tools/bin/sqlcmd \
+  - sudo docker cp data/sample_db_mssql1.sql mssql1:/tmp
+  - sudo docker exec -it mssql1 /opt/mssql-tools/bin/sqlcmd \
         -S 0.0.0.0 -U "SA" -P "yourStrong_Password" \
         -i '/tmp/sample_db_mssql1.sql'
 
-  - docker cp data/sample_db_mssql2.sql mssql2:/tmp
-  - docker exec -it mssql2 /opt/mssql-tools/bin/sqlcmd \
+  - sudo docker cp data/sample_db_mssql2.sql mssql2:/tmp
+  - sudo docker exec -it mssql2 /opt/mssql-tools/bin/sqlcmd \
        -S 0.0.0.0 -U "SA" -P "yourStrong_Password" \
        -i '/tmp/sample_db_mssql2.sql'
 
