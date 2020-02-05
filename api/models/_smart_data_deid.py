@@ -1,5 +1,6 @@
 from api.core import Mixin, KEYWORDS
 from api.models.base import db
+import pdb
 
 
 def _parse_vision(raw_data):
@@ -28,8 +29,8 @@ def _pressure_filter(lst, more_than, less_than):
     """Helper function that takes a list of tuples<pt_id, val>
     filter for val between more_than and less_than for pressure
     """
-    more_than = 0 if more_than is None else more_than
-    less_than = 1000 if less_than is None else less_than
+    more_than = 0 if more_than is None else int(more_than)
+    less_than = 1000 if less_than is None else int(less_than)
     return [(pt_id, val) for pt_id, val in lst if more_than <= int(val) <= less_than]
 
 
@@ -75,9 +76,9 @@ class smart_data_deid(Mixin, db.Model):
     @staticmethod
     def get_pt_id_by_vision(data: dict) -> set:
         """ Take the json data from filters
-        and filter for the pt_ids
+        and filter for the pt_ids with vision
 
-        paras:
+        params:
             data: <dict> input filter json
 
         returns:
@@ -105,40 +106,33 @@ class smart_data_deid(Mixin, db.Model):
         return set(pt_ids)
 
     @staticmethod
-    def get_pt_id_by_left_vision(val_range):
-        return _filter_vis_pres_range(
-            KEYWORDS["left_vision"],
-            val_range,
-            KEYWORDS["vision_value_regex"],
-            vision=True,
-        )
+    def get_pt_id_by_pressure(data: dict) -> set:
+        """ Take the json data from filters
+        and filter for the pt_ids with pressure
 
-    @staticmethod
-    def get_pt_id_by_right_vision(val_range):
-        return _filter_vis_pres_range(
-            KEYWORDS["right_vision"],
-            val_range,
-            KEYWORDS["vision_value_regex"],
-            vision=True,
-        )
+        params:
+            data: <dict> input filter json
 
-    @staticmethod
-    def get_pt_id_by_left_pressure(val_range):
-        return _filter_vis_pres_range(
-            KEYWORDS["left_pressure"],
-            val_range,
-            KEYWORDS["pressure_value_regex"],
-            vision=False,
-        )
+        returns:
+            pt_ids: <set>
+        """
+        pt_ids = []
+        for field in ("left_pressure", "right_pressure"):
+            if field not in data:
+                break
 
-    @staticmethod
-    def get_pt_id_by_right_pressure(val_range):
-        return _filter_vis_pres_range(
-            KEYWORDS["right_pressure"],
-            val_range,
-            KEYWORDS["pressure_value_regex"],
-            vision=False,
-        )
+            less = data.get(field).get("less")
+            more = data.get(field).get("more")
+
+            pt_ids.extend(
+                _filter_vis_pres_range(
+                    KEYWORDS[field],
+                    (less, more),
+                    KEYWORDS["pressure_value_regex"],
+                    vision=False,
+                )
+            )
+        return set(pt_ids)
 
     @staticmethod
     def get_data_for_pt_id(pt_id, pressure=False, vision=False):

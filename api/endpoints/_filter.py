@@ -132,39 +132,15 @@ def filter_post():
     # Currently parsing the number after "/" and converting to Int, which
     # will break if someone sends in something else
 
+    # Vision
     curr_ids = smart_data_deid.get_pt_id_by_vision(data)
     if curr_ids:
         pt_ids = pt_ids.intersection(curr_ids)
 
-    # if "left_vision" in data:
-    # less, more = _parse_vision_inp(data, "left_vision")
-    # curr_ids = smart_data_deid.get_pt_id_by_left_vision(less, more)
-    # pt_ids = pt_ids.intersection(curr_ids)
-
-    # # Right vision
-    # if "right_vision" in data:
-    # less, more = _parse_vision_inp(data, "right_vision")
-    # curr_ids = smart_data_deid.get_pt_id_by_right_vision(less, more)
-    # pt_ids = pt_ids.intersection(curr_ids)
-
-    # left pressure
-    if "left_pressure" in data:
-        curr_ids = smart_data_deid.get_pt_id_by_left_pressure(
-            [
-                data.get("left_pressure").get("more"),
-                data.get("left_pressure").get("less"),
-            ]
-        )
-        pt_ids = pt_ids.intersection(curr_ids)
-
-    # right pressure
-    if "right_pressure" in data:
-        curr_ids = smart_data_deid.get_pt_id_by_right_pressure(
-            [
-                data.get("right_pressure").get("more"),
-                data.get("right_pressure").get("less"),
-            ]
-        )
+    # Pressure
+    # BROKEN RIGHT NOW - RETURNS ALL PATIENTS - FIXME
+    curr_ids = smart_data_deid.get_pt_id_by_pressure(data)
+    if curr_ids:
         pt_ids = pt_ids.intersection(curr_ids)
 
     return create_response(
