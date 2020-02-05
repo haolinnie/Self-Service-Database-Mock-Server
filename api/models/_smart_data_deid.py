@@ -2,6 +2,14 @@ from api.core import Mixin, KEYWORDS
 from api.models.base import db
 
 
+def _parse_vision(raw_data):
+    """ Splits 20/30 type string data to extract the 2 digits right after /
+    """
+    if raw_data:
+        return int(raw_data.split("/")[1].split("-")[0].split("+")[0])
+    return None
+
+
 def _vision_filter(lst, more_than, less_than):
     """Helper function that takes a list of tuples<pt_id, val>
     filter for val between more_than and less_than for vision
@@ -12,7 +20,7 @@ def _vision_filter(lst, more_than, less_than):
     return [
         (pt_id, val)
         for pt_id, val in lst
-        if more_than <= int(val.split("/")[1].split("-")[0].split("+")[0]) <= less_than
+        if more_than <= _parse_vision(val) <= less_than
     ]
 
 
@@ -63,6 +71,38 @@ class smart_data_deid(Mixin, db.Model):
         return "<smart_data_deid {!r}, pt_id {!r}>".format(
             self.smart_data_id, self.pt_id
         )
+
+    @staticmethod
+    def get_pt_id_by_vision(data: dict) -> set:
+        """ Take the json data from filters
+        and filter for the pt_ids
+
+        paras:
+            data: <dict> input filter json
+
+        returns:
+            pt_ids: <set>
+
+        """
+        pt_ids = []
+
+        for field in ("left_vision", "right_vision"):
+            if field not in data:
+                break
+
+            less = _parse_vision(data.get(field).get("less"))
+            more = _parse_vision(data.get(field).get("more"))
+
+            pt_ids.extend(
+                _filter_vis_pres_range(
+                    KEYWORDS[field],
+                    (less, more),
+                    KEYWORDS["vision_value_regex"],
+                    vision=True,
+                )
+            )
+
+        return set(pt_ids)
 
     @staticmethod
     def get_pt_id_by_left_vision(val_range):
