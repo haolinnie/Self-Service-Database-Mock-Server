@@ -53,7 +53,7 @@ def filter_post():
     data = json.loads(request.data.decode())["filters"]
 
     # Create pt_ids set with all pt_ids
-    pt_ids = set(pt_deid.get_all_pt_ids())
+    pt_ids = set(exam_deid.get_distinct_pt_ids())
     # Get current time for age calculation and profiling
     td = datetime.today()
 

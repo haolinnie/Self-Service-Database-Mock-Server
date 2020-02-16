@@ -1,6 +1,5 @@
 from api.core import Mixin, KEYWORDS
 from api.models.base import db
-import pdb
 
 
 def _parse_vision(raw_data):
@@ -37,6 +36,7 @@ def _pressure_filter(lst, more_than, less_than):
 def _filter_vis_pres_range(
     elem_keywords, value_range, value_validation_regex, vision=False
 ):
+
     qry = smart_data_deid.query.with_entities(
         smart_data_deid.pt_id, smart_data_deid.smrtdta_elem_value
     )
@@ -91,13 +91,13 @@ class smart_data_deid(Mixin, db.Model):
             if field not in data:
                 break
 
-            less = _parse_vision(data.get(field).get("less"))
-            more = _parse_vision(data.get(field).get("more"))
+            less_than = _parse_vision(data.get(field).get("less"))
+            more_than = _parse_vision(data.get(field).get("more"))
 
             pt_ids.extend(
                 _filter_vis_pres_range(
                     KEYWORDS[field],
-                    (less, more),
+                    (more_than, less_than),
                     KEYWORDS["vision_value_regex"],
                     vision=True,
                 )
@@ -116,6 +116,7 @@ class smart_data_deid(Mixin, db.Model):
         returns:
             pt_ids: <set>
         """
+
         pt_ids = []
         for field in ("left_pressure", "right_pressure"):
             if field not in data:

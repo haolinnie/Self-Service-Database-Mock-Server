@@ -17,3 +17,12 @@ class exam_deid(Mixin, db.Model):
 
     def __repr__(self):
         return "<exam_deid {!r}, pt_id {!r}>".format(self.exam_id, self.pt_id)
+
+    @staticmethod
+    def get_distinct_pt_ids():
+        """Get all pt_ids available
+        Using this table to make sure all the patients
+        returned indeed have relevant data entries
+        """
+        qry = exam_deid.query.with_entities(exam_deid.pt_id).distinct()
+        return [v.pt_id for v in qry.all()]
