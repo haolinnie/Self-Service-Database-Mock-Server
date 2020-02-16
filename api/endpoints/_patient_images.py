@@ -47,18 +47,22 @@ def patient_images():
         out_json[curr_id_str] = []
 
         curr_exams = curr_id.exam_deid.order_by(exam_deid.exam_date.desc()).all()
+        import pdb
+
+        pdb.set_trace()
 
         for curr_exam in curr_exams:
             curr_exam_json = {
                 "exam_id": curr_exam.exam_id,
                 "exam_date": curr_exam.exam_date,
-                "image": {},
+                "images": {},
             }
 
             res = (
                 curr_exam.image_deid.with_entities(
                     image_deid.image_id,
                     image_deid.image_num,
+                    image_deid.image_type,
                     image_deid.image_laterality,
                     image_deid.image_procedure_id,
                 )
