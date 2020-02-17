@@ -1,5 +1,5 @@
 {
-  "eye_diagnosis_keywords": ["%retina%", "%macula%", "%opia%", "%iri%"],
+  "eye_diagnosis_keywords": ["%retin%", "%macula%", "%opia%", "%iri%", "%eye%", "%glaucoma%", "%uveitis%"],
   "vision": "%visual acuity%",
   "left_vision": "%visual acuity%left%",
   "right_vision": "%visual acuity%right%",
