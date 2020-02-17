@@ -119,20 +119,18 @@ class smart_data_deid(Mixin, db.Model):
 
         pt_ids = []
         for field in ("left_pressure", "right_pressure"):
-            if field not in data:
-                break
+            if field in data:
+                less_than = data.get(field).get("less")
+                more_than = data.get(field).get("more")
 
-            less = data.get(field).get("less")
-            more = data.get(field).get("more")
-
-            pt_ids.extend(
-                _filter_vis_pres_range(
-                    KEYWORDS[field],
-                    (less, more),
-                    KEYWORDS["pressure_value_regex"],
-                    vision=False,
+                pt_ids.extend(
+                    _filter_vis_pres_range(
+                        KEYWORDS[field],
+                        (more_than, less_than),
+                        KEYWORDS["pressure_value_regex"],
+                        vision=False,
+                    )
                 )
-            )
         return set(pt_ids)
 
     @staticmethod
