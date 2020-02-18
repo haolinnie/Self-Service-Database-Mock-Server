@@ -2,6 +2,8 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.middleware.profiler import ProfilerMiddleware
+
 
 from api.core import exception_handler
 from api.config import _config
@@ -23,6 +25,8 @@ def create_app(testing=False):
     if testing:
         app.config["TESTING"] = True
 
+    # TODO: Add logger
+
     # Register database
     db.init_app(app)
 
@@ -40,10 +44,11 @@ def create_app(testing=False):
     # Add CORS headers
     CORS(app)
 
-    # TODO: Add logger
-
     # proxy support for Nginx
     app.wsgi_app = ProxyFix(app.wsgi_app)
+
+    # Profile
+    # app.wsgi_app = ProfilerMiddleware(app.wsgi_app)
 
     # Register blueprints for API endpoints
     app.register_blueprint(_main._main)
