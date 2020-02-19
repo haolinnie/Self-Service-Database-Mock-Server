@@ -39,6 +39,9 @@ def create_app(testing=False):
             user = User(username="debug")
             user.hash_password("debug")
             db.session.add(user)
+            user = User(username="SelfService2020@northwestern.edu")
+            user.hash_password("SelfService2020")
+            db.session.add(user)
             db.session.commit()
 
     # Add CORS headers
