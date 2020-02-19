@@ -1,77 +1,82 @@
-def test_get_table_names(client):
+class TestGetTable:
     url = "/ssd_api/get_table"
 
-    res = client.get(url)
-    assert res.json["success"]
+    def TestGet(self, client):
+        res = client.get(self.url)
+        assert res.json["success"]
 
 
-def test_get_cols(client):
+class TestGetCols:
     url = "/ssd_api/get_table_cols"
 
-    # Test endpoint
-    res = client.get(url)
-    assert not res.json["success"]
+    def test_no_param(self, client):
+        # Test endpoint
+        res = client.get(self.url)
+        assert not res.json["success"]
 
-    # Test successful GET
-    res = client.get(url + "?table_name=pt_deid")
-    assert res.json["success"]
-    assert "table_name" in res.json["result"]
-    assert res.json["result"]["table_name"] == "pt_deid"
+    def test_with_table_name(self, client):
+        # Test successful GET
+        res = client.get(self.url + "?table_name=pt_deid")
+        assert res.json["success"]
+        assert "table_name" in res.json["result"]
+        assert res.json["result"]["table_name"] == "pt_deid"
 
-    # Test injection
-    res = client.get(url + "?table_name=some;injection")
-    assert not res.json["success"]
+    def test_injection(self, client):
+        res = client.get(self.url + "?table_name=some;injection")
+        assert not res.json["success"]
 
-    # Test wrong table
-    res = client.get(url + "?table_name=bla")
-    assert not res.json["success"]
+    def test_na_table(self, client):
+        res = client.get(self.url + "?table_name=bla")
+        assert not res.json["success"]
 
 
-def test_get_distinct(client):
+class TestGetDistinct:
     url = "/ssd_api/get_distinct"
 
-    # Table name required
-    res = client.get(url)
-    assert not res.json["success"]
+    def test_no_param(self, client):
+        res = client.get(self.url)
+        assert not res.json["success"]
 
-    # Successful GET
-    res = client.get(url + "?table_name=pt_deid&col_name=pt_id")
-    assert res.json["success"]
-    assert res.json["result"]["table_name"] == "pt_deid"
+    def test_missing_col_name(self, client):
+        res = client.get(self.url + "?table_name=pt_deid")
+        assert not res.json["success"]
 
-    # Missing col name
-    res = client.get(url + "?table_name=pt_deid")
-    assert not res.json["success"]
+    def test_table_name_and_col_name(self, client):
+        res = client.get(self.url + "?table_name=pt_deid&col_name=pt_id")
+        assert res.json["success"]
+        assert res.json["result"]["table_name"] == "pt_deid"
 
-    # Missing table name
-    res = client.get(url + "?col_name=pt_id")
-    assert not res.json["success"]
+    def test_na_col_name(self, client):
+        # Unavailable column name
+        res = client.get(self.url + "?table_name=pt_deid&col_name=bla")
+        assert not res.json["success"]
 
-    # Unavailable column name
-    res = client.get(url + "?table_name=pt_deid&col_name=bla")
-    assert not res.json["success"]
+    def test_na_table_name(self, client):
+        # Unavailable table name
+        res = client.get(self.url + "?table_name=bla&col_name=bla")
+        assert not res.json["success"]
 
-    # Unavailable table name
-    res = client.get(url + "?table_name=bla&col_name=bla")
-    assert not res.json["success"]
-
-    # Test injection
-    res = client.get(url + "?table_name=some;injection&col_name=in;a")
-    assert not res.json["success"]
+    def test_injection(self, client):
+        # Test injection
+        res = client.get(self.url + "?table_name=some;injection&col_name=in;a")
+        assert not res.json["success"]
 
 
-def test_get_distinct_special(client):
+class TestGetDistinctSpecial:
     url = "/ssd_api/get_distinct"
 
-    res = client.get(url + "?special=eye_diagnosis")
-    assert res.json["success"]
-    assert res.json["result"]["special"] == "eye_diagnosis"
+    def test_eye_diagnosis(self, client):
+        res = client.get(self.url + "?special=eye_diagnosis")
+        assert res.json["success"]
+        assert res.json["result"]["special"] == "eye_diagnosis"
 
-    res = client.get(url + "?special=systemic_diagnosis")
-    assert res.json["success"]
+    def test_systemic_diagnosis(self, client):
+        res = client.get(self.url + "?special=systemic_diagnosis")
+        assert res.json["success"]
 
-    res = client.get(url + "?special=bla")
-    assert not res.json["success"]
+    def test_na_special(self, client):
+        res = client.get(self.url + "?special=bla")
+        assert not res.json["success"]
 
 
 def test_filter_table_with_ptid(client):
