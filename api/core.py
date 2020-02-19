@@ -92,11 +92,9 @@ def get_keywords() -> dict:
 KEYWORDS = get_keywords()
 
 
-def _generate_like_or_filters(param, kws, unlike=False):
-    if unlike:  # Use notilike
-        or_filters = [param.notilike(kw) for kw in kws]
-    else:  # Use like
-        or_filters = [param.ilike(kw) for kw in kws]
+def _generate_like_or_filters(param, kws):
+    # SQLAlchemy ilike guarantees case-insensitive
+    or_filters = [param.ilike(kw) for kw in kws]
     return or_filters
 
 

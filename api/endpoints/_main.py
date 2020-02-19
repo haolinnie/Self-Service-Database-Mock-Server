@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, request, render_template
-from sqlalchemy import or_
+from sqlalchemy import or_, not_
 
 from api.models import db, models
 from api.core import create_response, KEYWORDS, _generate_like_or_filters
@@ -74,35 +74,29 @@ def get_distinct():
             }
         )
 
-    else:
+    elif "diagnosis" in request.args["special"]:
         """Get distinct eye_diagnosis or systemic_diagnosis
         """
         special = request.args["special"]
         tb = models["diagnosis_deid"]
 
+        or_filters = _generate_like_or_filters(
+            tb.diagnosis_name, KEYWORDS["eye_diagnosis_keywords"]
+        )
+        qry = (
+            tb.query.with_entities(tb.diagnosis_name)
+            .distinct()
+            .order_by(tb.diagnosis_name)
+        )
+
         if special == "eye_diagnosis":
-            # SQLAlchemy ilike guarantees case-insensitive
-            or_filters = _generate_like_or_filters(
-                tb.diagnosis_name, KEYWORDS["eye_diagnosis_keywords"]
-            )
-            qry = (
-                db.session.query(tb.diagnosis_name).distinct().filter(or_(*or_filters))
-            )
-            data = qry.all()
-            data = [r[0] for r in data]
+            qry = qry.filter(or_(*or_filters))
 
         elif special == "systemic_diagnosis":
+            qry = qry.filter(not_(or_(*or_filters)))
 
-            or_filters = _generate_like_or_filters(
-                tb.diagnosis_name, KEYWORDS["eye_diagnosis_keywords"], unlike=True
-            )
-            qry = (
-                db.session.query(tb.diagnosis_name).distinct().filter(or_(*or_filters))
-            )
-            data = qry.all()
-            data = [r[0] for r in data]
-        else:
-            return create_response(message="Special item not recognised", status=420)
+        data = qry.all()
+        data = [r[0] for r in data]
 
         return create_response(
             data={
@@ -111,6 +105,8 @@ def get_distinct():
                 "time_taken_seconds": (datetime.today() - td).total_seconds(),
             }
         )
+    else:
+        return create_response(message="Special item not recognised", status=420)
 
 
 @_main.route("/ssd_api/filter_table_with_ptid", methods=["GET"])
