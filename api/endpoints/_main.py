@@ -58,9 +58,9 @@ def get_distinct():
             )
 
         try:
-            data = (
-                db.session.query(models[table_name].__dict__[col_name]).distinct().all()
-            )
+            tb = models[table_name]
+            tb_col = tb.__dict__[col_name]
+            data = tb.query.with_entities(tb_col).distinct().order_by(tb_col).all()
             data = [r[0] for r in data if r[0]]
         except Exception as e:
             return create_response(message=str(e), status=420)
@@ -117,7 +117,7 @@ def filter_table_with_ptid():
 
     try:
         tb = models[table_name]
-        data = db.session.query(tb).filter(tb.pt_id.in_(pt_id)).all()
+        data = tb.query.filter(tb.pt_id.in_(pt_id)).all()
         data = [v.to_dict() for v in data]
     except Exception as e:
         return create_response(message=str(e), status=420)
