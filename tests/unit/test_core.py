@@ -38,12 +38,6 @@ def test_generate_like_or_filters(app):
         assert isinstance(res, list)
         assert isinstance(res[0], sqlalchemy.sql.elements.BinaryExpression)
 
-        res = _generate_like_or_filters(
-            models["pt_deid"].pt_id, ["%[0-9]%"], unlike=False
-        )
-        assert isinstance(res, list)
-        assert isinstance(res[0], sqlalchemy.sql.elements.BinaryExpression)
-
 
 def test_to_list_of_dict():
     data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]

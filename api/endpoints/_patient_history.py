@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from sqlalchemy import not_, or_
 
 from api.models import db
 from api.auth import auth
@@ -56,22 +57,27 @@ def patients():
         )
         out_json[curr_id_str]["medication"] = _to_list_of_dict(res, med_cols)
 
-        # Eye Diagnosis
         def _filter_diagnosis(systemic=True):
+            """
+            Helper function to filter eye or systemic diagnosis
+            """
             or_filters = _generate_like_or_filters(
-                diagnosis_deid.diagnosis_name,
-                KEYWORDS["eye_diagnosis_keywords"],
-                unlike=systemic,
-            )
-            return (
-                curr_id.diagnosis_deid.with_entities(
-                    diagnosis_deid.diagnosis_name, diagnosis_deid.diagnosis_start_dt
-                )
-                .filter(db.or_(*or_filters))
-                .order_by(diagnosis_deid.diagnosis_start_dt.desc())
-                .all()
+                diagnosis_deid.diagnosis_name, KEYWORDS["eye_diagnosis_keywords"],
             )
 
+            qry = curr_id.diagnosis_deid.with_entities(
+                diagnosis_deid.diagnosis_name, diagnosis_deid.diagnosis_start_dt
+            )
+            if systemic:
+                qry = qry.filter(not_(or_(*or_filters)))
+            else:
+                qry = qry.filter(or_(*or_filters))
+
+            qry = qry.order_by(diagnosis_deid.diagnosis_start_dt.desc())
+
+            return qry.all()
+
+        # Eye Diagnosis
         res = _filter_diagnosis(systemic=False)
         out_json[curr_id_str]["eye_diagnosis"] = dict(res)
 
