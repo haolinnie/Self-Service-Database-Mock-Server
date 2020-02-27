@@ -6,6 +6,10 @@ All searches are HTTP GET requests.
 
 Sample elasticsearch instance deployed at https://elastic.tigernie.com
 
+Basic authentication required:
+* Username: selfservice
+* Password: selfservice
+
 Currently, the elasticsearch instance has the following indices:
 
 * "systemic_diagnosis"
@@ -20,7 +24,7 @@ Currently, the elasticsearch instance has the following indices:
 Example: Search for the word "renal" in systemic_diagnosis. For other indices, simply substitute "systemic_diagnosis" with the other index in the URL. The user input should be put in the "query" field in the JSON data. Keep everything else in the request as is.
 
 ```bash
-curl -X GET "https://elastic.tigernie.com/systemic_diagnosis/_search?pretty" -H 'Content-Type: application/json' -d'
+curl -X GET "https://selfservice:selfservice@elastic.tigernie.com/systemic_diagnosis/_search?pretty" -H 'Content-Type: application/json' -d'
 {
   "query": {
     "multi_match": {
