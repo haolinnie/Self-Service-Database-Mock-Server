@@ -88,20 +88,18 @@ class smart_data_deid(Mixin, db.Model):
         pt_ids = []
 
         for field in ("left_vision", "right_vision"):
-            if field not in data:
-                break
+            if field in data:
+                less_than = _parse_vision(data.get(field).get("less"))
+                more_than = _parse_vision(data.get(field).get("more"))
 
-            less_than = _parse_vision(data.get(field).get("less"))
-            more_than = _parse_vision(data.get(field).get("more"))
-
-            pt_ids.extend(
-                _filter_vis_pres_range(
-                    KEYWORDS[field],
-                    (more_than, less_than),
-                    KEYWORDS["vision_value_regex"],
-                    vision=True,
+                pt_ids.extend(
+                    _filter_vis_pres_range(
+                        KEYWORDS[field],
+                        (more_than, less_than),
+                        KEYWORDS["vision_value_regex"],
+                        vision=True,
+                    )
                 )
-            )
 
         return set(pt_ids)
 
