@@ -7,7 +7,7 @@
 ELASTIC_URL=https://elastic.tigernie.com
 #ELASTIC_URL='localhost:9200'
 INDEX='my_index'
-FIELD='my_field'
+FIELD='name'
 
 
 #################################
@@ -97,6 +97,10 @@ for val in json.load(sys.stdin)['result']['data']:
 EOF
 }
 
+get_distinct() {
+    curl -s -XGET -u debug:debug "https://tigernie.com/ssd_api/get_distinct?table_name=$1&col_name=$2" | python3 -c "import sys, json; res=json.load(sys.stdin); [print(v) for v in res['result']['data']]"
+}
+
 get_distinct_special() {
     curl -s -XGET -u debug:debug https://tigernie.com/ssd_api/get_distinct\?special\=$1 | python3 -c "import sys, json; res=json.load(sys.stdin); [print(v) for v in res['result']['data']]"
 }
@@ -115,7 +119,7 @@ pretty_print_distinct() {
 
 create_systemic_diagnosis_entries() {
     INDEX="systemic_diagnosis"
-    FIELD="diagnosis"
+    FIELD="name"
     pretty_print_distinct systemic_diagnosis | while IFS= read -r line ; do
        add_a_sample $line
     done
@@ -123,24 +127,52 @@ create_systemic_diagnosis_entries() {
 
 create_eye_diagnosis_entries() {
     INDEX="eye_diagnosis"
-    FIELD="diagnosis"
+    FIELD="name"
     pretty_print_distinct eye_diagnosis | while IFS= read -r line ; do
        add_a_sample $line
     done
 }
 
-create_search_entries() {
-    create_systemic_diagnosis_entries
-    create_eye_diagnosis_entries
+create_medication_generic_name() {
+    INDEX="medication_generic_name"
+    FIELD="name"
+    get_distinct medication_deid generic_name | cat -n | while IFS= read -r line ; do
+        add_a_sample $line
+    done
 }
+
+create_medication_therapeutic_class() {
+    INDEX="medication_therapeutic_class"
+    FIELD="name"
+    get_distinct medication_deid therapeutic_class | cat -n | while IFS= read -r line ; do
+        add_a_sample $line
+    done
+}
+
+create_image_procedure() {
+    INDEX="image_procedure"
+    FIELD="name"
+    get_distinct image_procedure image_procedure | cat -n | while IFS= read -r line ; do
+        add_a_sample $line
+    done
+}
+
+create_lab() {
+    INDEX="lab"
+    FIELD="name"
+    get_distinct lab_value_deid name | cat -n | while IFS= read -r line ; do
+        add_a_sample $line
+    done
+}
+
 
 ########
 # Main
 ########
 main() {
     echo Running main
-    create_search_entries
-}
 
+    echo Done!
+}
 
 #main $@
