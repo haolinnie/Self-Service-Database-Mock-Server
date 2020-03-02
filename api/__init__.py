@@ -8,7 +8,14 @@ from werkzeug.middleware.profiler import ProfilerMiddleware
 from api.core import exception_handler
 from api.config import _config
 from api.models import db, models
-from api.endpoints import _main, _filter, _patient_history, _patient_images, _users
+from api.endpoints import (
+    _main,
+    _filter,
+    _patient_history,
+    _patient_images,
+    _users,
+    _elasticsearch,
+)
 
 
 def create_app(testing=False):
@@ -59,6 +66,7 @@ def create_app(testing=False):
     app.register_blueprint(_patient_history._patient_history)
     app.register_blueprint(_patient_images._patient_images)
     app.register_blueprint(_users._users)
+    app.register_blueprint(_elasticsearch._elasticsearch)
 
     # Register error handler
     app.register_error_handler(Exception, exception_handler)

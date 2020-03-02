@@ -70,7 +70,7 @@ def get_database_url(file: str = "credentials.config") -> dict:
         try:
             return config["database"]
         except KeyError:
-            print("Failed to retrieve SQL Server credentials from [{}].".format(file))
+            print("Failed to retrieve database credentials from [{}].".format(file))
     except:
         print("Failed to load config file [{}].".format(file))
 
