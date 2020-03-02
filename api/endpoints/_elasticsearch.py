@@ -4,7 +4,6 @@ Lightweight elasticsearch search-as-you-type proxy
 from datetime import datetime
 from flask import Blueprint, request
 from elasticsearch import Elasticsearch
-import certifi
 
 from api.models import db, models
 from api.core import create_response, KEYWORDS, get_database_url
@@ -13,9 +12,18 @@ from api.auth import auth
 
 _elasticsearch = Blueprint("_elasticsearch", __name__)
 
-_es = Elasticsearch(
-    get_database_url()["elasticsearch"], use_ssl=True, ca_certs=certifi.where()
-)
+_es_url = get_database_url()["elasticsearch"]
+
+_es = None
+
+if "https" in _es_url:
+    import certifi
+
+    _es = Elasticsearch(
+        get_database_url()["elasticsearch"], use_ssl=True, ca_certs=certifi.where()
+    )
+else:
+    _es = Elasticsearch(get_database_url()["elasticsearch"])
 
 
 def _generate_body(query):
