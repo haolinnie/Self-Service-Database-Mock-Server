@@ -20,8 +20,6 @@ from api.endpoints import (
 
 def create_app(testing=False):
     """Flask Application Factory
-
-    config_override isn't current used 
     """
     # Instantiate flask app
     app = Flask(__name__, instance_relative_config=True)
