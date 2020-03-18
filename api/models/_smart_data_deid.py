@@ -1,13 +1,17 @@
-from api.core import Mixin, KEYWORDS
+import re
+
+from api.core import Mixin
+from api.keywords import KEYWORDS
 from api.models.base import db
 
 
 def _parse_vision(raw_data):
     """ Splits 20/30 type string data to extract the 2 digits right after /
     """
-    if raw_data:
+    r = KEYWORDS["vision_value_regex"]
+    if isinstance(raw_data, str) and re.match(r, raw_data):
         return int(raw_data.split("/")[1].split("-")[0].split("+")[0])
-    return None
+    return -1
 
 
 def _vision_filter(lst, more_than, less_than):
@@ -15,8 +19,8 @@ def _vision_filter(lst, more_than, less_than):
     filter for val between more_than and less_than for vision
     
     """
-    more_than = 0 if more_than is None else more_than
-    less_than = 1000 if less_than is None else less_than
+    more_than = 0 if not more_than else more_than
+    less_than = 1000 if not less_than else less_than
     return [
         (pt_id, val)
         for pt_id, val in lst
@@ -30,22 +34,24 @@ def _pressure_filter(lst, more_than, less_than):
     """
     more_than = 0 if more_than is None else int(more_than)
     less_than = 1000 if less_than is None else int(less_than)
-    return [(pt_id, val) for pt_id, val in lst if more_than <= int(val) <= less_than]
+
+    r = KEYWORDS["pressure_value_regex"]
+
+    return [
+        (pt_id, val)
+        for pt_id, val in lst
+        if isinstance(val, str)
+        and re.match(r, val)
+        and more_than <= int(val) <= less_than
+    ]
 
 
-def _filter_vis_pres_range(
-    elem_keywords, value_range, value_validation_regex, vision=False
-):
+def _filter_vis_pres_range(elem_keywords, value_range, vision=False):
 
     qry = smart_data_deid.query.with_entities(
         smart_data_deid.pt_id, smart_data_deid.smrtdta_elem_value
     )
-    qry = qry.filter(
-        db.and_(
-            smart_data_deid.element_name.ilike(elem_keywords),
-            smart_data_deid.smrtdta_elem_value.ilike(value_validation_regex),
-        )
-    )
+    qry = qry.filter(db.and_(smart_data_deid.element_name.ilike(elem_keywords),))
     pt_ids = qry.all()
 
     if vision:
@@ -94,10 +100,7 @@ class smart_data_deid(Mixin, db.Model):
 
                 pt_ids.extend(
                     _filter_vis_pres_range(
-                        KEYWORDS[field],
-                        (more_than, less_than),
-                        KEYWORDS["vision_value_regex"],
-                        vision=True,
+                        KEYWORDS[field], (more_than, less_than), vision=True,
                     )
                 )
 
@@ -123,10 +126,7 @@ class smart_data_deid(Mixin, db.Model):
 
                 pt_ids.extend(
                     _filter_vis_pres_range(
-                        KEYWORDS[field],
-                        (more_than, less_than),
-                        KEYWORDS["pressure_value_regex"],
-                        vision=False,
+                        KEYWORDS[field], (more_than, less_than), vision=False,
                     )
                 )
         return set(pt_ids)

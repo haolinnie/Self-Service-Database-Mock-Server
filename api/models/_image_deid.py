@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from api.core import Mixin
 from api.models.base import db
 from api.models._image_procedure import image_procedure
@@ -40,7 +42,8 @@ class image_deid(Mixin, db.Model):
 
         # construct list of AND queries
         and_query = [
-            image_procedure.image_procedure == img_proc_type for img_proc_type in ipt
+            func.lower(image_procedure.image_procedure) == img_proc_type.lower()
+            for img_proc_type in ipt
         ]
 
         # do the query, get distinct pt_id

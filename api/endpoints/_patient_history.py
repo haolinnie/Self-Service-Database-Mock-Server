@@ -5,10 +5,10 @@ from api.models import db
 from api.auth import auth
 from api.core import (
     create_response,
-    KEYWORDS,
     _generate_like_or_filters,
     _to_list_of_dict,
 )
+from api.keywords import KEYWORDS
 from api.models import (
     pt_deid,
     diagnosis_deid,

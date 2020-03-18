@@ -9,7 +9,7 @@ auth = HTTPBasicAuth()
 
 @auth.verify_password
 def verify_password(username_or_token, password):
-    if current_app.config["TESTING"]:
+    if current_app.config.get("TESTING"):
         return True
 
     user = User.verify_auth_token(username_or_token)

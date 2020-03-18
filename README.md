@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/tiega/Self-Service-Database-Server.svg?branch=master)](https://travis-ci.com/tiega/Self-Service-Database-Server)
 [![Coverage Status](https://coveralls.io/repos/github/tiega/Self-Service-Database-Server/badge.svg)](https://coveralls.io/github/tiega/Self-Service-Database-Server)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tiega/Self-Service-Database-Server/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tiega/Self-Service-Database-Server/?branch=master)
-[![Maintainability](https://api.codeclimate.com/v1/badges/cf924c7e3dd6dc57e4f3/maintainability)](https://codeclimate.com/github/tiega/Self-Service-Database-Server/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/0bf44fc4e7adeec64fc0/maintainability)](https://codeclimate.com/github/tiega/Self-Service-Database-Server/maintainability)
 
 * Author: Tiger Nie [nhl0819@gmail.com]
 

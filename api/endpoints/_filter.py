@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from typing import Tuple
 
@@ -50,7 +49,7 @@ def filter_post():
     A query is constructed for each separate table other than pt_deid, thereby
     avoiding multiple joins which significantly slows down the search.
     """
-    data = json.loads(request.data.decode())["filters"]
+    data = request.get_json()["filters"]
 
     # Create pt_ids set with all pt_ids
     pt_ids = set(exam_deid.get_distinct_pt_ids())

@@ -3,29 +3,21 @@ from api.models._smart_data_deid import (
     _pressure_filter,
     _filter_vis_pres_range,
 )
-from api.core import KEYWORDS
+from api.keywords import KEYWORDS
 
 
 def test_filter_vis_pres_range(app):
     with app.app_context():
         res = _filter_vis_pres_range(
-            KEYWORDS["left_pressure"],
-            (None, 10),
-            KEYWORDS["pressure_value_regex"],
-            vision=False,
+            KEYWORDS["left_pressure"], (None, 10), vision=False,
         )
         assert res == [64656, 66166]
 
-        res = _filter_vis_pres_range(
-            KEYWORDS["left_pressure"],
-            (10, 10),
-            KEYWORDS["pressure_value_regex"],
-            vision=False,
-        )
+        res = _filter_vis_pres_range(KEYWORDS["left_pressure"], (10, 10), vision=False,)
         assert res == [64656, 66166]
 
         res = _filter_vis_pres_range(
-            KEYWORDS["left_pressure"], (None, None), "%[0-9]%", vision=False
+            KEYWORDS["left_pressure"], (None, None), vision=False
         )
         assert len(res) != 0
 
@@ -189,6 +181,6 @@ def test_pressure_filter():
     for v in res:
         assert 10 <= v[1] <= 12
 
-    data = [(1, -1), (1, 12345)]
+    data = [(1, "-1"), (1, "12345")]
     res = _pressure_filter(data, None, None)
     assert len(res) == 0

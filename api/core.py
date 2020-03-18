@@ -55,7 +55,7 @@ def exception_handler(error: Exception) -> Tuple[Response, int]:
     return create_response(message=str(error), status=500)
 
 
-def get_database_url(file: str = "credentials.config") -> dict:
+def get_database_url() -> dict:
     """Load config
     Example of config file:
     [mysql_creds]
@@ -64,32 +64,15 @@ def get_database_url(file: str = "credentials.config") -> dict:
     :param file <str> filename
     :returns str or None if Exception
     """
+    f = "credentials.config"
     try:
         config = configparser.ConfigParser()
-        config.read(file)
-        try:
-            return config["database"]
-        except KeyError:
-            print("Failed to retrieve database credentials from [{}].".format(file))
-    except:
-        print("Failed to load config file [{}].".format(file))
-
-
-def get_keywords() -> dict:
-    """Load keywords for search
-    
-    :returns dict or None if Exception
-    """
-    try:
-        with open("api/keywords.json") as f:
-            v = f.read()
-        return json.loads(v)
-    except FileNotFoundError as e:
-        return None
-
-
-# KEYWORDS dict accessible to all modules
-KEYWORDS = get_keywords()
+        config.read(f)
+        return config["database"]
+    except FileNotFoundError:
+        print("Failed to load config file [{}].".format(f))
+    except KeyError:
+        print("Failed to retrieve database credentials from [{}].".format(f))
 
 
 def _generate_like_or_filters(param, kws):

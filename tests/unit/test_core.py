@@ -4,7 +4,6 @@ from api.core import (
     create_response,
     exception_handler,
     get_database_url,
-    get_keywords,
     _generate_like_or_filters,
     _to_list_of_dict,
 )
@@ -25,11 +24,6 @@ def test_exception_handler(app):
 
 def test_get_database_url():
     res = get_database_url()
-
-
-def test_get_keywords():
-    res = get_keywords()
-    assert isinstance(res, dict)
 
 
 def test_generate_like_or_filters(app):

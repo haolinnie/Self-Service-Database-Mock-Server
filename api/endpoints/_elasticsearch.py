@@ -6,7 +6,7 @@ from flask import Blueprint, request
 from elasticsearch import Elasticsearch
 
 from api.models import db, models
-from api.core import create_response, KEYWORDS, get_database_url
+from api.core import create_response, get_database_url
 from api.auth import auth
 
 

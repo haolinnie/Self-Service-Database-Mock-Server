@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from api.core import Mixin
 from api.models.base import db
 
@@ -30,6 +32,10 @@ class diagnosis_deid(Mixin, db.Model):
         :returns <list<int>> list of pt_id
         """
         qry = diagnosis_deid.query.with_entities(diagnosis_deid.pt_id).distinct()
-        qry = qry.filter(diagnosis_deid.diagnosis_name.in_(diagnosis_names))
+        qry = qry.filter(
+            func.lower(diagnosis_deid.diagnosis_name).in_(
+                [v.lower() for v in diagnosis_names]
+            )
+        )
 
         return [v.pt_id for v in qry.all()]

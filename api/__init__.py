@@ -6,7 +6,7 @@ from werkzeug.middleware.profiler import ProfilerMiddleware
 
 
 from api.core import exception_handler
-from api.config import _config
+from api.config import DevelopmentConfig, ProductionConfig, TestingConfig
 from api.models import db, models
 from api.endpoints import (
     _main,
@@ -28,9 +28,15 @@ def create_app(testing=False):
 
     # Set configurations
     env = os.environ.get("FLASK_ENV", "development")
-    app.config.from_object(_config[env])
     if testing:
-        app.config["TESTING"] = True
+        env = "testing"
+
+    if env == "testing":
+        app.config.from_object(TestingConfig)
+    elif env == "production":
+        app.config.from_object(ProductionConfig)
+    elif env == "development":
+        app.config.from_object(DevelopmentConfig)
 
     # TODO: Add logger
 
@@ -40,7 +46,7 @@ def create_app(testing=False):
     with app.app_context():
         db.create_all(bind=["users"])
 
-        if env == "development":
+        if env == "development" or testing:
             from api.models import User
 
             user = User(username="debug")

@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from api.core import Mixin
 from api.models.base import db
 
@@ -42,7 +44,9 @@ class medication_deid(Mixin, db.Model):
         qry = medication_deid.query.with_entities(medication_deid.pt_id).distinct()
 
         # do query
-        qry = qry.filter(medication_deid.generic_name.in_(mgn))
+        qry = qry.filter(
+            func.lower(medication_deid.generic_name).in_([v.lower() for v in mgn])
+        )
 
         return [v.pt_id for v in qry.all()]
 
@@ -57,6 +61,8 @@ class medication_deid(Mixin, db.Model):
         qry = medication_deid.query.with_entities(medication_deid.pt_id).distinct()
 
         # do query
-        qry = qry.filter(medication_deid.therapeutic_class.in_(mtc))
+        qry = qry.filter(
+            func.lower(medication_deid.therapeutic_class).in_([v.lower() for v in mtc])
+        )
 
         return [v.pt_id for v in qry.all()]

@@ -3,7 +3,8 @@ from flask import Blueprint, request, render_template
 from sqlalchemy import or_, not_
 
 from api.models import db, models
-from api.core import create_response, KEYWORDS, _generate_like_or_filters
+from api.core import create_response, _generate_like_or_filters
+from api.keywords import KEYWORDS
 from api.auth import auth
 
 
